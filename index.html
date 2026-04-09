@@ -27,7 +27,31 @@
 
     .comment {background:#fff; padding:10px; margin:5px; border-radius:8px; text-align:left;}
 
-    #profileBox {display:none;}
+    /* 🔥 FLOATING POPUP FIX */
+    #profileBox {
+      display:none;
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      background:white;
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 0 20px rgba(0,0,0,0.5);
+      z-index:1000;
+      width:90%;
+      max-width:350px;
+    }
+
+    #overlay {
+      display:none;
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(0,0,0,0.5);
+      z-index:999;
+    }
+
   </style>
 </head>
 
@@ -50,8 +74,11 @@
   <div class="layer" id="layer2"></div>
   <div class="layer" id="layer3"></div>
 
-  <!-- PROFILE -->
-  <div class="box" id="profileBox">
+  <!-- OVERLAY -->
+  <div id="overlay" onclick="closeProfile()"></div>
+
+  <!-- FLOAT PROFILE -->
+  <div id="profileBox">
     <h3 id="profileName"></h3>
     <input id="birthday" placeholder="Birthday"><br>
     <input id="address" placeholder="Address"><br>
@@ -92,45 +119,40 @@ const db = getFirestore(appFirebase);
 let currentUser = "";
 let currentProfile = "";
 
-// 🔥 LOGIN CHECK (FIXED)
+// LOGIN
 window.onload = function(){
   const savedUser = localStorage.getItem("user");
-
   if(savedUser){
     currentUser = savedUser;
     showApp();
-  } else {
-    document.getElementById("loginBox").style.display="block";
-    document.getElementById("app").style.display="none";
   }
 };
 
 window.login = function(){
-  const u = document.getElementById("user").value.trim().toLowerCase();
-  const p = document.getElementById("pass").value.trim();
+  const u = user.value.trim().toLowerCase();
+  const p = pass.value.trim();
 
   if(u==="usee" && p==="123"){
     currentUser = u;
     localStorage.setItem("user", u);
     showApp();
   } else {
-    alert("Wrong username or password");
+    alert("Wrong login");
   }
 };
 
 function showApp(){
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("app").style.display="block";
+  loginBox.style.display="none";
+  app.style.display="block";
 }
 
-// FAMILY LAYERS
+// FAMILY
 const layers = {
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
   layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
 };
 
-// CREATE UI + REALTIME IMAGE
 Object.keys(layers).forEach(layerKey=>{
   const container = document.getElementById(layerKey);
 
@@ -145,10 +167,8 @@ Object.keys(layers).forEach(layerKey=>{
       </div>
     `;
 
-    // 🔥 REALTIME IMAGE FIX
-    const ref = doc(db,"familyTree",id);
-
-    onSnapshot(ref,(snap)=>{
+    // 🔥 REALTIME IMAGE (ADDED ONLY)
+    onSnapshot(doc(db,"familyTree",id),(snap)=>{
       if(snap.exists()){
         document.getElementById(id).src = snap.data().image;
       }
@@ -171,11 +191,13 @@ window.uploadImage = function(e,id){
   reader.readAsDataURL(file);
 };
 
-// PROFILE
+// PROFILE FLOAT
 window.openProfile = async function(name,id){
   currentProfile = id;
-  profileBox.style.display="block";
+
   profileName.innerText = name;
+  profileBox.style.display="block";
+  overlay.style.display="block";
 
   const snap = await getDoc(doc(db,"profiles",id));
 
@@ -188,6 +210,11 @@ window.openProfile = async function(name,id){
   }
 };
 
+window.closeProfile = function(){
+  profileBox.style.display="none";
+  overlay.style.display="none";
+};
+
 window.saveProfile = async function(){
   await setDoc(doc(db,"profiles",currentProfile),{
     birthday:birthday.value,
@@ -198,19 +225,14 @@ window.saveProfile = async function(){
   alert("Saved!");
 };
 
-window.closeProfile = function(){
-  profileBox.style.display="none";
-};
-
 // COMMENTS REALTIME
 window.addComment = async function(){
-  const text = comment.value;
-  if(!text) return;
+  if(!comment.value) return;
 
   await addDoc(collection(db,"comments"),{
     name: currentUser,
-    text,
-    time:Date.now()
+    text: comment.value,
+    time: Date.now()
   });
 
   comment.value="";
