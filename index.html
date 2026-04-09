@@ -35,6 +35,7 @@
 
 <header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
 
+<!-- LOGIN -->
 <div id="loginBox" class="box">
   <h3>🔐 Login</h3>
   <input id="user" placeholder="Username"><br>
@@ -42,12 +43,14 @@
   <button onclick="login()">Login</button>
 </div>
 
+<!-- APP -->
 <div id="app" style="display:none;">
 
   <div class="layer" id="layer1"></div>
   <div class="layer" id="layer2"></div>
   <div class="layer" id="layer3"></div>
 
+  <!-- PROFILE -->
   <div class="box" id="profileBox">
     <h3 id="profileName"></h3>
     <input id="birthday" placeholder="Birthday"><br>
@@ -59,6 +62,7 @@
     <button onclick="closeProfile()">Close</button>
   </div>
 
+  <!-- COMMENTS -->
   <div class="box">
     <h3>💬 Family Wall</h3>
     <input id="comment" placeholder="Write something...">
@@ -82,35 +86,41 @@ const firebaseConfig = {
   projectId: "family-web-10cb8"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const appFirebase = initializeApp(firebaseConfig);
+const db = getFirestore(appFirebase);
 
 let currentUser = "";
 let currentProfile = "";
 
-// AUTO LOGIN
-const savedUser = localStorage.getItem("user");
-if(savedUser){
-  currentUser = savedUser;
-  loginSuccess();
-}
+// 🔥 LOGIN CHECK (FIXED)
+window.onload = function(){
+  const savedUser = localStorage.getItem("user");
+
+  if(savedUser){
+    currentUser = savedUser;
+    showApp();
+  } else {
+    document.getElementById("loginBox").style.display="block";
+    document.getElementById("app").style.display="none";
+  }
+};
 
 window.login = function(){
-  const u = user.value.trim().toLowerCase();
-  const p = pass.value.trim();
+  const u = document.getElementById("user").value.trim().toLowerCase();
+  const p = document.getElementById("pass").value.trim();
 
   if(u==="usee" && p==="123"){
     currentUser = u;
     localStorage.setItem("user", u);
-    loginSuccess();
+    showApp();
   } else {
-    alert("Wrong login");
+    alert("Wrong username or password");
   }
 };
 
-function loginSuccess(){
-  loginBox.style.display="none";
-  app.style.display="block";
+function showApp(){
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("app").style.display="block";
 }
 
 // FAMILY LAYERS
@@ -120,7 +130,7 @@ const layers = {
   layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
 };
 
-// CREATE UI
+// CREATE UI + REALTIME IMAGE
 Object.keys(layers).forEach(layerKey=>{
   const container = document.getElementById(layerKey);
 
@@ -135,7 +145,7 @@ Object.keys(layers).forEach(layerKey=>{
       </div>
     `;
 
-    // 🔥 REALTIME IMAGE LISTENER
+    // 🔥 REALTIME IMAGE FIX
     const ref = doc(db,"familyTree",id);
 
     onSnapshot(ref,(snap)=>{
@@ -168,6 +178,7 @@ window.openProfile = async function(name,id){
   profileName.innerText = name;
 
   const snap = await getDoc(doc(db,"profiles",id));
+
   if(snap.exists()){
     const d = snap.data();
     birthday.value = d.birthday||"";
