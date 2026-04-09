@@ -4,12 +4,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lozada Family Ultimate</title>
 
-<style>
-body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center; transition:0.3s;}
-header {background:linear-gradient(to right, red, purple); color:white; padding:15px; font-size:20px;}
+<!-- FIREBASE COMPAT (IMPORTANT) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-.dark {background:#111; color:white;}
-.dark .box, .dark .card {background:#222;}
+<style>
+body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
+header {background:linear-gradient(to right, red, purple); color:white; padding:15px;}
 
 .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
 
@@ -20,17 +21,16 @@ header {background:linear-gradient(to right, red, purple); color:white; padding:
 }
 
 img {width:100%; height:120px; object-fit:cover; border-radius:8px; background:#ddd;}
-
 h4 {font-size:13px; border:2px solid red; padding:5px; border-radius:6px;}
 
 input {width:90%; padding:6px; margin:5px;}
-
-button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px; margin:3px;}
+button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
 
 .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
-
 .comment {background:#fff; padding:10px; margin:5px; border-radius:8px; text-align:left;}
-.dark .comment {background:#333;}
+
+.dark {background:#111; color:white;}
+.dark .box,.dark .card {background:#222;}
 
 #profileBox {display:none;}
 </style>
@@ -54,7 +54,6 @@ button {padding:6px 10px; background:purple; color:white; border:none; border-ra
 
 <!-- APP -->
 <div id="app" style="display:none;">
-
   <div class="layer" id="layer1"></div>
   <div class="layer" id="layer2"></div>
   <div class="layer" id="layer3"></div>
@@ -78,59 +77,49 @@ button {padding:6px 10px; background:purple; color:white; border:none; border-ra
     <button onclick="addComment()">Post</button>
     <div id="comments"></div>
   </div>
-
 </div>
 
-<script type="module">
+<script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
+/* FIREBASE INIT */
 const firebaseConfig = {
   apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   authDomain: "family-web-10cb8.firebaseapp.com",
   projectId: "family-web-10cb8"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-let currentUser="";
-let currentProfile="";
+/* LOGIN */
+let currentUser = "";
 
-// AUTO LOGIN
-const savedUser = localStorage.getItem("user");
-if(savedUser){
-  currentUser = savedUser;
+if(localStorage.getItem("user")){
+  currentUser = localStorage.getItem("user");
   loginBox.style.display="none";
   app.style.display="block";
 }
 
-// LOGIN
-window.login = function(){
-  const u = user.value.trim();
-  const p = pass.value.trim();
-
-  if(p==="123"){
-    currentUser = u;
-    localStorage.setItem("user",u);
+function login(){
+  if(pass.value === "123"){
+    currentUser = user.value;
+    localStorage.setItem("user",currentUser);
     loginBox.style.display="none";
     app.style.display="block";
-  }else alert("Wrong password");
-};
+  } else alert("Wrong password");
+}
 
-// LOGOUT
-window.logout = function(){
+function logout(){
   localStorage.removeItem("user");
   location.reload();
-};
+}
 
-// DARK MODE
-window.toggleDark = function(){
+/* DARK MODE */
+function toggleDark(){
   document.body.classList.toggle("dark");
-};
+}
 
-// FAMILY
+/* FAMILY */
 const layers = {
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -155,59 +144,68 @@ Object.keys(layers).forEach(layerKey=>{
   });
 });
 
-// IMAGE LOAD
-async function loadImage(id){
-  const ref=doc(db,"familyTree",id);
-  const snap=await getDoc(ref);
-  if(snap.exists()) document.getElementById(id).src=snap.data().image;
+/* LOAD IMAGE */
+function loadImage(id){
+  db.collection("familyTree").doc(id).get().then(doc=>{
+    if(doc.exists){
+      document.getElementById(id).src = doc.data().image;
+    }
+  });
 }
 
-// UPLOAD
-window.uploadImage=function(e,id){
+/* UPLOAD */
+function uploadImage(e,id){
   const file=e.target.files[0];
   const reader=new FileReader();
 
-  reader.onload=async()=>{
-    await setDoc(doc(db,"familyTree",id),{image:reader.result});
-    document.getElementById(id).src=reader.result;
+  reader.onload=function(){
+    db.collection("familyTree").doc(id).set({
+      image:reader.result
+    });
+    document.getElementById(id).src = reader.result;
   };
 
   reader.readAsDataURL(file);
-};
+}
 
-// PROFILE
-window.openProfile=async(name,id)=>{
+/* PROFILE */
+let currentProfile="";
+
+function openProfile(name,id){
   currentProfile=id;
   profileBox.style.display="block";
   profileName.innerText=name;
 
-  const snap=await getDoc(doc(db,"profiles",id));
-  if(snap.exists()){
-    const d=snap.data();
-    birthday.value=d.birthday||"";
-    address.value=d.address||"";
-    contact.value=d.contact||"";
-    email.value=d.email||"";
-  }
-};
+  db.collection("profiles").doc(id).get().then(doc=>{
+    if(doc.exists){
+      let d=doc.data();
+      birthday.value=d.birthday||"";
+      address.value=d.address||"";
+      contact.value=d.contact||"";
+      email.value=d.email||"";
+    }
+  });
+}
 
-window.saveProfile=async()=>{
-  await setDoc(doc(db,"profiles",currentProfile),{
+function saveProfile(){
+  db.collection("profiles").doc(currentProfile).set({
     birthday:birthday.value,
     address:address.value,
     contact:contact.value,
     email:email.value
   });
   alert("Saved!");
-};
+}
 
-window.closeProfile=()=>profileBox.style.display="none";
+function closeProfile(){
+  profileBox.style.display="none";
+}
 
-// COMMENTS
-window.addComment=async()=>{
+/* COMMENTS */
+function addComment(){
   if(!comment.value) return;
 
-  await addDoc(collection(db,"comments"),{
+  db.collection("comments").add({
     name:currentUser,
     text:comment.value,
     time:Date.now(),
@@ -215,44 +213,48 @@ window.addComment=async()=>{
   });
 
   comment.value="";
-};
+}
 
-// REALTIME COMMENTS
-const q=query(collection(db,"comments"),orderBy("time"));
-
-onSnapshot(q,(snap)=>{
+/* REALTIME */
+db.collection("comments").orderBy("time").onSnapshot(snap=>{
   comments.innerHTML="";
-  snap.forEach(d=>{
-    const c=d.data();
+  snap.forEach(doc=>{
+    let c=doc.data();
 
     comments.innerHTML+=`
     <div class="comment">
       <b>${c.name}</b><br>
       ${c.text}<br>
       ❤️ ${c.likes||0}<br>
-      <button onclick="like('${d.id}',${c.likes||0})">Like</button>
-      <button onclick="edit('${d.id}','${c.text}')">Edit</button>
-      <button onclick="del('${d.id}')">Delete</button>
+      <button onclick="like('${doc.id}',${c.likes||0})">Like</button>
+      <button onclick="edit('${doc.id}','${c.text}')">Edit</button>
+      <button onclick="del('${doc.id}')">Delete</button>
     </div>
     `;
   });
 });
 
-// LIKE
-window.like=async(id,likes)=>{
-  await updateDoc(doc(db,"comments",id),{likes:likes+1});
-};
+/* LIKE */
+function like(id,likes){
+  db.collection("comments").doc(id).update({
+    likes:likes+1
+  });
+}
 
-// DELETE
-window.del=async(id)=>{
-  await deleteDoc(doc(db,"comments",id));
-};
+/* DELETE */
+function del(id){
+  db.collection("comments").doc(id).delete();
+}
 
-// EDIT
-window.edit=(id,text)=>{
-  const t=prompt("Edit:",text);
-  if(t) updateDoc(doc(db,"comments",id),{text:t});
-};
+/* EDIT */
+function edit(id,text){
+  let t=prompt("Edit:",text);
+  if(t){
+    db.collection("comments").doc(id).update({
+      text:t
+    });
+  }
+}
 
 </script>
 
