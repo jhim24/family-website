@@ -27,7 +27,6 @@
 
     .comment {background:#fff; padding:10px; margin:5px; border-radius:8px; text-align:left;}
 
-    /* 🔥 FLOATING POPUP FIX */
     #profileBox {
       display:none;
       position:fixed;
@@ -51,7 +50,6 @@
       background:rgba(0,0,0,0.5);
       z-index:999;
     }
-
   </style>
 </head>
 
@@ -70,9 +68,17 @@
 <!-- APP -->
 <div id="app" style="display:none;">
 
+  <!-- FAMILY -->
   <div class="layer" id="layer1"></div>
   <div class="layer" id="layer2"></div>
   <div class="layer" id="layer3"></div>
+
+  <!-- 🔥 PAMANGKIN TITLE -->
+  <h2>PAMANGKIN</h2>
+
+  <!-- PAMANGKIN LAYERS -->
+  <div class="layer" id="pamangkin1"></div>
+  <div class="layer" id="pamangkin2"></div>
 
   <!-- OVERLAY -->
   <div id="overlay" onclick="closeProfile()"></div>
@@ -153,29 +159,42 @@ const layers = {
   layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
 };
 
-Object.keys(layers).forEach(layerKey=>{
-  const container = document.getElementById(layerKey);
+// 🔥 PAMANGKIN DATA
+const pamangkin = {
+  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye","Sherwin","Bjoy"],
+  pamangkin2:["Ashley","Union","Jazmine","Apple"]
+};
 
-  layers[layerKey].forEach((name,i)=>{
-    const id = layerKey+"_"+i;
+// FUNCTION CREATE CARDS
+function createCards(data){
+  Object.keys(data).forEach(layerKey=>{
+    const container = document.getElementById(layerKey);
 
-    container.innerHTML += `
-      <div class="card" onclick="openProfile('${name}','${id}')">
-        <img id="${id}">
-        <h4>${name}</h4>
-        <input type="file" onclick="event.stopPropagation()" onchange="uploadImage(event,'${id}')">
-      </div>
-    `;
+    data[layerKey].forEach((name,i)=>{
+      const id = layerKey+"_"+i;
 
-    // 🔥 REALTIME IMAGE (ADDED ONLY)
-    onSnapshot(doc(db,"familyTree",id),(snap)=>{
-      if(snap.exists()){
-        document.getElementById(id).src = snap.data().image;
-      }
+      container.innerHTML += `
+        <div class="card" onclick="openProfile('${name}','${id}')">
+          <img id="${id}">
+          <h4>${name}</h4>
+          <input type="file" onclick="event.stopPropagation()" onchange="uploadImage(event,'${id}')">
+        </div>
+      `;
+
+      // REALTIME IMAGE
+      onSnapshot(doc(db,"familyTree",id),(snap)=>{
+        if(snap.exists()){
+          document.getElementById(id).src = snap.data().image;
+        }
+      });
+
     });
-
   });
-});
+}
+
+// CREATE ALL
+createCards(layers);
+createCards(pamangkin);
 
 // UPLOAD IMAGE
 window.uploadImage = function(e,id){
@@ -191,7 +210,7 @@ window.uploadImage = function(e,id){
   reader.readAsDataURL(file);
 };
 
-// PROFILE FLOAT
+// PROFILE
 window.openProfile = async function(name,id){
   currentProfile = id;
 
@@ -225,7 +244,7 @@ window.saveProfile = async function(){
   alert("Saved!");
 };
 
-// COMMENTS REALTIME
+// COMMENTS
 window.addComment = async function(){
   if(!comment.value) return;
 
