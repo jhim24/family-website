@@ -4,7 +4,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lozada Family Ultimate</title>
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
@@ -43,24 +42,38 @@ img {width:100%; height:110px; border-radius:8px; background:#ddd;}
   text-align:left;
 }
 
-/* FLOATING */
+/* 🔥 UPDATED FLOATING POPUP */
 #profileBox {
 display:none;
 position:fixed;
-top:0; left:0;
+top:0;
+left:0;
 width:100%;
 height:100%;
 background:rgba(0,0,0,0.6);
 z-index:999;
 }
 
+/* 👉 NEW DESIGN */
 .modal {
-background:white;
+background:linear-gradient(135deg, #ffffff, #f3e5f5);
 margin:10% auto;
 padding:20px;
 width:90%;
 max-width:400px;
-border-radius:10px;
+border-radius:15px;
+
+/* NEW BORDER + COLOR */
+border:4px solid purple;
+box-shadow:0 0 20px rgba(128,0,128,0.5);
+
+animation:pop 0.3s ease;
+}
+
+/* 🔥 ANIMATION */
+@keyframes pop {
+from {transform:scale(0.7); opacity:0;}
+to {transform:scale(1); opacity:1;}
 }
 
 .dark {background:#111; color:white;}
@@ -76,7 +89,6 @@ border-radius:10px;
 <button onclick="toggleDark()">🌙</button>
 </header>
 
-<!-- LOGIN -->
 <div id="loginBox">
 <h3>Login</h3>
 <input id="user"><br>
@@ -84,7 +96,6 @@ border-radius:10px;
 <button onclick="login()">Login</button>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none;">
 
 <div class="layer" id="layer1"></div>
@@ -99,11 +110,11 @@ border-radius:10px;
 
 </div>
 
-<!-- PROFILE -->
+<!-- 🔥 FLOATING PROFILE -->
 <div id="profileBox">
 <div class="modal">
 
-<h3 id="profileName"></h3>
+<h3 id="profileName" style="color:purple;"></h3>
 
 <input type="file" onchange="uploadPhoto(event)">
 <input id="birthday" placeholder="Birthday">
@@ -167,7 +178,7 @@ const colors={
 return colors[name]||"black";
 }
 
-/* FAMILY LAYERS */
+/* LAYERS */
 const layer1=["DELIA LOZADA","JIMMY LOZADA"];
 const layer2=["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"];
 const layer3=["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"];
@@ -231,6 +242,13 @@ function closeProfile(){
 profileBox.style.display="none";
 }
 
+/* CLICK OUTSIDE CLOSE */
+window.onclick=function(e){
+if(e.target==profileBox){
+profileBox.style.display="none";
+}
+}
+
 /* UPLOAD */
 function uploadPhoto(e){
 let file=e.target.files[0];
@@ -257,7 +275,6 @@ likes:0
 comment.value="";
 }
 
-/* REALTIME */
 db.collection("comments").onSnapshot(snap=>{
 comments.innerHTML="";
 snap.forEach(doc=>{
