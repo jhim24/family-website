@@ -2,307 +2,257 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lozada Family Pro</title>
+<title>Lozada Family Ultimate</title>
 
 <style>
-body {
-  font-family: Arial;
-  margin: 0;
-  background: #f4f4f4;
-  transition: 0.3s;
+body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center; transition:0.3s;}
+header {background:linear-gradient(to right, red, purple); color:white; padding:15px; font-size:20px;}
+
+.dark {background:#111; color:white;}
+.dark .box, .dark .card {background:#222;}
+
+.layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
+
+.card {
+  background:white; margin:10px; padding:10px; width:150px;
+  border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.2);
+  border:3px solid purple; cursor:pointer;
 }
 
-.dark {
-  background: #121212;
-  color: white;
-}
+img {width:100%; height:120px; object-fit:cover; border-radius:8px; background:#ddd;}
 
-header {
-  background: linear-gradient(45deg, red, purple);
-  color: white;
-  text-align: center;
-  padding: 15px;
-}
+h4 {font-size:13px; border:2px solid red; padding:5px; border-radius:6px;}
 
-.family {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 20px;
-  padding: 20px;
-}
+input {width:90%; padding:6px; margin:5px;}
 
-.member {
-  text-align: center;
-  cursor: pointer;
-}
+button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px; margin:3px;}
 
-.member img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  border: 3px solid purple;
-}
+.box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
 
-button {
-  padding: 8px 12px;
-  border: none;
-  background: purple;
-  color: white;
-  border-radius: 5px;
-  margin: 5px;
-}
+.comment {background:#fff; padding:10px; margin:5px; border-radius:8px; text-align:left;}
+.dark .comment {background:#333;}
 
-input {
-  width: 100%;
-  padding: 8px;
-  margin: 5px 0;
-}
-
-/* MODAL */
-.modal {
-  display: none;
-  position: fixed;
-  background: rgba(0,0,0,0.6);
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.modal-content {
-  background: white;
-  margin: 10% auto;
-  padding: 20px;
-  width: 90%;
-  max-width: 400px;
-  border-radius: 10px;
-}
-
-.dark .modal-content {
-  background: #222;
-}
-
-/* LOGIN */
-#loginBox {
-  text-align: center;
-  margin-top: 100px;
-}
-
-.hidden {
-  display: none;
-}
-
-/* COMMENTS */
-.comment {
-  background: white;
-  padding: 10px;
-  margin: 10px;
-  border-radius: 5px;
-}
-
-.dark .comment {
-  background: #222;
-}
+#profileBox {display:none;}
 </style>
 </head>
 
 <body>
 
+<header>
+👨‍👩‍👧‍👦 Lozada Family Ultimate<br>
+<button onclick="logout()">Logout</button>
+<button onclick="toggleDark()">🌙</button>
+</header>
+
 <!-- LOGIN -->
-<div id="loginBox">
-  <h2>Login</h2>
+<div id="loginBox" class="box">
+  <h3>🔐 Login</h3>
   <input id="user" placeholder="Username"><br>
   <input id="pass" type="password" placeholder="Password"><br>
   <button onclick="login()">Login</button>
 </div>
 
 <!-- APP -->
-<div id="app" class="hidden">
+<div id="app" style="display:none;">
 
-<header>
-👨‍👩‍👧‍👦 Lozada Family Pro <br>
-<button onclick="logout()">Logout</button>
-<button onclick="toggleDark()">🌙 Dark Mode</button>
-</header>
+  <div class="layer" id="layer1"></div>
+  <div class="layer" id="layer2"></div>
+  <div class="layer" id="layer3"></div>
 
-<div class="family">
+  <!-- PROFILE -->
+  <div class="box" id="profileBox">
+    <h3 id="profileName"></h3>
+    <input id="birthday" placeholder="Birthday"><br>
+    <input id="address" placeholder="Address"><br>
+    <input id="contact" placeholder="Contact"><br>
+    <input id="email" placeholder="Email"><br>
 
-<script>
-const members = [
-"DELIA LOZADA","JIMMY LOZADA",
-"CHERRY GRACE","CHEVY","JERBOY",
-"JENADEL","JEMMEL","JIMDEL","JISA"
-];
-
-members.forEach(name=>{
-  document.write(`
-  <div class="member" onclick="openProfile('${name}')">
-    <img src="${localStorage.getItem(name+'img') || 'https://via.placeholder.com/100'}">
-    <p>${name}</p>
+    <button onclick="saveProfile()">SAVE / UPDATE</button>
+    <button onclick="closeProfile()">Close</button>
   </div>
-  `)
-});
-</script>
+
+  <!-- COMMENTS -->
+  <div class="box">
+    <h3>💬 Family Wall</h3>
+    <input id="comment" placeholder="Write something...">
+    <button onclick="addComment()">Post</button>
+    <div id="comments"></div>
+  </div>
 
 </div>
 
-<!-- COMMENTS -->
-<div style="padding:20px;">
-<h3>💬 Family Wall</h3>
-<input id="commentInput" placeholder="Write something...">
-<button onclick="postComment()">Post</button>
+<script type="module">
 
-<div id="comments"></div>
-</div>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-</div>
+const firebaseConfig = {
+  apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
+  authDomain: "family-web-10cb8.firebaseapp.com",
+  projectId: "family-web-10cb8"
+};
 
-<!-- PROFILE MODAL -->
-<div id="modal" class="modal">
-<div class="modal-content">
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-<h3 id="name"></h3>
+let currentUser="";
+let currentProfile="";
 
-<input type="file" onchange="uploadPhoto(event)">
-<input id="birthday" placeholder="Birthday">
-<input id="address" placeholder="Address">
-<input id="contact" placeholder="Contact">
-<input id="email" placeholder="Email">
-
-<button onclick="saveProfile()">SAVE</button>
-<button onclick="closeModal()">Close</button>
-
-</div>
-</div>
-
-<script>
-
-/* LOGIN SYSTEM */
-if(localStorage.getItem("login")){
-  showApp();
-}
-
-function login(){
-  let u = user.value;
-  let p = pass.value;
-
-  if(p === "123"){
-    localStorage.setItem("login", true);
-    localStorage.setItem("username", u);
-    showApp();
-  } else alert("Wrong password");
-}
-
-function logout(){
-  localStorage.removeItem("login");
-  location.reload();
-}
-
-function showApp(){
+// AUTO LOGIN
+const savedUser = localStorage.getItem("user");
+if(savedUser){
+  currentUser = savedUser;
   loginBox.style.display="none";
-  app.classList.remove("hidden");
+  app.style.display="block";
 }
 
-/* DARK MODE */
-function toggleDark(){
+// LOGIN
+window.login = function(){
+  const u = user.value.trim();
+  const p = pass.value.trim();
+
+  if(p==="123"){
+    currentUser = u;
+    localStorage.setItem("user",u);
+    loginBox.style.display="none";
+    app.style.display="block";
+  }else alert("Wrong password");
+};
+
+// LOGOUT
+window.logout = function(){
+  localStorage.removeItem("user");
+  location.reload();
+};
+
+// DARK MODE
+window.toggleDark = function(){
   document.body.classList.toggle("dark");
+};
+
+// FAMILY
+const layers = {
+  layer1:["DELIA LOZADA","JIMMY LOZADA"],
+  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
+  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
+};
+
+Object.keys(layers).forEach(layerKey=>{
+  const container=document.getElementById(layerKey);
+
+  layers[layerKey].forEach((name,i)=>{
+    const id=layerKey+"_"+i;
+
+    container.innerHTML+=`
+    <div class="card" onclick="openProfile('${name}','${id}')">
+      <img id="${id}">
+      <h4>${name}</h4>
+      <input type="file" onclick="event.stopPropagation()" onchange="uploadImage(event,'${id}')">
+    </div>
+    `;
+
+    loadImage(id);
+  });
+});
+
+// IMAGE LOAD
+async function loadImage(id){
+  const ref=doc(db,"familyTree",id);
+  const snap=await getDoc(ref);
+  if(snap.exists()) document.getElementById(id).src=snap.data().image;
 }
 
-/* PROFILE */
-let current="";
+// UPLOAD
+window.uploadImage=function(e,id){
+  const file=e.target.files[0];
+  const reader=new FileReader();
 
-function openProfile(name){
-  current = name;
-  modal.style.display="block";
-  document.getElementById("name").innerText=name;
-
-  let data = JSON.parse(localStorage.getItem(name)) || {};
-
-  birthday.value = data.birthday || "";
-  address.value = data.address || "";
-  contact.value = data.contact || "";
-  email.value = data.email || "";
-}
-
-function saveProfile(){
-  let data = {
-    birthday: birthday.value,
-    address: address.value,
-    contact: contact.value,
-    email: email.value
+  reader.onload=async()=>{
+    await setDoc(doc(db,"familyTree",id),{image:reader.result});
+    document.getElementById(id).src=reader.result;
   };
 
-  localStorage.setItem(current, JSON.stringify(data));
-  alert("Saved!");
-}
-
-/* UPLOAD PHOTO */
-function uploadPhoto(e){
-  let file = e.target.files[0];
-  let reader = new FileReader();
-
-  reader.onload = function(){
-    localStorage.setItem(current+"img", reader.result);
-    location.reload();
-  }
-
   reader.readAsDataURL(file);
-}
+};
 
-function closeModal(){
-  modal.style.display="none";
-}
+// PROFILE
+window.openProfile=async(name,id)=>{
+  currentProfile=id;
+  profileBox.style.display="block";
+  profileName.innerText=name;
 
-/* COMMENTS */
-function postComment(){
-  let text = commentInput.value;
-  let user = localStorage.getItem("username");
+  const snap=await getDoc(doc(db,"profiles",id));
+  if(snap.exists()){
+    const d=snap.data();
+    birthday.value=d.birthday||"";
+    address.value=d.address||"";
+    contact.value=d.contact||"";
+    email.value=d.email||"";
+  }
+};
 
-  if(!text) return;
+window.saveProfile=async()=>{
+  await setDoc(doc(db,"profiles",currentProfile),{
+    birthday:birthday.value,
+    address:address.value,
+    contact:contact.value,
+    email:email.value
+  });
+  alert("Saved!");
+};
 
-  let comments = JSON.parse(localStorage.getItem("comments")) || [];
+window.closeProfile=()=>profileBox.style.display="none";
 
-  comments.push({user, text, likes:0});
+// COMMENTS
+window.addComment=async()=>{
+  if(!comment.value) return;
 
-  localStorage.setItem("comments", JSON.stringify(comments));
-  commentInput.value="";
-  loadComments();
-}
+  await addDoc(collection(db,"comments"),{
+    name:currentUser,
+    text:comment.value,
+    time:Date.now(),
+    likes:0
+  });
 
-function loadComments(){
-  let comments = JSON.parse(localStorage.getItem("comments")) || "";
-  let html="";
+  comment.value="";
+};
 
-  comments.forEach((c,i)=>{
-    html += `
+// REALTIME COMMENTS
+const q=query(collection(db,"comments"),orderBy("time"));
+
+onSnapshot(q,(snap)=>{
+  comments.innerHTML="";
+  snap.forEach(d=>{
+    const c=d.data();
+
+    comments.innerHTML+=`
     <div class="comment">
-      <b>${c.user}</b>: ${c.text}<br>
-      ❤️ ${c.likes}
-      <button onclick="like(${i})">Like</button>
-      <button onclick="del(${i})">Delete</button>
+      <b>${c.name}</b><br>
+      ${c.text}<br>
+      ❤️ ${c.likes||0}<br>
+      <button onclick="like('${d.id}',${c.likes||0})">Like</button>
+      <button onclick="edit('${d.id}','${c.text}')">Edit</button>
+      <button onclick="del('${d.id}')">Delete</button>
     </div>
     `;
   });
+});
 
-  document.getElementById("comments").innerHTML=html;
-}
+// LIKE
+window.like=async(id,likes)=>{
+  await updateDoc(doc(db,"comments",id),{likes:likes+1});
+};
 
-function like(i){
-  let c = JSON.parse(localStorage.getItem("comments"));
-  c[i].likes++;
-  localStorage.setItem("comments", JSON.stringify(c));
-  loadComments();
-}
+// DELETE
+window.del=async(id)=>{
+  await deleteDoc(doc(db,"comments",id));
+};
 
-function del(i){
-  let c = JSON.parse(localStorage.getItem("comments"));
-  c.splice(i,1);
-  localStorage.setItem("comments", JSON.stringify(c));
-  loadComments();
-}
-
-loadComments();
+// EDIT
+window.edit=(id,text)=>{
+  const t=prompt("Edit:",text);
+  if(t) updateDoc(doc(db,"comments",id),{text:t});
+};
 
 </script>
 
