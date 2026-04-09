@@ -1,50 +1,70 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>My Family Website</title>
+  <title>Lozada Family</title>
 
   <style>
     body {
       margin: 0;
-      font-family: Arial;
-      background: #f5f5f5;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #6a0dad, #b06ab3);
+      color: white;
       text-align: center;
     }
 
     header {
-      background: #6a0dad;
-      color: white;
-      padding: 20px;
+      padding: 30px;
     }
 
     h1 {
       margin: 0;
+      font-size: 32px;
     }
 
     .section {
       padding: 20px;
     }
 
-    .card {
-      background: white;
-      padding: 15px;
-      margin: 10px auto;
-      border-radius: 10px;
-      width: 80%;
-      max-width: 300px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
-    img {
+    .card {
+      background: white;
+      color: black;
+      margin: 10px;
+      padding: 15px;
+      border-radius: 15px;
+      width: 250px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .card img {
       width: 100%;
       border-radius: 10px;
     }
 
+    .gallery img {
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
     footer {
-      background: #333;
-      color: white;
-      padding: 10px;
       margin-top: 20px;
+      padding: 10px;
+      background: #222;
+    }
+
+    .btn {
+      background: #ffcc00;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -53,50 +73,66 @@
 
 <header>
   <h1>👨‍👩‍👧‍👦 Lozada Family</h1>
-  <p>Welcome to our family website</p>
+  <p>Welcome to our happy family website ❤️</p>
 </header>
 
 <div class="section">
   <h2>About Us</h2>
-  <p>We are a happy family. This website shows our memories and moments together ❤️</p>
+  <p>We are a loving and happy family. This website shows our memories and special moments together.</p>
 </div>
 
 <div class="section">
   <h2>Family Members</h2>
 
-  <div class="card">
-    <img src="https://via.placeholder.com/300">
-    <h3>Father</h3>
-    <p>Head of the family</p>
-  </div>
+  <div class="container">
 
-  <div class="card">
-    <img src="https://via.placeholder.com/300">
-    <h3>Mother</h3>
-    <p>Loving and caring</p>
-  </div>
+    <div class="card">
+      <img src="https://via.placeholder.com/300">
+      <h3>Father</h3>
+      <p>Strong and responsible</p>
+    </div>
 
-  <div class="card">
-    <img src="https://via.placeholder.com/300">
-    <h3>Children</h3>
-    <p>Joy of the family</p>
-  </div>
+    <div class="card">
+      <img src="https://via.placeholder.com/300">
+      <h3>Mother</h3>
+      <p>Loving and caring</p>
+    </div>
 
+    <div class="card">
+      <img src="https://via.placeholder.com/300">
+      <h3>Children</h3>
+      <p>Joy of the family</p>
+    </div>
+
+  </div>
 </div>
 
 <div class="section">
   <h2>Photo Gallery</h2>
 
-  <div class="card">
-    <img src="https://via.placeholder.com/300">
-    <p>Family Vacation</p>
-  </div>
+  <div class="container gallery">
 
-  <div class="card">
-    <img src="https://via.placeholder.com/300">
-    <p>Birthday Celebration</p>
-  </div>
+    <div class="card">
+      <img src="https://via.placeholder.com/300">
+      <p>Family Vacation</p>
+    </div>
 
+    <div class="card">
+      <img src="https://via.placeholder.com/300">
+      <p>Birthday Celebration</p>
+    </div>
+
+    <div class="card">
+      <img src="https://via.placeholder.com/300">
+      <p>Happy Moments</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <h2>Message</h2>
+  <p>"Family is where life begins and love never ends."</p>
 </div>
 
 <footer>
