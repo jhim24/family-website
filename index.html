@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lozada Family Pro</title>
+  <title>Lozada Family</title>
 
   <style>
     body {
@@ -16,30 +16,64 @@
       color: white;
       padding: 15px;
       font-size: 22px;
+      font-weight: bold;
     }
 
+    .layer {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .card {
+      background: white;
+      margin: 10px;
+      padding: 10px;
+      width: 150px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      border: 3px solid purple;
+    }
+
+    img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #ddd;
+    }
+
+    h4 {
+      font-size: 13px;
+      border: 2px solid red;
+      padding: 5px;
+      border-radius: 6px;
+      background: #fff0f5;
+    }
+
+    input {
+      font-size: 10px;
+      margin-top: 5px;
+    }
+
+    /* COMMENTS */
     .box {
+      background: white;
       margin: 20px auto;
       padding: 15px;
       width: 90%;
       max-width: 400px;
-      background: white;
       border-radius: 10px;
     }
 
-    input {
-      padding: 8px;
-      margin: 5px;
-      width: 80%;
-    }
-
     button {
-      padding: 8px 12px;
+      padding: 6px 10px;
       background: purple;
       color: white;
       border: none;
       border-radius: 5px;
-      margin: 3px;
+      margin-top: 5px;
     }
 
     .comment {
@@ -56,35 +90,29 @@
 <body>
 
 <header>
-  👨‍👩‍👧‍👦 Lozada Family Pro
+  👨‍👩‍👧‍👦 Lozada Family
 </header>
 
-<!-- LOGIN -->
-<div class="box" id="loginBox">
-  <h3>Login</h3>
-  <input id="username" placeholder="Enter your name">
-  <br>
-  <button onclick="login()">Enter</button>
-</div>
+<!-- FAMILY TREE -->
+<div class="layer" id="layer1"></div>
+<div class="layer" id="layer2"></div>
+<div class="layer" id="layer3"></div>
 
-<!-- MAIN -->
-<div id="app" style="display:none;">
+<!-- COMMENTS -->
+<div class="box">
+  <h3>💬 Family Wall</h3>
 
-  <!-- COMMENT -->
-  <div class="box">
-    <h3>💬 Family Wall</h3>
-    <input id="comment" placeholder="Write something...">
-    <button onclick="addComment()">Post</button>
+  <input id="username" placeholder="Your name"><br>
+  <input id="comment" placeholder="Write something..." style="width:70%">
+  <button onclick="addComment()">Post</button>
 
-    <div id="comments"></div>
-  </div>
-
+  <div id="comments"></div>
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
@@ -98,76 +126,104 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let user = "";
-
-// LOGIN
-window.login = function(){
-  user = document.getElementById("username").value;
-  if(!user) return alert("Enter name");
-
-  localStorage.setItem("user", user);
-
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("app").style.display="block";
+// FAMILY LAYERS
+const layers = {
+  layer1: [
+    "DELIA LOZADA",
+    "JIMMY LOZADA"
+  ],
+  layer2: [
+    "CHERRY GRACE LOZADA",
+    "CHEVY LOZADA CORTEZ",
+    "JERBOY LOZADA"
+  ],
+  layer3: [
+    "JENADEL LOZADA",
+    "JEMMEL LOZADA",
+    "JIMDEL LOZADA",
+    "JISA LOZADA"
+  ]
 };
 
-// AUTO LOGIN
-const savedUser = localStorage.getItem("user");
-if(savedUser){
-  user = savedUser;
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("app").style.display="block";
+// CREATE FAMILY
+Object.keys(layers).forEach(layerKey=>{
+  const container = document.getElementById(layerKey);
+
+  layers[layerKey].forEach((name,i)=>{
+    const id = layerKey+"_"+i;
+
+    container.innerHTML += `
+      <div class="card">
+        <img id="${id}">
+        <h4>${name}</h4>
+        <input type="file" onchange="uploadImage(event,'${id}')">
+      </div>
+    `;
+
+    loadImage(id);
+  });
+});
+
+// LOAD IMAGE
+async function loadImage(id){
+  const ref = doc(db,"familyTree",id);
+  const snap = await getDoc(ref);
+
+  if(snap.exists()){
+    document.getElementById(id).src = snap.data().image;
+  }
 }
 
-// ADD COMMENT
+// UPLOAD
+window.uploadImage = function(e,id){
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async function(){
+    const base64 = reader.result;
+
+    await setDoc(doc(db,"familyTree",id),{
+      image: base64
+    });
+
+    document.getElementById(id).src = base64;
+  };
+
+  reader.readAsDataURL(file);
+};
+
+// COMMENTS
 window.addComment = async function(){
+  const name = document.getElementById("username").value;
   const text = document.getElementById("comment").value;
-  if(!text) return;
+
+  if(!name || !text) return;
 
   await addDoc(collection(db,"comments"),{
-    user:user,
+    name:name,
     text:text,
-    likes:0,
     time:Date.now()
   });
 
   document.getElementById("comment").value="";
 };
 
-// LOAD COMMENTS
 const q = query(collection(db,"comments"),orderBy("time"));
 
 onSnapshot(q,(snap)=>{
   const box = document.getElementById("comments");
   box.innerHTML="";
 
-  snap.forEach(docSnap=>{
-    const c = docSnap.data();
-    const id = docSnap.id;
+  snap.forEach(doc=>{
+    const c = doc.data();
 
     box.innerHTML += `
       <div class="comment">
-        <b>${c.user}</b><br>${c.text}<br>
-        👍 ${c.likes}
-        <br>
-        <button onclick="likePost('${id}',${c.likes})">Like</button>
-        ${c.user === user ? `<button onclick="deletePost('${id}')">Delete</button>` : ""}
+        <b>${c.name}</b><br>${c.text}
       </div>
     `;
   });
 });
-
-// LIKE
-window.likePost = async function(id,likes){
-  await updateDoc(doc(db,"comments",id),{
-    likes: likes + 1
-  });
-};
-
-// DELETE
-window.deletePost = async function(id){
-  await deleteDoc(doc(db,"comments",id));
-};
 
 </script>
 
