@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lozada Family App</title>
+  <title>Lozada Family Tree</title>
 
   <style>
     body {
       font-family: Arial;
       background: #f0f0f0;
-      margin: 0;
       text-align: center;
+      margin: 0;
     }
 
     header {
@@ -16,21 +16,24 @@
       color: white;
       padding: 15px;
       font-size: 22px;
+      font-weight: bold;
     }
 
-    .container {
+    .layer {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
     }
 
     .card {
       background: white;
       margin: 10px;
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 12px;
       width: 150px;
-      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      border: 3px solid purple;
     }
 
     img {
@@ -39,77 +42,52 @@
       object-fit: cover;
       border-radius: 8px;
       background: #ddd;
+      border: 2px solid #ccc;
+    }
+
+    h4 {
+      margin: 8px 0 5px;
+      font-size: 13px;
+      padding: 5px;
+      border: 2px solid red;
+      border-radius: 6px;
+      background: #fff0f5;
     }
 
     .role {
       font-size: 10px;
       color: gray;
+      margin-bottom: 5px;
     }
 
-    .profile {
-      display: none;
-      padding: 20px;
+    input {
+      font-size: 10px;
     }
 
-    .post-box {
-      margin: 10px;
-    }
+    /* LAYER COLORS */
+    #layer1 .card { border-color: gold; }
+    #layer2 .card { border-color: blue; }
+    #layer3 .card { border-color: green; }
+    #layer4 .card { border-color: purple; }
 
-    textarea {
-      width: 80%;
-      height: 60px;
-    }
-
-    button {
-      padding: 8px 15px;
-      background: purple;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-
-    .post {
-      background: white;
-      margin: 10px auto;
-      padding: 10px;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 10px;
-      text-align: left;
-    }
   </style>
 </head>
 
 <body>
 
 <header>
-  👨‍👩‍👧‍👦 Lozada Family App
+  👨‍👩‍👧‍👦 Lozada Family Tree
 </header>
 
-<!-- FAMILY GRID -->
-<div class="container" id="family"></div>
-
-<!-- PROFILE VIEW -->
-<div class="profile" id="profile">
-  <h2 id="profileName"></h2>
-  <img id="profileImg" style="width:200px;">
-  <br><br>
-  <button onclick="back()">Back</button>
-</div>
-
-<!-- TIMELINE -->
-<div class="post-box">
-  <h3>Family Timeline</h3>
-  <textarea id="postText" placeholder="What's happening?"></textarea><br>
-  <button onclick="addPost()">Post</button>
-</div>
-
-<div id="posts"></div>
+<div class="layer" id="layer1"></div>
+<div class="layer" id="layer2"></div>
+<div class="layer" id="layer3"></div>
+<div class="layer" id="layer4"></div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
@@ -123,47 +101,54 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 👨‍👩‍👧‍👦 MEMBERS + ROLE
-const members = [
-  {name:"DELIA LOZADA", role:"Mother"},
-  {name:"JIMMY LOZADA", role:"Father"},
-  {name:"CHERRY GRACE LOZADA", role:"Sibling"},
-  {name:"CHEVY LOZADA CORTEZ", role:"Sibling"},
-  {name:"JERBOY LOZADA", role:"Sibling"},
-  {name:"JENADEL LOZADA", role:"Sibling"},
-  {name:"JEMMEL LOZADA", role:"Sibling"},
-  {name:"JIMDEL LOZADA", role:"Sibling"},
-  {name:"JISA LOZADA", role:"Sibling"}
-];
+const layers = {
+  layer1: [
+    {name:"DELIA LOZADA", role:"Mother"},
+    {name:"JIMMY LOZADA", role:"Father"}
+  ],
+  layer2: [
+    {name:"CHERRY GRACE LOZADA", role:"Sibling"},
+    {name:"CHEVY LOZADA CORTEZ", role:"Sibling"}
+  ],
+  layer3: [
+    {name:"JERBOY LOZADA", role:"Sibling"},
+    {name:"JENADEL LOZADA", role:"Sibling"}
+  ],
+  layer4: [
+    {name:"JEMMEL LOZADA", role:"Sibling"},
+    {name:"JIMDEL LOZADA", role:"Sibling"},
+    {name:"JISA LOZADA", role:"Sibling"}
+  ]
+};
 
-const container = document.getElementById("family");
+Object.keys(layers).forEach((layerKey) => {
+  const container = document.getElementById(layerKey);
 
-// CREATE CARDS
-members.forEach((m, i) => {
-  const id = "img"+i;
+  layers[layerKey].forEach((m, i) => {
+    const id = layerKey + "_" + i;
 
-  container.innerHTML += `
-    <div class="card" onclick="openProfile('${m.name}','${id}')">
-      <img id="${id}">
-      <h4>${m.name}</h4>
-      <div class="role">${m.role}</div>
-      <input type="file" onchange="uploadImage(event,'${id}')">
-    </div>
-  `;
+    container.innerHTML += `
+      <div class="card">
+        <img id="${id}">
+        <h4>${m.name}</h4>
+        <div class="role">${m.role}</div>
+        <input type="file" onchange="uploadImage(event,'${id}')">
+      </div>
+    `;
+
+    loadImage(id);
+  });
 });
 
-// LOAD IMAGES
-members.forEach(async (m,i)=>{
-  const id="img"+i;
-  const docRef = doc(db,"images",id);
+async function loadImage(id){
+  const docRef = doc(db,"familyTree",id);
   const snap = await getDoc(docRef);
 
   if(snap.exists()){
     document.getElementById(id).src = snap.data().image;
   }
-});
+}
 
-// UPLOAD IMAGE
 window.uploadImage = function(e,id){
   const file = e.target.files[0];
   const reader = new FileReader();
@@ -171,7 +156,7 @@ window.uploadImage = function(e,id){
   reader.onload = async function(){
     const base64 = reader.result;
 
-    await setDoc(doc(db,"images",id),{
+    await setDoc(doc(db,"familyTree",id),{
       image: base64
     });
 
@@ -180,45 +165,6 @@ window.uploadImage = function(e,id){
 
   reader.readAsDataURL(file);
 };
-
-// PROFILE VIEW
-window.openProfile = function(name,id){
-  document.getElementById("profile").style.display="block";
-  document.getElementById("profileName").innerText=name;
-  document.getElementById("profileImg").src =
-    document.getElementById(id).src;
-};
-
-window.back = function(){
-  document.getElementById("profile").style.display="none";
-};
-
-// ADD POST
-window.addPost = async function(){
-  const text = document.getElementById("postText").value;
-  if(!text) return;
-
-  await addDoc(collection(db,"posts"),{
-    text:text,
-    time:Date.now()
-  });
-
-  document.getElementById("postText").value="";
-};
-
-// LOAD POSTS REALTIME
-const q = query(collection(db,"posts"),orderBy("time"));
-
-onSnapshot(q,(snap)=>{
-  const posts = document.getElementById("posts");
-  posts.innerHTML="";
-
-  snap.forEach(doc=>{
-    posts.innerHTML += `
-      <div class="post">${doc.data().text}</div>
-    `;
-  });
-});
 
 </script>
 
