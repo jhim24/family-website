@@ -9,48 +9,65 @@ body {
   font-family: Arial;
   margin: 0;
   background: #f4f4f4;
+  transition: 0.3s;
 }
 
-/* HEADER */
+.dark {
+  background: #121212;
+  color: white;
+}
+
 header {
   background: linear-gradient(45deg, red, purple);
   color: white;
   text-align: center;
   padding: 15px;
-  font-size: 20px;
 }
 
-/* FAMILY GRID */
 .family {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 20px;
   padding: 20px;
 }
 
 .member {
   text-align: center;
-  margin: 10px;
   cursor: pointer;
 }
 
 .member img {
-  width: 100px;
-  height: 100px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   border: 3px solid purple;
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  background: purple;
+  color: white;
+  border-radius: 5px;
+  margin: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
 }
 
 /* MODAL */
 .modal {
   display: none;
   position: fixed;
-  z-index: 999;
-  left: 0;
-  top: 0;
+  background: rgba(0,0,0,0.6);
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.6);
+  top: 0;
+  left: 0;
 }
 
 .modal-content {
@@ -60,24 +77,10 @@ header {
   width: 90%;
   max-width: 400px;
   border-radius: 10px;
-  text-align: center;
 }
 
-/* INPUTS */
-input {
-  width: 100%;
-  padding: 8px;
-  margin: 5px 0;
-}
-
-/* BUTTONS */
-button {
-  padding: 10px;
-  border: none;
-  background: purple;
-  color: white;
-  border-radius: 5px;
-  margin: 5px;
+.dark .modal-content {
+  background: #222;
 }
 
 /* LOGIN */
@@ -91,15 +94,15 @@ button {
 }
 
 /* COMMENTS */
-#comments {
-  padding: 20px;
-}
-
-.comment-box {
+.comment {
   background: white;
   padding: 10px;
-  margin: 5px;
+  margin: 10px;
   border-radius: 5px;
+}
+
+.dark .comment {
+  background: #222;
 }
 </style>
 </head>
@@ -114,121 +117,105 @@ button {
   <button onclick="login()">Login</button>
 </div>
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div id="app" class="hidden">
 
-<header>👨‍👩‍👧‍👦 Lozada Family Pro</header>
+<header>
+👨‍👩‍👧‍👦 Lozada Family Pro <br>
+<button onclick="logout()">Logout</button>
+<button onclick="toggleDark()">🌙 Dark Mode</button>
+</header>
 
 <div class="family">
 
-  <div class="member" onclick="openProfile('DELIA LOZADA')">
-    <img src="https://via.placeholder.com/100">
-    <p>DELIA LOZADA</p>
-  </div>
+<script>
+const members = [
+"DELIA LOZADA","JIMMY LOZADA",
+"CHERRY GRACE","CHEVY","JERBOY",
+"JENADEL","JEMMEL","JIMDEL","JISA"
+];
 
-  <div class="member" onclick="openProfile('JIMMY LOZADA')">
-    <img src="https://via.placeholder.com/100">
-    <p>JIMMY LOZADA</p>
+members.forEach(name=>{
+  document.write(`
+  <div class="member" onclick="openProfile('${name}')">
+    <img src="${localStorage.getItem(name+'img') || 'https://via.placeholder.com/100'}">
+    <p>${name}</p>
   </div>
-
-  <div class="member" onclick="openProfile('CHERRY GRACE LOZADA')">
-    <img src="https://via.placeholder.com/100">
-    <p>CHERRY GRACE</p>
-  </div>
-
-  <div class="member" onclick="openProfile('CHEVY LOZADA')">
-    <img src="https://via.placeholder.com/100">
-    <p>CHEVY</p>
-  </div>
-
-  <div class="member" onclick="openProfile('JERBOY LOZADA')">
-    <img src="https://via.placeholder.com/100">
-    <p>JERBOY</p>
-  </div>
-
-  <div class="member" onclick="openProfile('JENADEL LOZADA')">
-    <img src="https://via.placeholder.com/100">
-    <p>JENADEL</p>
-  </div>
-
-  <div class="member" onclick="openProfile('JEMMEL LOZADA')">
-    <img src="https://via.placeholder.com/100">
-    <p>JEMMEL</p>
-  </div>
-
-  <div class="member" onclick="openProfile('JIMDEL LOZADA')">
-    <img src="https://via.placeholder.com/100">
-    <p>JIMDEL</p>
-  </div>
-
-  <div class="member" onclick="openProfile('JISA LOZADA')">
-    <img src="https://via.placeholder.com/100">
-    <p>JISA</p>
-  </div>
+  `)
+});
+</script>
 
 </div>
 
 <!-- COMMENTS -->
-<div id="comments">
-  <h3>💬 Family Wall</h3>
-  <input id="commentInput" placeholder="Write something...">
-  <button onclick="postComment()">Post</button>
+<div style="padding:20px;">
+<h3>💬 Family Wall</h3>
+<input id="commentInput" placeholder="Write something...">
+<button onclick="postComment()">Post</button>
 
-  <div id="commentList"></div>
+<div id="comments"></div>
 </div>
 
 </div>
 
 <!-- PROFILE MODAL -->
 <div id="modal" class="modal">
-  <div class="modal-content">
+<div class="modal-content">
 
-    <h3 id="name"></h3>
+<h3 id="name"></h3>
 
-    <input id="birthday" placeholder="Birthday">
-    <input id="address" placeholder="Address">
-    <input id="contact" placeholder="Contact">
-    <input id="email" placeholder="Email">
+<input type="file" onchange="uploadPhoto(event)">
+<input id="birthday" placeholder="Birthday">
+<input id="address" placeholder="Address">
+<input id="contact" placeholder="Contact">
+<input id="email" placeholder="Email">
 
-    <button onclick="saveProfile()">SAVE / UPDATE</button>
-    <button onclick="closeModal()">Close</button>
+<button onclick="saveProfile()">SAVE</button>
+<button onclick="closeModal()">Close</button>
 
-  </div>
+</div>
 </div>
 
 <script>
 
-/* AUTO LOGIN */
-if(localStorage.getItem("login") === "true"){
+/* LOGIN SYSTEM */
+if(localStorage.getItem("login")){
   showApp();
 }
 
-/* LOGIN */
 function login(){
-  let u = document.getElementById("user").value;
-  let p = document.getElementById("pass").value;
+  let u = user.value;
+  let p = pass.value;
 
-  if(u === "usee" && p === "123"){
-    localStorage.setItem("login", "true");
+  if(p === "123"){
+    localStorage.setItem("login", true);
     localStorage.setItem("username", u);
     showApp();
-  } else {
-    alert("Wrong login");
-  }
+  } else alert("Wrong password");
+}
+
+function logout(){
+  localStorage.removeItem("login");
+  location.reload();
 }
 
 function showApp(){
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("app").classList.remove("hidden");
+  loginBox.style.display="none";
+  app.classList.remove("hidden");
+}
+
+/* DARK MODE */
+function toggleDark(){
+  document.body.classList.toggle("dark");
 }
 
 /* PROFILE */
-let currentUser = "";
+let current="";
 
 function openProfile(name){
-  currentUser = name;
-  document.getElementById("modal").style.display = "block";
-  document.getElementById("name").innerText = name;
+  current = name;
+  modal.style.display="block";
+  document.getElementById("name").innerText=name;
 
   let data = JSON.parse(localStorage.getItem(name)) || {};
 
@@ -246,39 +233,73 @@ function saveProfile(){
     email: email.value
   };
 
-  localStorage.setItem(currentUser, JSON.stringify(data));
+  localStorage.setItem(current, JSON.stringify(data));
   alert("Saved!");
 }
 
+/* UPLOAD PHOTO */
+function uploadPhoto(e){
+  let file = e.target.files[0];
+  let reader = new FileReader();
+
+  reader.onload = function(){
+    localStorage.setItem(current+"img", reader.result);
+    location.reload();
+  }
+
+  reader.readAsDataURL(file);
+}
+
 function closeModal(){
-  document.getElementById("modal").style.display = "none";
+  modal.style.display="none";
 }
 
 /* COMMENTS */
 function postComment(){
-  let text = document.getElementById("commentInput").value;
-  let name = localStorage.getItem("username");
+  let text = commentInput.value;
+  let user = localStorage.getItem("username");
 
-  if(text === "") return;
+  if(!text) return;
 
   let comments = JSON.parse(localStorage.getItem("comments")) || [];
 
-  comments.push({name, text});
+  comments.push({user, text, likes:0});
 
   localStorage.setItem("comments", JSON.stringify(comments));
-  document.getElementById("commentInput").value = "";
+  commentInput.value="";
   loadComments();
 }
 
 function loadComments(){
-  let comments = JSON.parse(localStorage.getItem("comments")) || [];
-  let html = "";
+  let comments = JSON.parse(localStorage.getItem("comments")) || "";
+  let html="";
 
-  comments.forEach(c => {
-    html += `<div class="comment-box"><b>${c.name}</b>: ${c.text}</div>`;
+  comments.forEach((c,i)=>{
+    html += `
+    <div class="comment">
+      <b>${c.user}</b>: ${c.text}<br>
+      ❤️ ${c.likes}
+      <button onclick="like(${i})">Like</button>
+      <button onclick="del(${i})">Delete</button>
+    </div>
+    `;
   });
 
-  document.getElementById("commentList").innerHTML = html;
+  document.getElementById("comments").innerHTML=html;
+}
+
+function like(i){
+  let c = JSON.parse(localStorage.getItem("comments"));
+  c[i].likes++;
+  localStorage.setItem("comments", JSON.stringify(c));
+  loadComments();
+}
+
+function del(i){
+  let c = JSON.parse(localStorage.getItem("comments"));
+  c.splice(i,1);
+  localStorage.setItem("comments", JSON.stringify(c));
+  loadComments();
 }
 
 loadComments();
