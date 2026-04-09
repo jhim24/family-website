@@ -1,331 +1,219 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lozada Family Ultimate</title>
+  <title>Lozada Family Ultimate</title>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <style>
+    body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
+    header {background:linear-gradient(to right, red, purple); color:white; padding:15px; font-size:22px;}
 
-<style>
-body {font-family: Arial; margin:0; text-align:center; background:#f0f0f0;}
-header {background:linear-gradient(to right, red, purple); color:white; padding:15px;}
+    .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
 
-.layer {
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin:20px;
-  gap:10px;
-}
+    .card {
+      background:white; margin:10px; padding:10px; width:150px;
+      border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.2);
+      border:3px solid purple; cursor:pointer;
+    }
 
-.card {
-  background:white;
-  margin:10px;
-  padding:10px;
-  width:140px;
-  min-width:140px; /* 🔥 FIX */
-  border-radius:12px;
-  border:3px solid purple;
-  cursor:pointer;
-}
+    img {width:100%; height:120px; object-fit:cover; border-radius:8px; background:#ddd;}
 
-img {width:100%; height:110px; border-radius:8px; background:#ddd;}
+    h4 {font-size:13px; border:2px solid red; padding:5px; border-radius:6px;}
 
-.box {
-  background:white;
-  margin:20px auto;
-  padding:15px;
-  width:90%;
-  max-width:400px;
-  border-radius:10px;
-}
+    input {width:90%; padding:6px; margin:5px;}
 
-.comment {
-  background:#fff;
-  padding:10px;
-  margin:5px;
-  border-radius:8px;
-  text-align:left;
-}
+    button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
 
-/* FLOATING */
-#profileBox {
-display:none;
-position:fixed;
-top:0; left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.6);
-z-index:999;
-}
+    .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
 
-.modal {
-background:linear-gradient(135deg,#fff,#f3e5f5);
-margin:10% auto;
-padding:20px;
-width:90%;
-max-width:400px;
-border-radius:15px;
-border:4px solid purple;
-box-shadow:0 0 20px rgba(128,0,128,0.5);
-}
+    .comment {background:#fff; padding:10px; margin:5px; border-radius:8px; text-align:left;}
 
-/* DARK MODE */
-.dark {background:#111; color:white;}
-.dark .card,.dark .box,.dark .modal {background:#222;}
-
-/* 📱 MOBILE FIX */
-@media (max-width:600px){
-
-.layer {
-  flex-wrap:nowrap;
-  overflow-x:auto;
-}
-
-.card {
-  flex-shrink:0;
-}
-
-.modal {
-  width:95%;
-  margin:20% auto;
-}
-
-.box {
-  width:95%;
-}
-
-}
-</style>
+    #profileBox {display:none;}
+  </style>
 </head>
 
 <body>
 
-<header>
-👨‍👩‍👧‍👦 Lozada Family Ultimate<br>
-<button onclick="logout()">Logout</button>
-<button onclick="toggleDark()">🌙</button>
-</header>
+<header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
 
-<div id="loginBox">
-<h3>Login</h3>
-<input id="user"><br>
-<input id="pass" type="password"><br>
-<button onclick="login()">Login</button>
+<div id="loginBox" class="box">
+  <h3>🔐 Login</h3>
+  <input id="user" placeholder="Username"><br>
+  <input id="pass" type="password" placeholder="Password"><br>
+  <button onclick="login()">Login</button>
 </div>
 
 <div id="app" style="display:none;">
 
-<div class="layer" id="layer1"></div>
-<div class="layer" id="layer2"></div>
-<div class="layer" id="layer3"></div>
+  <div class="layer" id="layer1"></div>
+  <div class="layer" id="layer2"></div>
+  <div class="layer" id="layer3"></div>
 
-<div class="box">
-<input id="comment" placeholder="Write comment">
-<button onclick="addComment()">Post</button>
-<div id="comments"></div>
-</div>
+  <div class="box" id="profileBox">
+    <h3 id="profileName"></h3>
+    <input id="birthday" placeholder="Birthday"><br>
+    <input id="address" placeholder="Address"><br>
+    <input id="contact" placeholder="Contact"><br>
+    <input id="email" placeholder="Email"><br>
 
-</div>
+    <button onclick="saveProfile()">SAVE / UPDATE</button>
+    <button onclick="closeProfile()">Close</button>
+  </div>
 
-<div id="profileBox">
-<div class="modal">
-
-<h3 id="profileName" style="color:purple;"></h3>
-
-<input type="file" onchange="uploadPhoto(event)">
-<input id="birthday" placeholder="Birthday">
-<input id="address" placeholder="Address">
-<input id="contact" placeholder="Contact">
-<input id="email" placeholder="Email">
-
-<button onclick="saveProfile()">Save</button>
-<button onclick="closeProfile()">Close</button>
+  <div class="box">
+    <h3>💬 Family Wall</h3>
+    <input id="comment" placeholder="Write something...">
+    <button onclick="addComment()">Post</button>
+    <div id="comments"></div>
+  </div>
 
 </div>
-</div>
 
-<script>
+<script type="module">
 
-/* FIREBASE */
-firebase.initializeApp({
-apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
-projectId:"family-web-10cb8"
-});
-const db=firebase.firestore();
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { 
+  getFirestore, doc, setDoc, getDoc, 
+  collection, addDoc, onSnapshot, query, orderBy 
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-/* LOGIN */
-function login(){
-if(pass.value==="123"){
-localStorage.setItem("user",user.value);
-showApp();
-}else alert("Wrong password");
-}
-
-if(localStorage.getItem("user")) showApp();
-
-function showApp(){
-loginBox.style.display="none";
-app.style.display="block";
-}
-
-function logout(){
-localStorage.removeItem("user");
-location.reload();
-}
-
-/* DARK MODE */
-function toggleDark(){
-document.body.classList.toggle("dark");
-}
-
-/* COLOR */
-function getColor(name){
-const colors={
-"DELIA LOZADA":"red",
-"JIMMY LOZADA":"blue",
-"CHERRY GRACE LOZADA":"purple",
-"CHEVY LOZADA CORTEZ":"green",
-"JERBOY LOZADA":"orange",
-"JENADEL LOZADA":"pink",
-"JEMMEL LOZADA":"brown",
-"JIMDEL LOZADA":"teal",
-"JISA LOZADA":"gold"
-};
-return colors[name]||"black";
-}
-
-/* LAYERS */
-const layer1=["DELIA LOZADA","JIMMY LOZADA"];
-const layer2=["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"];
-const layer3=["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"];
-
-function render(layer,container){
-layer.forEach(name=>{
-container.innerHTML+=`
-<div class="card" onclick="openProfile('${name}')">
-<img id="img-${name}">
-<h4 style="border:2px solid ${getColor(name)}; padding:5px; border-radius:6px;">
-${name}
-</h4>
-</div>`;
-loadImage(name);
-});
-}
-
-render(layer1,document.getElementById("layer1"));
-render(layer2,document.getElementById("layer2"));
-render(layer3,document.getElementById("layer3"));
-
-/* LOAD IMAGE */
-function loadImage(name){
-db.collection("photos").doc(name).get().then(doc=>{
-if(doc.exists){
-document.getElementById("img-"+name).src=doc.data().img;
-}
-});
-}
-
-/* PROFILE */
-let current="";
-
-function openProfile(name){
-current=name;
-profileBox.style.display="block";
-profileName.innerText=name;
-
-db.collection("profiles").doc(name).get().then(doc=>{
-if(doc.exists){
-let d=doc.data();
-birthday.value=d.birthday||"";
-address.value=d.address||"";
-contact.value=d.contact||"";
-email.value=d.email||"";
-}
-});
-}
-
-function saveProfile(){
-db.collection("profiles").doc(current).set({
-birthday:birthday.value,
-address:address.value,
-contact:contact.value,
-email:email.value
-});
-alert("Saved!");
-}
-
-function closeProfile(){
-profileBox.style.display="none";
-}
-
-window.onclick=function(e){
-if(e.target==profileBox){
-profileBox.style.display="none";
-}
-}
-
-/* UPLOAD */
-function uploadPhoto(e){
-let file=e.target.files[0];
-let reader=new FileReader();
-
-reader.onload=function(){
-db.collection("photos").doc(current).set({img:reader.result});
-loadImage(current);
+const firebaseConfig = {
+  apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
+  authDomain: "family-web-10cb8.firebaseapp.com",
+  projectId: "family-web-10cb8"
 };
 
-reader.readAsDataURL(file);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let currentUser = "";
+let currentProfile = "";
+
+// AUTO LOGIN
+const savedUser = localStorage.getItem("user");
+if(savedUser){
+  currentUser = savedUser;
+  loginSuccess();
 }
 
-/* COMMENTS */
-function addComment(){
-if(!comment.value) return;
+window.login = function(){
+  const u = user.value.trim().toLowerCase();
+  const p = pass.value.trim();
 
-db.collection("comments").add({
-name:localStorage.getItem("user"),
-text:comment.value,
-likes:0
+  if(u==="usee" && p==="123"){
+    currentUser = u;
+    localStorage.setItem("user", u);
+    loginSuccess();
+  } else {
+    alert("Wrong login");
+  }
+};
+
+function loginSuccess(){
+  loginBox.style.display="none";
+  app.style.display="block";
+}
+
+// FAMILY LAYERS
+const layers = {
+  layer1:["DELIA LOZADA","JIMMY LOZADA"],
+  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
+  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
+};
+
+// CREATE UI
+Object.keys(layers).forEach(layerKey=>{
+  const container = document.getElementById(layerKey);
+
+  layers[layerKey].forEach((name,i)=>{
+    const id = layerKey+"_"+i;
+
+    container.innerHTML += `
+      <div class="card" onclick="openProfile('${name}','${id}')">
+        <img id="${id}">
+        <h4>${name}</h4>
+        <input type="file" onclick="event.stopPropagation()" onchange="uploadImage(event,'${id}')">
+      </div>
+    `;
+
+    // 🔥 REALTIME IMAGE LISTENER
+    const ref = doc(db,"familyTree",id);
+
+    onSnapshot(ref,(snap)=>{
+      if(snap.exists()){
+        document.getElementById(id).src = snap.data().image;
+      }
+    });
+
+  });
 });
 
-comment.value="";
-}
+// UPLOAD IMAGE
+window.uploadImage = function(e,id){
+  const file = e.target.files[0];
+  const reader = new FileReader();
 
-db.collection("comments").onSnapshot(snap=>{
-comments.innerHTML="";
-snap.forEach(doc=>{
-let c=doc.data();
+  reader.onload = async function(){
+    await setDoc(doc(db,"familyTree",id),{
+      image: reader.result
+    });
+  };
 
-comments.innerHTML+=`
-<div class="comment">
-<b>${c.name}</b><br>
-${c.text}<br>
-❤️ ${c.likes||0}<br>
-<button onclick="like('${doc.id}',${c.likes||0})">Like</button>
-<button onclick="edit('${doc.id}','${c.text}')">Edit</button>
-<button onclick="del('${doc.id}')">Delete</button>
-</div>`;
+  reader.readAsDataURL(file);
+};
+
+// PROFILE
+window.openProfile = async function(name,id){
+  currentProfile = id;
+  profileBox.style.display="block";
+  profileName.innerText = name;
+
+  const snap = await getDoc(doc(db,"profiles",id));
+  if(snap.exists()){
+    const d = snap.data();
+    birthday.value = d.birthday||"";
+    address.value = d.address||"";
+    contact.value = d.contact||"";
+    email.value = d.email||"";
+  }
+};
+
+window.saveProfile = async function(){
+  await setDoc(doc(db,"profiles",currentProfile),{
+    birthday:birthday.value,
+    address:address.value,
+    contact:contact.value,
+    email:email.value
+  });
+  alert("Saved!");
+};
+
+window.closeProfile = function(){
+  profileBox.style.display="none";
+};
+
+// COMMENTS REALTIME
+window.addComment = async function(){
+  const text = comment.value;
+  if(!text) return;
+
+  await addDoc(collection(db,"comments"),{
+    name: currentUser,
+    text,
+    time:Date.now()
+  });
+
+  comment.value="";
+};
+
+const q = query(collection(db,"comments"),orderBy("time"));
+
+onSnapshot(q,(snap)=>{
+  comments.innerHTML="";
+  snap.forEach(doc=>{
+    const c = doc.data();
+    comments.innerHTML += `<div class="comment"><b>${c.name}</b><br>${c.text}</div>`;
+  });
 });
-});
-
-/* LIKE */
-function like(id,likes){
-db.collection("comments").doc(id).update({likes:likes+1});
-}
-
-/* DELETE */
-function del(id){
-db.collection("comments").doc(id).delete();
-}
-
-/* EDIT */
-function edit(id,text){
-let t=prompt("Edit:",text);
-if(t){
-db.collection("comments").doc(id).update({text:t});
-}
-}
 
 </script>
 
