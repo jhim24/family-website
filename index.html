@@ -1,27 +1,34 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>Lozada Family Cloud</title>
+  <title>Lozada Family</title>
 
   <style>
     body {
       font-family: Arial;
-      text-align: center;
       background: #f5f5f5;
+      text-align: center;
     }
 
     header {
       background: linear-gradient(to right, red, purple);
       color: white;
       padding: 20px;
+      font-size: 24px;
+    }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .card {
       background: white;
-      margin: 15px auto;
-      padding: 15px;
-      border-radius: 10px;
-      width: 260px;
+      margin: 15px;
+      padding: 10px;
+      border-radius: 12px;
+      width: 180px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
@@ -29,11 +36,18 @@
       width: 100%;
       height: 150px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
+      background: #ddd;
     }
 
     input {
-      margin-top: 10px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    h3 {
+      font-size: 14px;
+      margin-top: 8px;
     }
   </style>
 </head>
@@ -41,12 +55,60 @@
 <body>
 
 <header>
-  <h1>👨‍👩‍👧‍👦 Lozada Family Cloud</h1>
+  👨‍👩‍👧‍👦 Lozada Family
 </header>
 
-<div class="card">
-  <img id="preview">
-  <input type="file" onchange="uploadImage(event)">
+<div class="container">
+
+  <!-- MEMBER 1 -->
+  <div class="card">
+    <img id="img1" src="https://via.placeholder.com/150">
+    <h3>CHERRY GRACE LOZADA</h3>
+    <input type="file" onchange="uploadImage(event, 'img1')">
+  </div>
+
+  <!-- MEMBER 2 -->
+  <div class="card">
+    <img id="img2" src="https://via.placeholder.com/150">
+    <h3>CHEVY LOZADA CORTEZ</h3>
+    <input type="file" onchange="uploadImage(event, 'img2')">
+  </div>
+
+  <!-- MEMBER 3 -->
+  <div class="card">
+    <img id="img3" src="https://via.placeholder.com/150">
+    <h3>JERBOY LOZADA</h3>
+    <input type="file" onchange="uploadImage(event, 'img3')">
+  </div>
+
+  <!-- MEMBER 4 -->
+  <div class="card">
+    <img id="img4" src="https://via.placeholder.com/150">
+    <h3>JENADEL LOZADA</h3>
+    <input type="file" onchange="uploadImage(event, 'img4')">
+  </div>
+
+  <!-- MEMBER 5 -->
+  <div class="card">
+    <img id="img5" src="https://via.placeholder.com/150">
+    <h3>JEMMEL LOZADA</h3>
+    <input type="file" onchange="uploadImage(event, 'img5')">
+  </div>
+
+  <!-- MEMBER 6 -->
+  <div class="card">
+    <img id="img6" src="https://via.placeholder.com/150">
+    <h3>JIMDEL LOZADA</h3>
+    <input type="file" onchange="uploadImage(event, 'img6')">
+  </div>
+
+  <!-- MEMBER 7 -->
+  <div class="card">
+    <img id="img7" src="https://via.placeholder.com/150">
+    <h3>JISA LOZADA</h3>
+    <input type="file" onchange="uploadImage(event, 'img7')">
+  </div>
+
 </div>
 
 <script type="module">
@@ -54,12 +116,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
 
-// 🔥 YOUR CONFIG (OK NA ITO)
 const firebaseConfig = {
   apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   authDomain: "family-web-10cb8.firebaseapp.com",
   projectId: "family-web-10cb8",
-  storageBucket: "family-web-10cb8.appspot.com", // FIXED ito
+  storageBucket: "family-web-10cb8.appspot.com",
   messagingSenderId: "152048365178",
   appId: "1:152048365178:web:bd24e27f676b02b7d915c3",
   measurementId: "G-LJG0JXDXTS"
@@ -68,24 +129,35 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 
-// 🔥 UPLOAD FUNCTION
-window.uploadImage = async function(event) {
-  const file = event.target.files[0];
+// 🔥 LOAD ALL IMAGES
+for (let i = 1; i <= 7; i++) {
+  const imageId = "img" + i;
+  const storageRef = ref(storage, "family/" + imageId + ".jpg");
 
+  getDownloadURL(storageRef)
+    .then(url => {
+      document.getElementById(imageId).src = url;
+    })
+    .catch(() => {});
+}
+
+// 🔥 UPLOAD FUNCTION
+window.uploadImage = async function(event, id) {
+  const file = event.target.files[0];
   if (!file) return;
 
-  const storageRef = ref(storage, "family/photo.jpg");
+  const storageRef = ref(storage, "family/" + id + ".jpg");
 
   await uploadBytes(storageRef, file);
 
   const url = await getDownloadURL(storageRef);
 
-  document.getElementById("preview").src = url;
+  document.getElementById(id).src = url;
 
-  alert("✅ Uploaded successfully!");
+  alert("✅ Uploaded!");
 };
 
 </script>
 
 </body>
-</html>   
+</html>
