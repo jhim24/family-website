@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lozada Family Pro</title>
+  <title>Lozada Family Ultimate</title>
 
   <style>
     body {
@@ -53,15 +53,6 @@
       background: #fff0f5;
     }
 
-    .box {
-      background: white;
-      margin: 20px auto;
-      padding: 15px;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 10px;
-    }
-
     input {
       width: 90%;
       padding: 6px;
@@ -75,6 +66,15 @@
       border: none;
       border-radius: 5px;
       margin: 5px;
+    }
+
+    .box {
+      background: white;
+      margin: 20px auto;
+      padding: 15px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 10px;
     }
 
     .comment {
@@ -95,7 +95,7 @@
 <body>
 
 <header>
-  👨‍👩‍👧‍👦 Lozada Family Pro
+  👨‍👩‍👧‍👦 Lozada Family Ultimate
 </header>
 
 <!-- LOGIN -->
@@ -109,4 +109,197 @@
 <!-- MAIN -->
 <div id="app" style="display:none;">
 
-  <!--
+  <!-- FAMILY TREE -->
+  <div class="layer" id="layer1"></div>
+  <div class="layer" id="layer2"></div>
+  <div class="layer" id="layer3"></div>
+
+  <!-- PROFILE -->
+  <div class="box" id="profileBox">
+    <h3 id="profileName"></h3>
+
+    <input id="birthday" placeholder="Birthday"><br>
+    <input id="address" placeholder="Address"><br>
+    <input id="contact" placeholder="Contact"><br>
+    <input id="email" placeholder="Email"><br>
+
+    <button onclick="saveProfile()">SAVE / UPDATE</button>
+    <button onclick="closeProfile()">Close</button>
+  </div>
+
+  <!-- COMMENTS -->
+  <div class="box">
+    <h3>💬 Family Wall</h3>
+
+    <input id="comment" placeholder="Write something...">
+    <button onclick="addComment()">Post</button>
+
+    <div id="comments"></div>
+  </div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
+  authDomain: "family-web-10cb8.firebaseapp.com",
+  projectId: "family-web-10cb8",
+  storageBucket: "family-web-10cb8.appspot.com",
+  messagingSenderId: "152048365178",
+  appId: "1:152048365178:web:bd24e27f676b02b7d915c3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let currentUser = "";
+let currentProfile = "";
+
+// LOGIN
+window.login = function(){
+  const u = document.getElementById("user").value;
+  const p = document.getElementById("pass").value;
+
+  if(u === "usee" && p === "123"){
+    currentUser = u;
+    document.getElementById("loginBox").style.display="none";
+    document.getElementById("app").style.display="block";
+  } else {
+    alert("Wrong login");
+  }
+};
+
+// FAMILY STRUCTURE
+const layers = {
+  layer1: ["DELIA LOZADA","JIMMY LOZADA"],
+  layer2: ["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
+  layer3: ["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
+};
+
+// CREATE FAMILY
+Object.keys(layers).forEach(layerKey=>{
+  const container = document.getElementById(layerKey);
+
+  layers[layerKey].forEach((name,i)=>{
+    const id = layerKey+"_"+i;
+
+    container.innerHTML += `
+      <div class="card" onclick="openProfile('${name}','${id}')">
+        <img id="${id}">
+        <h4>${name}</h4>
+        <input type="file" onclick="event.stopPropagation()" onchange="uploadImage(event,'${id}')">
+      </div>
+    `;
+
+    loadImage(id);
+  });
+});
+
+// LOAD IMAGE
+async function loadImage(id){
+  const ref = doc(db,"familyTree",id);
+  const snap = await getDoc(ref);
+
+  if(snap.exists()){
+    document.getElementById(id).src = snap.data().image;
+  }
+}
+
+// UPLOAD IMAGE
+window.uploadImage = function(e,id){
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = async function(){
+    const base64 = reader.result;
+
+    await setDoc(doc(db,"familyTree",id),{
+      image: base64
+    });
+
+    document.getElementById(id).src = base64;
+  };
+
+  reader.readAsDataURL(file);
+};
+
+// OPEN PROFILE
+window.openProfile = async function(name,id){
+  currentProfile = id;
+
+  document.getElementById("profileBox").style.display="block";
+  document.getElementById("profileName").innerText = name;
+
+  const ref = doc(db,"profiles",id);
+  const snap = await getDoc(ref);
+
+  if(snap.exists()){
+    const d = snap.data();
+    document.getElementById("birthday").value = d.birthday || "";
+    document.getElementById("address").value = d.address || "";
+    document.getElementById("contact").value = d.contact || "";
+    document.getElementById("email").value = d.email || "";
+  } else {
+    document.getElementById("birthday").value = "";
+    document.getElementById("address").value = "";
+    document.getElementById("contact").value = "";
+    document.getElementById("email").value = "";
+  }
+};
+
+// SAVE PROFILE
+window.saveProfile = async function(){
+  await setDoc(doc(db,"profiles",currentProfile),{
+    birthday: document.getElementById("birthday").value,
+    address: document.getElementById("address").value,
+    contact: document.getElementById("contact").value,
+    email: document.getElementById("email").value
+  });
+
+  alert("✅ Saved!");
+};
+
+// CLOSE PROFILE
+window.closeProfile = function(){
+  document.getElementById("profileBox").style.display="none";
+};
+
+// COMMENTS
+window.addComment = async function(){
+  const text = document.getElementById("comment").value;
+  if(!text) return;
+
+  await addDoc(collection(db,"comments"),{
+    name: currentUser,
+    text: text,
+    time: Date.now()
+  });
+
+  document.getElementById("comment").value="";
+};
+
+const q = query(collection(db,"comments"),orderBy("time"));
+
+onSnapshot(q,(snap)=>{
+  const box = document.getElementById("comments");
+  box.innerHTML="";
+
+  snap.forEach(doc=>{
+    const c = doc.data();
+
+    box.innerHTML += `
+      <div class="comment">
+        <b>${c.name}</b><br>${c.text}
+      </div>
+    `;
+  });
+});
+
+</script>
+
+</body>
+</html>
