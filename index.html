@@ -1,225 +1,287 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lozada Family Ultimate</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lozada Family Pro</title>
 
-  <style>
-    body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
-    header {background:linear-gradient(to right, red, purple); color:white; padding:15px; font-size:22px;}
+<style>
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f4f4f4;
+}
 
-    .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
+/* HEADER */
+header {
+  background: linear-gradient(45deg, red, purple);
+  color: white;
+  text-align: center;
+  padding: 15px;
+  font-size: 20px;
+}
 
-    .card {
-      background:white; margin:10px; padding:10px; width:150px;
-      border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.2);
-      border:3px solid purple; cursor:pointer;
-    }
+/* FAMILY GRID */
+.family {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px;
+}
 
-    img {width:100%; height:120px; object-fit:cover; border-radius:8px; background:#ddd;}
+.member {
+  text-align: center;
+  margin: 10px;
+  cursor: pointer;
+}
 
-    h4 {font-size:13px; border:2px solid red; padding:5px; border-radius:6px;}
+.member img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid purple;
+}
 
-    input {width:90%; padding:6px; margin:5px;}
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+}
 
-    button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
+.modal-content {
+  background: white;
+  margin: 10% auto;
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 10px;
+  text-align: center;
+}
 
-    .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
+/* INPUTS */
+input {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+}
 
-    .comment {background:#fff; padding:10px; margin:5px; border-radius:8px; text-align:left;}
+/* BUTTONS */
+button {
+  padding: 10px;
+  border: none;
+  background: purple;
+  color: white;
+  border-radius: 5px;
+  margin: 5px;
+}
 
-    #profileBox {display:none;}
-  </style>
+/* LOGIN */
+#loginBox {
+  text-align: center;
+  margin-top: 100px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* COMMENTS */
+#comments {
+  padding: 20px;
+}
+
+.comment-box {
+  background: white;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 5px;
+}
+</style>
 </head>
 
 <body>
 
-<header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
-
 <!-- LOGIN -->
-<div id="loginBox" class="box">
-  <h3>🔐 Login</h3>
+<div id="loginBox">
+  <h2>Login</h2>
   <input id="user" placeholder="Username"><br>
   <input id="pass" type="password" placeholder="Password"><br>
   <button onclick="login()">Login</button>
 </div>
 
-<!-- APP -->
-<div id="app" style="display:none;">
+<!-- MAIN APP -->
+<div id="app" class="hidden">
 
-  <div class="layer" id="layer1"></div>
-  <div class="layer" id="layer2"></div>
-  <div class="layer" id="layer3"></div>
+<header>👨‍👩‍👧‍👦 Lozada Family Pro</header>
 
-  <!-- PROFILE -->
-  <div class="box" id="profileBox">
-    <h3 id="profileName"></h3>
-    <input id="birthday" placeholder="Birthday"><br>
-    <input id="address" placeholder="Address"><br>
-    <input id="contact" placeholder="Contact"><br>
-    <input id="email" placeholder="Email"><br>
+<div class="family">
 
-    <button onclick="saveProfile()">SAVE / UPDATE</button>
-    <button onclick="closeProfile()">Close</button>
+  <div class="member" onclick="openProfile('DELIA LOZADA')">
+    <img src="https://via.placeholder.com/100">
+    <p>DELIA LOZADA</p>
   </div>
 
-  <!-- COMMENTS -->
-  <div class="box">
-    <h3>💬 Family Wall</h3>
-    <input id="comment" placeholder="Write something...">
-    <button onclick="addComment()">Post</button>
-    <div id="comments"></div>
+  <div class="member" onclick="openProfile('JIMMY LOZADA')">
+    <img src="https://via.placeholder.com/100">
+    <p>JIMMY LOZADA</p>
+  </div>
+
+  <div class="member" onclick="openProfile('CHERRY GRACE LOZADA')">
+    <img src="https://via.placeholder.com/100">
+    <p>CHERRY GRACE</p>
+  </div>
+
+  <div class="member" onclick="openProfile('CHEVY LOZADA')">
+    <img src="https://via.placeholder.com/100">
+    <p>CHEVY</p>
+  </div>
+
+  <div class="member" onclick="openProfile('JERBOY LOZADA')">
+    <img src="https://via.placeholder.com/100">
+    <p>JERBOY</p>
+  </div>
+
+  <div class="member" onclick="openProfile('JENADEL LOZADA')">
+    <img src="https://via.placeholder.com/100">
+    <p>JENADEL</p>
+  </div>
+
+  <div class="member" onclick="openProfile('JEMMEL LOZADA')">
+    <img src="https://via.placeholder.com/100">
+    <p>JEMMEL</p>
+  </div>
+
+  <div class="member" onclick="openProfile('JIMDEL LOZADA')">
+    <img src="https://via.placeholder.com/100">
+    <p>JIMDEL</p>
+  </div>
+
+  <div class="member" onclick="openProfile('JISA LOZADA')">
+    <img src="https://via.placeholder.com/100">
+    <p>JISA</p>
   </div>
 
 </div>
 
-<script type="module">
+<!-- COMMENTS -->
+<div id="comments">
+  <h3>💬 Family Wall</h3>
+  <input id="commentInput" placeholder="Write something...">
+  <button onclick="postComment()">Post</button>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+  <div id="commentList"></div>
+</div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
-  authDomain: "family-web-10cb8.firebaseapp.com",
-  projectId: "family-web-10cb8"
-};
+</div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+<!-- PROFILE MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-content">
 
-let currentUser = "";
-let currentProfile = "";
+    <h3 id="name"></h3>
 
-// ✅ AUTO LOGIN
-const savedUser = localStorage.getItem("user");
-if(savedUser){
-  currentUser = savedUser;
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("app").style.display="block";
+    <input id="birthday" placeholder="Birthday">
+    <input id="address" placeholder="Address">
+    <input id="contact" placeholder="Contact">
+    <input id="email" placeholder="Email">
+
+    <button onclick="saveProfile()">SAVE / UPDATE</button>
+    <button onclick="closeModal()">Close</button>
+
+  </div>
+</div>
+
+<script>
+
+/* AUTO LOGIN */
+if(localStorage.getItem("login") === "true"){
+  showApp();
 }
 
-// LOGIN FUNCTION (FIXED)
-window.login = function(){
-  const u = document.getElementById("user").value.trim().toLowerCase();
-  const p = document.getElementById("pass").value.trim();
+/* LOGIN */
+function login(){
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
 
   if(u === "usee" && p === "123"){
-    currentUser = u;
-
-    // SAVE LOGIN
-    localStorage.setItem("user", u);
-
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("app").style.display="block";
+    localStorage.setItem("login", "true");
+    localStorage.setItem("username", u);
+    showApp();
   } else {
-    alert("Wrong username or password");
-  }
-};
-
-// FAMILY
-const layers = {
-  layer1:["DELIA LOZADA","JIMMY LOZADA"],
-  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
-  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
-};
-
-Object.keys(layers).forEach(layerKey=>{
-  const container = document.getElementById(layerKey);
-
-  layers[layerKey].forEach((name,i)=>{
-    const id = layerKey+"_"+i;
-
-    container.innerHTML += `
-      <div class="card" onclick="openProfile('${name}','${id}')">
-        <img id="${id}">
-        <h4>${name}</h4>
-        <input type="file" onclick="event.stopPropagation()" onchange="uploadImage(event,'${id}')">
-      </div>
-    `;
-
-    loadImage(id);
-  });
-});
-
-// LOAD IMAGE
-async function loadImage(id){
-  const ref = doc(db,"familyTree",id);
-  const snap = await getDoc(ref);
-  if(snap.exists()){
-    document.getElementById(id).src = snap.data().image;
+    alert("Wrong login");
   }
 }
 
-// UPLOAD
-window.uploadImage = function(e,id){
-  const file = e.target.files[0];
-  const reader = new FileReader();
+function showApp(){
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").classList.remove("hidden");
+}
 
-  reader.onload = async function(){
-    await setDoc(doc(db,"familyTree",id),{
-      image: reader.result
-    });
+/* PROFILE */
+let currentUser = "";
 
-    document.getElementById(id).src = reader.result;
+function openProfile(name){
+  currentUser = name;
+  document.getElementById("modal").style.display = "block";
+  document.getElementById("name").innerText = name;
+
+  let data = JSON.parse(localStorage.getItem(name)) || {};
+
+  birthday.value = data.birthday || "";
+  address.value = data.address || "";
+  contact.value = data.contact || "";
+  email.value = data.email || "";
+}
+
+function saveProfile(){
+  let data = {
+    birthday: birthday.value,
+    address: address.value,
+    contact: contact.value,
+    email: email.value
   };
 
-  reader.readAsDataURL(file);
-};
-
-// PROFILE
-window.openProfile = async function(name,id){
-  currentProfile = id;
-  document.getElementById("profileBox").style.display="block";
-  document.getElementById("profileName").innerText = name;
-
-  const ref = doc(db,"profiles",id);
-  const snap = await getDoc(ref);
-
-  if(snap.exists()){
-    const d = snap.data();
-    birthday.value = d.birthday||"";
-    address.value = d.address||"";
-    contact.value = d.contact||"";
-    email.value = d.email||"";
-  }
-};
-
-window.saveProfile = async function(){
-  await setDoc(doc(db,"profiles",currentProfile),{
-    birthday:birthday.value,
-    address:address.value,
-    contact:contact.value,
-    email:email.value
-  });
+  localStorage.setItem(currentUser, JSON.stringify(data));
   alert("Saved!");
-};
+}
 
-window.closeProfile = function(){
-  profileBox.style.display="none";
-};
+function closeModal(){
+  document.getElementById("modal").style.display = "none";
+}
 
-// COMMENTS
-window.addComment = async function(){
-  const text = document.getElementById("comment").value;
-  if(!text) return;
+/* COMMENTS */
+function postComment(){
+  let text = document.getElementById("commentInput").value;
+  let name = localStorage.getItem("username");
 
-  await addDoc(collection(db,"comments"),{
-    name: currentUser,
-    text:text,
-    time:Date.now()
+  if(text === "") return;
+
+  let comments = JSON.parse(localStorage.getItem("comments")) || [];
+
+  comments.push({name, text});
+
+  localStorage.setItem("comments", JSON.stringify(comments));
+  document.getElementById("commentInput").value = "";
+  loadComments();
+}
+
+function loadComments(){
+  let comments = JSON.parse(localStorage.getItem("comments")) || [];
+  let html = "";
+
+  comments.forEach(c => {
+    html += `<div class="comment-box"><b>${c.name}</b>: ${c.text}</div>`;
   });
 
-  document.getElementById("comment").value="";
-};
+  document.getElementById("commentList").innerHTML = html;
+}
 
-const q = query(collection(db,"comments"),orderBy("time"));
-
-onSnapshot(q,(snap)=>{
-  comments.innerHTML="";
-  snap.forEach(doc=>{
-    const c = doc.data();
-    comments.innerHTML += `<div class="comment"><b>${c.name}</b><br>${c.text}</div>`;
-  });
-});
+loadComments();
 
 </script>
 
