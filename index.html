@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lozada Family Ultimate</title>
 
-<!-- FIREBASE STABLE -->
+<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
@@ -12,12 +12,7 @@
 body {font-family: Arial; margin:0; text-align:center; background:#f0f0f0;}
 header {background:linear-gradient(to right, red, purple); color:white; padding:15px;}
 
-.layer {
-  display:flex;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin:20px;
-}
+.layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px;}
 
 .card {
   background:white;
@@ -48,12 +43,11 @@ img {width:100%; height:110px; border-radius:8px; background:#ddd;}
   text-align:left;
 }
 
-/* FLOATING PROFILE */
+/* FLOATING */
 #profileBox {
 display:none;
 position:fixed;
-top:0;
-left:0;
+top:0; left:0;
 width:100%;
 height:100%;
 background:rgba(0,0,0,0.6);
@@ -93,16 +87,10 @@ border-radius:10px;
 <!-- APP -->
 <div id="app" style="display:none;">
 
-<!-- LAYER 1 -->
 <div class="layer" id="layer1"></div>
-
-<!-- LAYER 2 -->
 <div class="layer" id="layer2"></div>
-
-<!-- LAYER 3 -->
 <div class="layer" id="layer3"></div>
 
-<!-- COMMENTS -->
 <div class="box">
 <input id="comment" placeholder="Write comment">
 <button onclick="addComment()">Post</button>
@@ -163,25 +151,43 @@ function toggleDark(){
 document.body.classList.toggle("dark");
 }
 
+/* COLOR FUNCTION */
+function getColor(name){
+const colors={
+"DELIA LOZADA":"red",
+"JIMMY LOZADA":"blue",
+"CHERRY GRACE LOZADA":"purple",
+"CHEVY LOZADA CORTEZ":"green",
+"JERBOY LOZADA":"orange",
+"JENADEL LOZADA":"pink",
+"JEMMEL LOZADA":"brown",
+"JIMDEL LOZADA":"teal",
+"JISA LOZADA":"gold"
+};
+return colors[name]||"black";
+}
+
 /* FAMILY LAYERS */
 const layer1=["DELIA LOZADA","JIMMY LOZADA"];
-const layer2=["CHERRY GRACE","CHEVY","JERBOY"];
-const layer3=["JENADEL","JEMMEL","JIMDEL","JISA"];
+const layer2=["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"];
+const layer3=["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"];
 
 function render(layer,container){
 layer.forEach(name=>{
 container.innerHTML+=`
 <div class="card" onclick="openProfile('${name}')">
 <img id="img-${name}">
-<h4>${name}</h4>
+<h4 style="border:2px solid ${getColor(name)}; padding:5px; border-radius:6px;">
+${name}
+</h4>
 </div>`;
 loadImage(name);
 });
 }
 
-render(layer1,layer1Div=document.getElementById("layer1"));
-render(layer2,layer2Div=document.getElementById("layer2"));
-render(layer3,layer3Div=document.getElementById("layer3"));
+render(layer1,document.getElementById("layer1"));
+render(layer2,document.getElementById("layer2"));
+render(layer3,document.getElementById("layer3"));
 
 /* LOAD IMAGE */
 function loadImage(name){
