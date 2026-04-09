@@ -4,99 +4,36 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {
-      font-family: Arial;
-      background: #f0f0f0;
-      margin: 0;
-      text-align: center;
-    }
+    body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
+    header {background:linear-gradient(to right, red, purple); color:white; padding:15px; font-size:22px;}
 
-    header {
-      background: linear-gradient(to right, red, purple);
-      color: white;
-      padding: 15px;
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .layer {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 20px 0;
-    }
+    .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
 
     .card {
-      background: white;
-      margin: 10px;
-      padding: 10px;
-      width: 150px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      border: 3px solid purple;
-      cursor: pointer;
+      background:white; margin:10px; padding:10px; width:150px;
+      border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.2);
+      border:3px solid purple; cursor:pointer;
     }
 
-    img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-      background: #ddd;
-    }
+    img {width:100%; height:120px; object-fit:cover; border-radius:8px; background:#ddd;}
 
-    h4 {
-      font-size: 13px;
-      border: 2px solid red;
-      padding: 5px;
-      border-radius: 6px;
-      background: #fff0f5;
-    }
+    h4 {font-size:13px; border:2px solid red; padding:5px; border-radius:6px;}
 
-    input {
-      width: 90%;
-      padding: 6px;
-      margin: 5px;
-    }
+    input {width:90%; padding:6px; margin:5px;}
 
-    button {
-      padding: 6px 10px;
-      background: purple;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      margin: 5px;
-    }
+    button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
 
-    .box {
-      background: white;
-      margin: 20px auto;
-      padding: 15px;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 10px;
-    }
+    .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
 
-    .comment {
-      background: #fff;
-      padding: 10px;
-      margin: 5px;
-      border-radius: 8px;
-      text-align: left;
-    }
+    .comment {background:#fff; padding:10px; margin:5px; border-radius:8px; text-align:left;}
 
-    #profileBox {
-      display: none;
-    }
-
+    #profileBox {display:none;}
   </style>
 </head>
 
 <body>
 
-<header>
-  👨‍👩‍👧‍👦 Lozada Family Ultimate
-</header>
+<header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
 
 <!-- LOGIN -->
 <div id="loginBox" class="box">
@@ -106,10 +43,9 @@
   <button onclick="login()">Login</button>
 </div>
 
-<!-- MAIN -->
+<!-- APP -->
 <div id="app" style="display:none;">
 
-  <!-- FAMILY TREE -->
   <div class="layer" id="layer1"></div>
   <div class="layer" id="layer2"></div>
   <div class="layer" id="layer3"></div>
@@ -117,7 +53,6 @@
   <!-- PROFILE -->
   <div class="box" id="profileBox">
     <h3 id="profileName"></h3>
-
     <input id="birthday" placeholder="Birthday"><br>
     <input id="address" placeholder="Address"><br>
     <input id="contact" placeholder="Contact"><br>
@@ -130,10 +65,8 @@
   <!-- COMMENTS -->
   <div class="box">
     <h3>💬 Family Wall</h3>
-
     <input id="comment" placeholder="Write something...">
     <button onclick="addComment()">Post</button>
-
     <div id="comments"></div>
   </div>
 
@@ -147,10 +80,7 @@ import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, quer
 const firebaseConfig = {
   apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   authDomain: "family-web-10cb8.firebaseapp.com",
-  projectId: "family-web-10cb8",
-  storageBucket: "family-web-10cb8.appspot.com",
-  messagingSenderId: "152048365178",
-  appId: "1:152048365178:web:bd24e27f676b02b7d915c3"
+  projectId: "family-web-10cb8"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -159,28 +89,39 @@ const db = getFirestore(app);
 let currentUser = "";
 let currentProfile = "";
 
-// LOGIN
+// ✅ AUTO LOGIN
+const savedUser = localStorage.getItem("user");
+if(savedUser){
+  currentUser = savedUser;
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("app").style.display="block";
+}
+
+// LOGIN FUNCTION (FIXED)
 window.login = function(){
-  const u = document.getElementById("user").value;
-  const p = document.getElementById("pass").value;
+  const u = document.getElementById("user").value.trim().toLowerCase();
+  const p = document.getElementById("pass").value.trim();
 
   if(u === "usee" && p === "123"){
     currentUser = u;
+
+    // SAVE LOGIN
+    localStorage.setItem("user", u);
+
     document.getElementById("loginBox").style.display="none";
     document.getElementById("app").style.display="block";
   } else {
-    alert("Wrong login");
+    alert("Wrong username or password");
   }
 };
 
-// FAMILY STRUCTURE
+// FAMILY
 const layers = {
-  layer1: ["DELIA LOZADA","JIMMY LOZADA"],
-  layer2: ["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
-  layer3: ["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
+  layer1:["DELIA LOZADA","JIMMY LOZADA"],
+  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
+  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
 };
 
-// CREATE FAMILY
 Object.keys(layers).forEach(layerKey=>{
   const container = document.getElementById(layerKey);
 
@@ -203,34 +144,30 @@ Object.keys(layers).forEach(layerKey=>{
 async function loadImage(id){
   const ref = doc(db,"familyTree",id);
   const snap = await getDoc(ref);
-
   if(snap.exists()){
     document.getElementById(id).src = snap.data().image;
   }
 }
 
-// UPLOAD IMAGE
+// UPLOAD
 window.uploadImage = function(e,id){
   const file = e.target.files[0];
   const reader = new FileReader();
 
   reader.onload = async function(){
-    const base64 = reader.result;
-
     await setDoc(doc(db,"familyTree",id),{
-      image: base64
+      image: reader.result
     });
 
-    document.getElementById(id).src = base64;
+    document.getElementById(id).src = reader.result;
   };
 
   reader.readAsDataURL(file);
 };
 
-// OPEN PROFILE
+// PROFILE
 window.openProfile = async function(name,id){
   currentProfile = id;
-
   document.getElementById("profileBox").style.display="block";
   document.getElementById("profileName").innerText = name;
 
@@ -239,33 +176,25 @@ window.openProfile = async function(name,id){
 
   if(snap.exists()){
     const d = snap.data();
-    document.getElementById("birthday").value = d.birthday || "";
-    document.getElementById("address").value = d.address || "";
-    document.getElementById("contact").value = d.contact || "";
-    document.getElementById("email").value = d.email || "";
-  } else {
-    document.getElementById("birthday").value = "";
-    document.getElementById("address").value = "";
-    document.getElementById("contact").value = "";
-    document.getElementById("email").value = "";
+    birthday.value = d.birthday||"";
+    address.value = d.address||"";
+    contact.value = d.contact||"";
+    email.value = d.email||"";
   }
 };
 
-// SAVE PROFILE
 window.saveProfile = async function(){
   await setDoc(doc(db,"profiles",currentProfile),{
-    birthday: document.getElementById("birthday").value,
-    address: document.getElementById("address").value,
-    contact: document.getElementById("contact").value,
-    email: document.getElementById("email").value
+    birthday:birthday.value,
+    address:address.value,
+    contact:contact.value,
+    email:email.value
   });
-
-  alert("✅ Saved!");
+  alert("Saved!");
 };
 
-// CLOSE PROFILE
 window.closeProfile = function(){
-  document.getElementById("profileBox").style.display="none";
+  profileBox.style.display="none";
 };
 
 // COMMENTS
@@ -275,8 +204,8 @@ window.addComment = async function(){
 
   await addDoc(collection(db,"comments"),{
     name: currentUser,
-    text: text,
-    time: Date.now()
+    text:text,
+    time:Date.now()
   });
 
   document.getElementById("comment").value="";
@@ -285,17 +214,10 @@ window.addComment = async function(){
 const q = query(collection(db,"comments"),orderBy("time"));
 
 onSnapshot(q,(snap)=>{
-  const box = document.getElementById("comments");
-  box.innerHTML="";
-
+  comments.innerHTML="";
   snap.forEach(doc=>{
     const c = doc.data();
-
-    box.innerHTML += `
-      <div class="comment">
-        <b>${c.name}</b><br>${c.text}
-      </div>
-    `;
+    comments.innerHTML += `<div class="comment"><b>${c.name}</b><br>${c.text}</div>`;
   });
 });
 
