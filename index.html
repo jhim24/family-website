@@ -1,112 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lozada Family Ultimate</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lozada Family Ultimate</title>
 
-  <style>
-    body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
+<!-- ✅ FIREBASE COMPAT (NO ERROR) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-    header {
-      background:linear-gradient(to right, red, purple);
-      color:white;
-      padding:15px;
-      font-size:22px;
-    }
+<style>
+body {font-family: Arial; margin:0; text-align:center; background:#f0f0f0;}
 
-    .layer {
-      display:flex;
-      justify-content:center;
-      flex-wrap:wrap;
-      margin:20px 0;
-    }
+header {
+  background:linear-gradient(to right, red, purple);
+  color:white;
+  padding:15px;
+}
 
-    .card {
-      background:white;
-      margin:10px;
-      padding:10px;
-      width:150px;
-      border-radius:12px;
-      box-shadow:0 4px 10px rgba(0,0,0,0.2);
-      border:3px solid purple;
-      cursor:pointer;
-    }
+/* LOGIN */
+#loginBox {
+  margin-top:100px;
+}
 
-    img {
-      width:100%;
-      height:120px;
-      object-fit:cover;
-      border-radius:8px;
-      background:#ddd;
-    }
+/* FAMILY */
+.layer {
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin:20px 0;
+}
 
-    h4 {
-      font-size:13px;
-      border:2px solid red;
-      padding:5px;
-      border-radius:6px;
-    }
+.card {
+  background:white;
+  margin:10px;
+  padding:10px;
+  width:150px;
+  border-radius:12px;
+  border:3px solid purple;
+  cursor:pointer;
+}
 
-    input {
-      width:90%;
-      padding:6px;
-      margin:5px;
-    }
+img {
+  width:100%;
+  height:120px;
+  border-radius:8px;
+  background:#ddd;
+}
 
-    button {
-      padding:6px 10px;
-      background:purple;
-      color:white;
-      border:none;
-      border-radius:5px;
-      margin:3px;
-    }
+.box {
+  background:white;
+  margin:20px auto;
+  padding:15px;
+  width:90%;
+  max-width:400px;
+  border-radius:10px;
+}
 
-    .box {
-      background:white;
-      margin:20px auto;
-      padding:15px;
-      width:90%;
-      max-width:400px;
-      border-radius:10px;
-    }
+/* FLOATING PROFILE */
+#profileBox {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.6);
+}
 
-    .comment {
-      background:#fff;
-      padding:10px;
-      margin:5px;
-      border-radius:8px;
-      text-align:left;
-    }
-
-    /* 🔥 FLOATING MODAL */
-    #profileBox {
-      display:none;
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background:rgba(0,0,0,0.6);
-      z-index:999;
-    }
-
-    .modalContent {
-      background:white;
-      margin:10% auto;
-      padding:20px;
-      width:90%;
-      max-width:400px;
-      border-radius:10px;
-      text-align:center;
-      animation:pop 0.3s ease;
-    }
-
-    @keyframes pop {
-      from {transform:scale(0.7); opacity:0;}
-      to {transform:scale(1); opacity:1;}
-    }
-
-  </style>
+.modal {
+  background:white;
+  margin:10% auto;
+  padding:20px;
+  width:90%;
+  max-width:400px;
+  border-radius:10px;
+}
+</style>
 </head>
 
 <body>
@@ -114,7 +82,7 @@
 <header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
 
 <!-- LOGIN -->
-<div id="loginBox" class="box">
+<div id="loginBox">
   <h3>🔐 Login</h3>
   <input id="user" placeholder="Username"><br>
   <input id="pass" type="password" placeholder="Password"><br>
@@ -125,22 +93,18 @@
 <div id="app" style="display:none;">
 
   <div class="layer" id="layer1"></div>
-  <div class="layer" id="layer2"></div>
-  <div class="layer" id="layer3"></div>
 
-  <!-- 💬 COMMENTS -->
   <div class="box">
-    <h3>💬 Family Wall</h3>
-    <input id="comment" placeholder="Write something...">
+    <input id="comment" placeholder="Write comment">
     <button onclick="addComment()">Post</button>
     <div id="comments"></div>
   </div>
 
 </div>
 
-<!-- 🔥 FLOATING PROFILE -->
+<!-- FLOATING PROFILE -->
 <div id="profileBox">
-  <div class="modalContent">
+  <div class="modal">
     <h3 id="profileName"></h3>
 
     <input id="birthday" placeholder="Birthday"><br>
@@ -148,168 +112,97 @@
     <input id="contact" placeholder="Contact"><br>
     <input id="email" placeholder="Email"><br>
 
-    <button onclick="saveProfile()">SAVE / UPDATE</button>
+    <button onclick="saveProfile()">Save</button>
     <button onclick="closeProfile()">Close</button>
   </div>
 </div>
 
-<script type="module">
+<script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
+/* 🔥 FIREBASE INIT */
 const firebaseConfig = {
   apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   authDomain: "family-web-10cb8.firebaseapp.com",
   projectId: "family-web-10cb8"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-let currentUser = "";
-let currentProfile = "";
+/* LOGIN FIX */
+function login(){
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
 
-// AUTO LOGIN
-const savedUser = localStorage.getItem("user");
-if(savedUser){
-  currentUser = savedUser;
-  loginSuccess();
-}
-
-// LOGIN
-window.login = function(){
-  const u = user.value.trim().toLowerCase();
-  const p = pass.value.trim();
-
-  if(u === "usee" && p === "123"){
-    currentUser = u;
+  if(p === "123"){
     localStorage.setItem("user", u);
-    loginSuccess();
+    showApp();
   } else {
-    alert("Wrong login");
+    alert("Wrong password");
   }
-};
-
-function loginSuccess(){
-  loginBox.style.display="none";
-  app.style.display="block";
 }
 
-// FAMILY LAYERS
-const layers = {
-  layer1:["DELIA LOZADA","JIMMY LOZADA"],
-  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
-  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
-};
+/* AUTO LOGIN */
+if(localStorage.getItem("user")){
+  showApp();
+}
 
-Object.keys(layers).forEach(layerKey=>{
-  const container = document.getElementById(layerKey);
+function showApp(){
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("app").style.display = "block";
+}
 
-  layers[layerKey].forEach((name,i)=>{
-    const id = layerKey+"_"+i;
+/* FAMILY MEMBERS */
+const members = [
+"DELIA LOZADA","JIMMY LOZADA",
+"CHERRY GRACE","CHEVY","JERBOY",
+"JENADEL","JEMMEL","JIMDEL","JISA"
+];
 
-    container.innerHTML += `
-      <div class="card" onclick="openProfile('${name}','${id}')">
-        <img id="${id}">
-        <h4>${name}</h4>
-        <input type="file" onclick="event.stopPropagation()" onchange="uploadImage(event,'${id}')">
-      </div>
-    `;
+const layer1 = document.getElementById("layer1");
 
-    loadImage(id);
-  });
+members.forEach(name=>{
+  layer1.innerHTML += `
+    <div class="card" onclick="openProfile('${name}')">
+      <h4>${name}</h4>
+    </div>
+  `;
 });
 
-// LOAD IMAGE
-async function loadImage(id){
-  const snap = await getDoc(doc(db,"familyTree",id));
-  if(snap.exists()){
-    document.getElementById(id).src = snap.data().image;
-  }
+/* PROFILE POPUP */
+function openProfile(name){
+  document.getElementById("profileBox").style.display = "block";
+  document.getElementById("profileName").innerText = name;
 }
 
-// UPLOAD IMAGE
-window.uploadImage = function(e,id){
-  const file = e.target.files[0];
-  const reader = new FileReader();
+function closeProfile(){
+  document.getElementById("profileBox").style.display = "none";
+}
 
-  reader.onload = async function(){
-    await setDoc(doc(db,"familyTree",id),{
-      image: reader.result
-    });
-    document.getElementById(id).src = reader.result;
-  };
+/* COMMENTS */
+function addComment(){
+  let text = document.getElementById("comment").value;
 
-  reader.readAsDataURL(file);
-};
-
-// 🔥 OPEN FLOATING PROFILE
-window.openProfile = async function(name,id){
-  currentProfile = id;
-
-  document.getElementById("profileBox").style.display="block";
-  document.getElementById("profileName").innerText = name;
-
-  const snap = await getDoc(doc(db,"profiles",id));
-  if(snap.exists()){
-    const d = snap.data();
-    birthday.value = d.birthday||"";
-    address.value = d.address||"";
-    contact.value = d.contact||"";
-    email.value = d.email||"";
-  }
-};
-
-// SAVE PROFILE
-window.saveProfile = async function(){
-  await setDoc(doc(db,"profiles",currentProfile),{
-    birthday:birthday.value,
-    address:address.value,
-    contact:contact.value,
-    email:email.value
-  });
-  alert("Saved!");
-};
-
-// CLOSE
-window.closeProfile = function(){
-  profileBox.style.display="none";
-};
-
-// CLICK OUTSIDE CLOSE
-window.onclick = function(e){
-  if(e.target == profileBox){
-    profileBox.style.display="none";
-  }
-};
-
-// COMMENTS
-window.addComment = async function(){
-  const text = comment.value;
   if(!text) return;
 
-  await addDoc(collection(db,"comments"),{
-    name: currentUser,
-    text:text,
-    time:Date.now()
+  db.collection("comments").add({
+    name: localStorage.getItem("user"),
+    text: text
   });
 
-  comment.value="";
-};
+  document.getElementById("comment").value="";
+}
 
-const q = query(collection(db,"comments"),orderBy("time"));
+/* REALTIME COMMENTS */
+db.collection("comments").onSnapshot(snapshot=>{
+  let html = "";
 
-onSnapshot(q,(snap)=>{
-  comments.innerHTML="";
-  snap.forEach(doc=>{
-    const c = doc.data();
-    comments.innerHTML += `
-      <div class="comment">
-        <b>${c.name}</b><br>${c.text}
-      </div>
-    `;
+  snapshot.forEach(doc=>{
+    let c = doc.data();
+    html += `<div>${c.name}: ${c.text}</div>`;
   });
+
+  document.getElementById("comments").innerHTML = html;
 });
 
 </script>
