@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lozada Family Tree</title>
+  <title>Lozada Family Pro</title>
 
   <style>
     body {
       font-family: Arial;
       background: #f0f0f0;
-      text-align: center;
       margin: 0;
+      text-align: center;
     }
 
     header {
@@ -16,59 +16,39 @@
       color: white;
       padding: 15px;
       font-size: 22px;
-      font-weight: bold;
     }
 
-    .layer {
-      display: flex;
-      justify-content: center;
-      margin: 20px 0;
-      flex-wrap: wrap;
-    }
-
-    .card {
+    .box {
+      margin: 20px auto;
+      padding: 15px;
+      width: 90%;
+      max-width: 400px;
       background: white;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 12px;
-      width: 150px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      border: 3px solid purple;
-    }
-
-    img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-      background: #ddd;
-      border: 2px solid #ccc;
-    }
-
-    h4 {
-      margin: 8px 0 5px;
-      font-size: 13px;
-      padding: 5px;
-      border: 2px solid red;
-      border-radius: 6px;
-      background: #fff0f5;
-    }
-
-    .role {
-      font-size: 10px;
-      color: gray;
-      margin-bottom: 5px;
+      border-radius: 10px;
     }
 
     input {
-      font-size: 10px;
+      padding: 8px;
+      margin: 5px;
+      width: 80%;
     }
 
-    /* LAYER COLORS */
-    #layer1 .card { border-color: gold; }
-    #layer2 .card { border-color: blue; }
-    #layer3 .card { border-color: green; }
-    #layer4 .card { border-color: purple; }
+    button {
+      padding: 8px 12px;
+      background: purple;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      margin: 3px;
+    }
+
+    .comment {
+      background: #fff;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 8px;
+      text-align: left;
+    }
 
   </style>
 </head>
@@ -76,18 +56,35 @@
 <body>
 
 <header>
-  👨‍👩‍👧‍👦 Lozada Family Tree
+  👨‍👩‍👧‍👦 Lozada Family Pro
 </header>
 
-<div class="layer" id="layer1"></div>
-<div class="layer" id="layer2"></div>
-<div class="layer" id="layer3"></div>
-<div class="layer" id="layer4"></div>
+<!-- LOGIN -->
+<div class="box" id="loginBox">
+  <h3>Login</h3>
+  <input id="username" placeholder="Enter your name">
+  <br>
+  <button onclick="login()">Enter</button>
+</div>
+
+<!-- MAIN -->
+<div id="app" style="display:none;">
+
+  <!-- COMMENT -->
+  <div class="box">
+    <h3>💬 Family Wall</h3>
+    <input id="comment" placeholder="Write something...">
+    <button onclick="addComment()">Post</button>
+
+    <div id="comments"></div>
+  </div>
+
+</div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
@@ -101,69 +98,75 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const layers = {
-  layer1: [
-    {name:"DELIA LOZADA", role:"Mother"},
-    {name:"JIMMY LOZADA", role:"Father"}
-  ],
-  layer2: [
-    {name:"CHERRY GRACE LOZADA", role:"Sibling"},
-    {name:"CHEVY LOZADA CORTEZ", role:"Sibling"}
-  ],
-  layer3: [
-    {name:"JERBOY LOZADA", role:"Sibling"},
-    {name:"JENADEL LOZADA", role:"Sibling"}
-  ],
-  layer4: [
-    {name:"JEMMEL LOZADA", role:"Sibling"},
-    {name:"JIMDEL LOZADA", role:"Sibling"},
-    {name:"JISA LOZADA", role:"Sibling"}
-  ]
+let user = "";
+
+// LOGIN
+window.login = function(){
+  user = document.getElementById("username").value;
+  if(!user) return alert("Enter name");
+
+  localStorage.setItem("user", user);
+
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("app").style.display="block";
 };
 
-Object.keys(layers).forEach((layerKey) => {
-  const container = document.getElementById(layerKey);
+// AUTO LOGIN
+const savedUser = localStorage.getItem("user");
+if(savedUser){
+  user = savedUser;
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("app").style.display="block";
+}
 
-  layers[layerKey].forEach((m, i) => {
-    const id = layerKey + "_" + i;
+// ADD COMMENT
+window.addComment = async function(){
+  const text = document.getElementById("comment").value;
+  if(!text) return;
 
-    container.innerHTML += `
-      <div class="card">
-        <img id="${id}">
-        <h4>${m.name}</h4>
-        <div class="role">${m.role}</div>
-        <input type="file" onchange="uploadImage(event,'${id}')">
+  await addDoc(collection(db,"comments"),{
+    user:user,
+    text:text,
+    likes:0,
+    time:Date.now()
+  });
+
+  document.getElementById("comment").value="";
+};
+
+// LOAD COMMENTS
+const q = query(collection(db,"comments"),orderBy("time"));
+
+onSnapshot(q,(snap)=>{
+  const box = document.getElementById("comments");
+  box.innerHTML="";
+
+  snap.forEach(docSnap=>{
+    const c = docSnap.data();
+    const id = docSnap.id;
+
+    box.innerHTML += `
+      <div class="comment">
+        <b>${c.user}</b><br>${c.text}<br>
+        👍 ${c.likes}
+        <br>
+        <button onclick="likePost('${id}',${c.likes})">Like</button>
+        ${c.user === user ? `<button onclick="deletePost('${id}')">Delete</button>` : ""}
       </div>
     `;
-
-    loadImage(id);
   });
 });
 
-async function loadImage(id){
-  const docRef = doc(db,"familyTree",id);
-  const snap = await getDoc(docRef);
+// LIKE
+window.likePost = async function(id,likes){
+  await updateDoc(doc(db,"comments",id),{
+    likes: likes + 1
+  });
+};
 
-  if(snap.exists()){
-    document.getElementById(id).src = snap.data().image;
-  }
-}
-
-window.uploadImage = function(e,id){
-  const file = e.target.files[0];
-  const reader = new FileReader();
-
-  reader.onload = async function(){
-    const base64 = reader.result;
-
-    await setDoc(doc(db,"familyTree",id),{
-      image: base64
-    });
-
-    document.getElementById(id).src = base64;
-  };
-
-  reader.readAsDataURL(file);
+// DELETE
+window.deletePost = async function(id){
+  await deleteDoc(doc(db,"comments",id));
 };
 
 </script>
