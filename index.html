@@ -25,29 +25,28 @@
 
     .card {
       background: white;
-      margin: 15px;
+      margin: 10px;
       padding: 10px;
-      border-radius: 12px;
-      width: 180px;
+      border-radius: 10px;
+      width: 160px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
     img {
       width: 100%;
-      height: 150px;
+      height: 130px;
       object-fit: cover;
-      border-radius: 10px;
+      border-radius: 8px;
       background: #ddd;
     }
 
     input {
-      margin-top: 8px;
-      font-size: 12px;
+      font-size: 10px;
+      margin-top: 5px;
     }
 
     h3 {
-      font-size: 14px;
-      margin-top: 8px;
+      font-size: 12px;
     }
   </style>
 </head>
@@ -58,63 +57,12 @@
   👨‍👩‍👧‍👦 Lozada Family
 </header>
 
-<div class="container">
-
-  <!-- MEMBER 1 -->
-  <div class="card">
-    <img id="img1" src="https://via.placeholder.com/150">
-    <h3>CHERRY GRACE LOZADA</h3>
-    <input type="file" onchange="uploadImage(event, 'img1')">
-  </div>
-
-  <!-- MEMBER 2 -->
-  <div class="card">
-    <img id="img2" src="https://via.placeholder.com/150">
-    <h3>CHEVY LOZADA CORTEZ</h3>
-    <input type="file" onchange="uploadImage(event, 'img2')">
-  </div>
-
-  <!-- MEMBER 3 -->
-  <div class="card">
-    <img id="img3" src="https://via.placeholder.com/150">
-    <h3>JERBOY LOZADA</h3>
-    <input type="file" onchange="uploadImage(event, 'img3')">
-  </div>
-
-  <!-- MEMBER 4 -->
-  <div class="card">
-    <img id="img4" src="https://via.placeholder.com/150">
-    <h3>JENADEL LOZADA</h3>
-    <input type="file" onchange="uploadImage(event, 'img4')">
-  </div>
-
-  <!-- MEMBER 5 -->
-  <div class="card">
-    <img id="img5" src="https://via.placeholder.com/150">
-    <h3>JEMMEL LOZADA</h3>
-    <input type="file" onchange="uploadImage(event, 'img5')">
-  </div>
-
-  <!-- MEMBER 6 -->
-  <div class="card">
-    <img id="img6" src="https://via.placeholder.com/150">
-    <h3>JIMDEL LOZADA</h3>
-    <input type="file" onchange="uploadImage(event, 'img6')">
-  </div>
-
-  <!-- MEMBER 7 -->
-  <div class="card">
-    <img id="img7" src="https://via.placeholder.com/150">
-    <h3>JISA LOZADA</h3>
-    <input type="file" onchange="uploadImage(event, 'img7')">
-  </div>
-
-</div>
+<div class="container" id="family"></div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
@@ -122,39 +70,70 @@ const firebaseConfig = {
   projectId: "family-web-10cb8",
   storageBucket: "family-web-10cb8.appspot.com",
   messagingSenderId: "152048365178",
-  appId: "1:152048365178:web:bd24e27f676b02b7d915c3",
-  measurementId: "G-LJG0JXDXTS"
+  appId: "1:152048365178:web:bd24e27f676b02b7d915c3"
 };
 
 const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
+const db = getFirestore(app);
 
-// 🔥 LOAD ALL IMAGES
-for (let i = 1; i <= 7; i++) {
-  const imageId = "img" + i;
-  const storageRef = ref(storage, "family/" + imageId + ".jpg");
+// 👨‍👩‍👧‍👦 FAMILY MEMBERS
+const members = [
+  "DELIA LOZADA",
+  "JIMMY LOZADA",
+  "CHERRY GRACE LOZADA",
+  "CHEVY LOZADA CORTEZ",
+  "JERBOY LOZADA",
+  "JENADEL LOZADA",
+  "JEMMEL LOZADA",
+  "JIMDEL LOZADA",
+  "JISA LOZADA"
+];
 
-  getDownloadURL(storageRef)
-    .then(url => {
-      document.getElementById(imageId).src = url;
-    })
-    .catch(() => {});
-}
+const container = document.getElementById("family");
 
-// 🔥 UPLOAD FUNCTION
-window.uploadImage = async function(event, id) {
+// CREATE UI
+members.forEach((name, index) => {
+  const id = "img" + index;
+
+  container.innerHTML += `
+    <div class="card">
+      <img id="${id}">
+      <h3>${name}</h3>
+      <input type="file" onchange="uploadImage(event, '${id}')">
+    </div>
+  `;
+});
+
+// LOAD IMAGES
+members.forEach(async (name, index) => {
+  const id = "img" + index;
+
+  const docRef = doc(db, "familyImages", id);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    document.getElementById(id).src = docSnap.data().image;
+  }
+});
+
+// UPLOAD IMAGE
+window.uploadImage = function(event, id) {
   const file = event.target.files[0];
-  if (!file) return;
+  const reader = new FileReader();
 
-  const storageRef = ref(storage, "family/" + id + ".jpg");
+  reader.onload = async function() {
+    const base64 = reader.result;
 
-  await uploadBytes(storageRef, file);
+    await setDoc(doc(db, "familyImages", id), {
+      image: base64
+    });
 
-  const url = await getDownloadURL(storageRef);
+    document.getElementById(id).src = base64;
 
-  document.getElementById(id).src = url;
+    alert("✅ Uploaded!");
+  };
 
-  alert("✅ Uploaded!");
+  reader.readAsDataURL(file);
 };
 
 </script>
