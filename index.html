@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Lozada Family</title>
+  <title>Lozada Family App</title>
 
   <style>
     body {
       font-family: Arial;
-      background: #f5f5f5;
+      background: #f0f0f0;
+      margin: 0;
       text-align: center;
     }
 
     header {
       background: linear-gradient(to right, red, purple);
       color: white;
-      padding: 20px;
-      font-size: 24px;
+      padding: 15px;
+      font-size: 22px;
     }
 
     .container {
@@ -28,25 +29,53 @@
       margin: 10px;
       padding: 10px;
       border-radius: 10px;
-      width: 160px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      width: 150px;
+      cursor: pointer;
     }
 
     img {
       width: 100%;
-      height: 130px;
+      height: 120px;
       object-fit: cover;
       border-radius: 8px;
       background: #ddd;
     }
 
-    input {
+    .role {
       font-size: 10px;
-      margin-top: 5px;
+      color: gray;
     }
 
-    h3 {
-      font-size: 12px;
+    .profile {
+      display: none;
+      padding: 20px;
+    }
+
+    .post-box {
+      margin: 10px;
+    }
+
+    textarea {
+      width: 80%;
+      height: 60px;
+    }
+
+    button {
+      padding: 8px 15px;
+      background: purple;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .post {
+      background: white;
+      margin: 10px auto;
+      padding: 10px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 10px;
+      text-align: left;
     }
   </style>
 </head>
@@ -54,15 +83,33 @@
 <body>
 
 <header>
-  👨‍👩‍👧‍👦 Lozada Family
+  👨‍👩‍👧‍👦 Lozada Family App
 </header>
 
+<!-- FAMILY GRID -->
 <div class="container" id="family"></div>
+
+<!-- PROFILE VIEW -->
+<div class="profile" id="profile">
+  <h2 id="profileName"></h2>
+  <img id="profileImg" style="width:200px;">
+  <br><br>
+  <button onclick="back()">Back</button>
+</div>
+
+<!-- TIMELINE -->
+<div class="post-box">
+  <h3>Family Timeline</h3>
+  <textarea id="postText" placeholder="What's happening?"></textarea><br>
+  <button onclick="addPost()">Post</button>
+</div>
+
+<div id="posts"></div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, addDoc, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
@@ -76,65 +123,102 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 👨‍👩‍👧‍👦 FAMILY MEMBERS
+// 👨‍👩‍👧‍👦 MEMBERS + ROLE
 const members = [
-  "DELIA LOZADA",
-  "JIMMY LOZADA",
-  "CHERRY GRACE LOZADA",
-  "CHEVY LOZADA CORTEZ",
-  "JERBOY LOZADA",
-  "JENADEL LOZADA",
-  "JEMMEL LOZADA",
-  "JIMDEL LOZADA",
-  "JISA LOZADA"
+  {name:"DELIA LOZADA", role:"Mother"},
+  {name:"JIMMY LOZADA", role:"Father"},
+  {name:"CHERRY GRACE LOZADA", role:"Sibling"},
+  {name:"CHEVY LOZADA CORTEZ", role:"Sibling"},
+  {name:"JERBOY LOZADA", role:"Sibling"},
+  {name:"JENADEL LOZADA", role:"Sibling"},
+  {name:"JEMMEL LOZADA", role:"Sibling"},
+  {name:"JIMDEL LOZADA", role:"Sibling"},
+  {name:"JISA LOZADA", role:"Sibling"}
 ];
 
 const container = document.getElementById("family");
 
-// CREATE UI
-members.forEach((name, index) => {
-  const id = "img" + index;
+// CREATE CARDS
+members.forEach((m, i) => {
+  const id = "img"+i;
 
   container.innerHTML += `
-    <div class="card">
+    <div class="card" onclick="openProfile('${m.name}','${id}')">
       <img id="${id}">
-      <h3>${name}</h3>
-      <input type="file" onchange="uploadImage(event, '${id}')">
+      <h4>${m.name}</h4>
+      <div class="role">${m.role}</div>
+      <input type="file" onchange="uploadImage(event,'${id}')">
     </div>
   `;
 });
 
 // LOAD IMAGES
-members.forEach(async (name, index) => {
-  const id = "img" + index;
+members.forEach(async (m,i)=>{
+  const id="img"+i;
+  const docRef = doc(db,"images",id);
+  const snap = await getDoc(docRef);
 
-  const docRef = doc(db, "familyImages", id);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    document.getElementById(id).src = docSnap.data().image;
+  if(snap.exists()){
+    document.getElementById(id).src = snap.data().image;
   }
 });
 
 // UPLOAD IMAGE
-window.uploadImage = function(event, id) {
-  const file = event.target.files[0];
+window.uploadImage = function(e,id){
+  const file = e.target.files[0];
   const reader = new FileReader();
 
-  reader.onload = async function() {
+  reader.onload = async function(){
     const base64 = reader.result;
 
-    await setDoc(doc(db, "familyImages", id), {
+    await setDoc(doc(db,"images",id),{
       image: base64
     });
 
     document.getElementById(id).src = base64;
-
-    alert("✅ Uploaded!");
   };
 
   reader.readAsDataURL(file);
 };
+
+// PROFILE VIEW
+window.openProfile = function(name,id){
+  document.getElementById("profile").style.display="block";
+  document.getElementById("profileName").innerText=name;
+  document.getElementById("profileImg").src =
+    document.getElementById(id).src;
+};
+
+window.back = function(){
+  document.getElementById("profile").style.display="none";
+};
+
+// ADD POST
+window.addPost = async function(){
+  const text = document.getElementById("postText").value;
+  if(!text) return;
+
+  await addDoc(collection(db,"posts"),{
+    text:text,
+    time:Date.now()
+  });
+
+  document.getElementById("postText").value="";
+};
+
+// LOAD POSTS REALTIME
+const q = query(collection(db,"posts"),orderBy("time"));
+
+onSnapshot(q,(snap)=>{
+  const posts = document.getElementById("posts");
+  posts.innerHTML="";
+
+  snap.forEach(doc=>{
+    posts.innerHTML += `
+      <div class="post">${doc.data().text}</div>
+    `;
+  });
+});
 
 </script>
 
