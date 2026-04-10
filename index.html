@@ -120,18 +120,6 @@
       padding:20px;
     }
 
-    #profileBox {
-      display:none;
-      position:fixed;
-      top:50%;
-      left:50%;
-      transform:translate(-50%,-50%);
-      background:#222;
-      padding:20px;
-      border-radius:12px;
-      z-index:2000;
-    }
-
     #zoomBox {
       display:none;
       position:fixed;
@@ -150,12 +138,8 @@
       width:60%;
       max-width:500px;
       border-radius:12px;
-      box-shadow:0 0 20px rgba(255,0,255,0.5);
     }
 
-    #zoomBox button {
-      margin-top:10px;
-    }
   </style>
 </head>
 
@@ -203,38 +187,24 @@
 
 </div>
 
-<div id="profileBox">
-  <h3 id="profileName"></h3>
-  <input id="birthday"><br>
-  <input id="address"><br>
-  <input id="contact"><br>
-  <input id="email"><br>
-  <button onclick="saveProfile()">Save</button>
-  <button onclick="closeAll()">Close</button>
-</div>
-
 <div id="zoomBox">
   <img id="zoomImg">
-  <button onclick="deletePhoto()">Delete</button>
-  <button onclick="closeAll()">Close</button>
+  <button onclick="closeZoom()">Close</button>
 </div>
 
-<script type="module">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-const SUPABASE_URL = "https://farxyhjjgvqzwjqrskte.supabase.co";
+<script>
+const SUPABASE_URL = "https://farxyhjigvqzwjqrskte.supabase.co";
 const SUPABASE_KEY = "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentZoom="", currentProfile="";
-
-window.login=()=>{
+function login(){
   loginBox.style.display="none";
   credit.style.display="none";
   app.style.display="block";
-};
+}
 
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
@@ -253,26 +223,14 @@ for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 function create(data){
   Object.keys(data).forEach(k=>{
     const c=document.getElementById(k);
-
-    data[k].forEach(async (name,i)=>{
+    data[k].forEach((name,i)=>{
       const id=k+"_"+i;
-
       c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
-        <h4 onclick="openProfile('${id}','${name}')">${name}</h4>
+        <h4>${name}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
-
-      const { data:img } = await supabase
-        .from("images")
-        .select("url")
-        .eq("id", id)
-        .single();
-
-      if(img){
-        document.getElementById(id).src = img.url;
-      }
     });
   });
 }
@@ -281,60 +239,43 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-window.upload = async(e,id)=>{
+// UPLOAD
+async function upload(e,id){
   const file=e.target.files[0];
-  if(!file) return;
+  if(!file)return;
 
-  const fileName = id + "_" + Date.now();
+  const fileName=id+"_"+Date.now();
 
-  const { error } = await supabase.storage
-    .from("family")
-    .upload(fileName, file);
+  await supabase.storage.from("family").upload(fileName,file);
 
-  if(error){
-    alert("Upload failed");
-    return;
-  }
+  const {data}=supabase.storage.from("family").getPublicUrl(fileName);
+  const url=data.publicUrl;
 
-  const { data } = supabase.storage
-    .from("family")
-    .getPublicUrl(fileName);
+  await supabase.from("images").upsert({id:id,url:url});
 
-  const url = data.publicUrl;
+  document.getElementById(id).src=url;
+}
 
-  await supabase.from("images").upsert({
-    id: id,
-    url: url
+// LOAD
+async function loadImages(){
+  const {data}=await supabase.from("images").select("*");
+  data.forEach(item=>{
+    const img=document.getElementById(item.id);
+    if(img) img.src=item.url;
   });
+}
 
-  document.getElementById(id).src = url;
-};
+loadImages();
 
-window.saveProfile=()=>{ alert("Saved!"); };
-
-window.openProfile=(id,name)=>{
-  currentProfile=id;
-  profileName.innerText=name;
-  profileBox.style.display="block";
-};
-
-window.zoom=(id)=>{
-  currentZoom=id;
+// ZOOM
+function zoom(id){
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
-};
+}
 
-window.deletePhoto=async()=>{
-  await supabase.from("images").delete().eq("id",currentZoom);
-  document.getElementById(currentZoom).src="";
+function closeZoom(){
   zoomBox.style.display="none";
-};
-
-window.closeAll=()=>{
-  zoomBox.style.display="none";
-  profileBox.style.display="none";
-};
-
+}
 </script>
 
 </body>
