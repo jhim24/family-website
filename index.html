@@ -4,7 +4,13 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {font-family: Arial; background:#111; margin:0; text-align:center; color:white;}
+    body {
+      font-family: Arial;
+      background:#111;
+      margin:0;
+      text-align:center;
+      color:white;
+    }
 
     header {
       background:linear-gradient(to right, red, purple);
@@ -56,7 +62,10 @@
       margin:30px auto;
     }
 
-    #layer1,#layer2,#layer3 { gap:40px; margin:40px auto; }
+    #layer1, #layer2, #layer3 {
+      gap:40px;
+      margin:40px auto;
+    }
 
     .card {
       background:#1c1c1c;
@@ -81,6 +90,7 @@
       border:2px solid red;
       padding:5px;
       border-radius:6px;
+      cursor:pointer;
     }
 
     .title {
@@ -92,9 +102,13 @@
     }
 
     .family-section {
+      position:relative;
       padding:20px 10px;
+      overflow:hidden;
       background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
     }
+
+    .content { position:relative; z-index:2; }
 
     .pamangkin-section {
       background:repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px);
@@ -137,8 +151,8 @@
 
 <div id="loginBox">
   <h2>HI WELCOME</h2>
-  <input id="user" placeholder="Username"><br>
-  <input id="pass" type="password" placeholder="Password"><br>
+  <input id="user"><br>
+  <input id="pass" type="password"><br>
   <button onclick="login()">Login</button>
 </div>
 
@@ -147,10 +161,12 @@
 <div id="app" style="display:none;">
 
   <div class="family-section">
-    <h2 class="title">FAMILY</h2>
-    <div class="layer" id="layer1"></div>
-    <div class="layer" id="layer2"></div>
-    <div class="layer" id="layer3"></div>
+    <div class="content">
+      <h2 class="title">FAMILY</h2>
+      <div class="layer" id="layer1"></div>
+      <div class="layer" id="layer2"></div>
+      <div class="layer" id="layer3"></div>
+    </div>
   </div>
 
   <div class="pamangkin-section">
@@ -172,7 +188,7 @@
 
 <div id="zoomBox">
   <img id="zoomImg">
-  <button onclick="closeZoom()">Close</button>
+  <button onclick="closeAll()">Close</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
@@ -183,41 +199,37 @@ const supabase = window.supabase.createClient(
   "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB"
 );
 
-/* 🔐 LOGIN FIX */
+/* LOGIN (ORIGINAL STYLE) */
 function login(){
-  const u = user.value.trim();
-  const p = pass.value.trim();
-
-  if(u === "admin" && p === "1234"){
-    loginBox.style.display="none";
-    credit.style.display="none";
-    app.style.display="block";
-    loadImages();
-  } else {
-    alert("Wrong username/password!");
-  }
+  loginBox.style.display="none";
+  credit.style.display="none";
+  app.style.display="block";
+  loadImages();
 }
 
-/* DATA */
-const sections={
+/* ORIGINAL DATA */
+const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
-  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA","JERBOY LOZADA"],
-  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"],
-  pamangkin1:["A","B","C","D"],
-  pamangkin2:["E","F","G","H"]
+  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
+  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
 };
 
-for(let i=1;i<=5;i++){
-  sections["gallery"+i]=["","","",""];
-}
+const pamangkin={
+  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
+  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
+};
 
-/* CREATE UI */
-function create(){
-  Object.keys(sections).forEach(k=>{
-    const el=document.getElementById(k);
-    sections[k].forEach((name,i)=>{
+const gallery={};
+for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
+
+/* CREATE CARDS */
+function create(data){
+  Object.keys(data).forEach(k=>{
+    const c=document.getElementById(k);
+    data[k].forEach((name,i)=>{
       const id=k+"_"+i;
-      el.innerHTML+=`
+
+      c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
         <h4>${name}</h4>
@@ -226,9 +238,12 @@ function create(){
     });
   });
 }
-create();
 
-/* UPLOAD */
+create(layers);
+create(pamangkin);
+create(gallery);
+
+/* UPLOAD FIX */
 async function upload(e,id){
   const file=e.target.files[0];
   if(!file) return;
@@ -251,13 +266,13 @@ async function upload(e,id){
   });
 
   document.getElementById(id).src=data.publicUrl;
-
-  alert("Upload success!");
 }
 
 /* LOAD IMAGES */
 async function loadImages(){
   const {data}=await supabase.from("images").select("*");
+
+  if(!data) return;
 
   data.forEach(row=>{
     const img=document.getElementById(row.id);
@@ -271,7 +286,7 @@ function zoom(id){
   zoomBox.style.display="flex";
 }
 
-function closeZoom(){
+function closeAll(){
   zoomBox.style.display="none";
 }
 </script>
