@@ -75,6 +75,37 @@
       text-align:left;
     }
 
+    /* 🔥 NEW LOGIN DESIGN */
+    .login-box {
+      background:url('https://images.unsplash.com/photo-1614064641938-3bbee52942c7') center/cover no-repeat;
+      border:4px solid purple;
+      border-radius:15px;
+      padding:20px;
+      width:90%;
+      max-width:350px;
+      margin:50px auto;
+      color:white;
+      box-shadow:0 0 20px rgba(128,0,128,0.6);
+    }
+
+    .login-box input {
+      width:90%;
+      padding:8px;
+      margin:6px;
+      border-radius:6px;
+      border:none;
+    }
+
+    .login-box button {
+      background:red;
+      font-weight:bold;
+    }
+
+    .creator {
+      margin-top:10px;
+      font-size:12px;
+    }
+
     #zoomBox {
       display:none;
       position:fixed;
@@ -118,14 +149,15 @@
   <div class="header-quote">"Family is not an important thing, it's everything."</div>
 </header>
 
-<!-- LOGIN -->
-<div id="loginBox" class="box">
+<!-- 🔥 NEW LOGIN -->
+<div id="loginBox" class="login-box">
+  <h2>🔐 LOGIN</h2>
   <input id="user" placeholder="Username"><br>
   <input id="pass" type="password" placeholder="Password"><br>
-  <button onclick="login()">Login</button>
+  <button onclick="login()">LOGIN</button>
+  <p class="creator">Created by JHIM LOZADA</p>
 </div>
 
-<!-- APP -->
 <div id="app" style="display:none;">
 
   <div class="family-bg">
@@ -173,20 +205,11 @@ const db = getFirestore(initializeApp({
 
 let currentUser="", currentZoom="";
 
-/* 🔥 NEW LOGIN (MANUAL ONLY) */
-loginBox.style.display="block";
-app.style.display="none";
-
+/* 🔐 NEW LOGIN */
 window.login = function(){
   const u = user.value.trim();
   const p = pass.value.trim();
 
-  if(!u || !p){
-    alert("Enter username and password");
-    return;
-  }
-
-  // ADMIN
   if(u === "admin" && p === "1234"){
     currentUser = "ADMIN";
     loginBox.style.display="none";
@@ -194,18 +217,10 @@ window.login = function(){
     return;
   }
 
-  // USER
-  if(p === "123"){
-    currentUser = u;
-    loginBox.style.display="none";
-    app.style.display="block";
-    return;
-  }
-
-  alert("Wrong login ❌");
+  alert("Invalid login ❌");
 };
 
-/* DATA */
+/* REST CODE SAME */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
