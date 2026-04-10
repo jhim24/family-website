@@ -150,6 +150,7 @@
       width:60%;
       max-width:500px;
       border-radius:12px;
+      box-shadow:0 0 20px rgba(255,0,255,0.5);
     }
   </style>
 </head>
@@ -198,8 +199,19 @@
 
 </div>
 
+<div id="profileBox">
+  <h3 id="profileName"></h3>
+  <input id="birthday"><br>
+  <input id="address"><br>
+  <input id="contact"><br>
+  <input id="email"><br>
+  <button onclick="saveProfile()">Save</button>
+  <button onclick="closeAll()">Close</button>
+</div>
+
 <div id="zoomBox">
   <img id="zoomImg">
+  <button onclick="deletePhoto()">Delete</button>
   <button onclick="closeAll()">Close</button>
 </div>
 
@@ -211,7 +223,9 @@ const supabase = window.supabase.createClient(
   "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB"
 );
 
-/* 🔥 FIXED LOGIN (SIMPLE & WORKING) */
+let currentZoom="", currentProfile="";
+
+/* LOGIN FIX */
 function login(){
   document.getElementById("loginBox").style.display="none";
   document.getElementById("credit").style.display="none";
@@ -238,13 +252,14 @@ for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 function create(data){
   Object.keys(data).forEach(k=>{
     const c=document.getElementById(k);
+
     data[k].forEach((name,i)=>{
       const id=k+"_"+i;
 
       c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
-        <h4>${name}</h4>
+        <h4 onclick="openProfile('${id}','${name}')">${name}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
     });
@@ -282,14 +297,40 @@ async function loadImages(){
   });
 }
 
+/* PROFILE */
+async function saveProfile(){
+  await supabase.from("profiles").upsert({
+    id:currentProfile,
+    birthday:birthday.value,
+    address:address.value,
+    contact:contact.value,
+    email:email.value
+  });
+}
+
+async function openProfile(id,name){
+  currentProfile=id;
+  profileName.innerText=name;
+  profileBox.style.display="block";
+}
+
 /* ZOOM */
 function zoom(id){
+  currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 }
 
+/* DELETE */
+async function deletePhoto(){
+  await supabase.from("images").delete().eq("id",currentZoom);
+  document.getElementById(currentZoom).src="";
+  zoomBox.style.display="none";
+}
+
 function closeAll(){
   zoomBox.style.display="none";
+  profileBox.style.display="none";
 }
 </script>
 
