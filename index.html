@@ -4,13 +4,7 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {
-      font-family: Arial;
-      background:#111;
-      margin:0;
-      text-align:center;
-      color:white;
-    }
+    body {font-family: Arial; background:#111; margin:0; text-align:center; color:white;}
 
     header {
       background:linear-gradient(to right, red, purple);
@@ -62,10 +56,7 @@
       margin:30px auto;
     }
 
-    #layer1, #layer2, #layer3 {
-      gap:40px;
-      margin:40px auto;
-    }
+    #layer1,#layer2,#layer3 { gap:40px; margin:40px auto; }
 
     .card {
       background:#1c1c1c;
@@ -102,13 +93,9 @@
     }
 
     .family-section {
-      position:relative;
       padding:20px 10px;
-      overflow:hidden;
       background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
     }
-
-    .content { position:relative; z-index:2; }
 
     .pamangkin-section {
       background:repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px);
@@ -118,6 +105,18 @@
     .gallery-section {
       background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
       padding:20px;
+    }
+
+    #profileBox {
+      display:none;
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      background:#222;
+      padding:20px;
+      border-radius:12px;
+      z-index:2000;
     }
 
     #zoomBox {
@@ -161,12 +160,10 @@
 <div id="app" style="display:none;">
 
   <div class="family-section">
-    <div class="content">
-      <h2 class="title">FAMILY</h2>
-      <div class="layer" id="layer1"></div>
-      <div class="layer" id="layer2"></div>
-      <div class="layer" id="layer3"></div>
-    </div>
+    <h2 class="title">FAMILY</h2>
+    <div class="layer" id="layer1"></div>
+    <div class="layer" id="layer2"></div>
+    <div class="layer" id="layer3"></div>
   </div>
 
   <div class="pamangkin-section">
@@ -186,6 +183,8 @@
 
 </div>
 
+<div id="profileBox"></div>
+
 <div id="zoomBox">
   <img id="zoomImg">
   <button onclick="closeAll()">Close</button>
@@ -199,15 +198,15 @@ const supabase = window.supabase.createClient(
   "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB"
 );
 
-/* LOGIN (ORIGINAL STYLE) */
-function login(){
+/* LOGIN FIX */
+window.login=function(){
   loginBox.style.display="none";
   credit.style.display="none";
   app.style.display="block";
   loadImages();
-}
+};
 
-/* ORIGINAL DATA */
+/* DATA */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -222,13 +221,12 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 
-/* CREATE CARDS */
+/* CREATE */
 function create(data){
   Object.keys(data).forEach(k=>{
     const c=document.getElementById(k);
     data[k].forEach((name,i)=>{
       const id=k+"_"+i;
-
       c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
@@ -243,35 +241,25 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* UPLOAD FIX */
-async function upload(e,id){
+/* UPLOAD */
+window.upload=async(e,id)=>{
   const file=e.target.files[0];
   if(!file) return;
 
   const fileName=id+"_"+Date.now();
 
-  const {error}=await supabase.storage.from("family").upload(fileName,file);
-
-  if(error){
-    alert("Upload failed!");
-    console.log(error);
-    return;
-  }
+  await supabase.storage.from("family").upload(fileName,file);
 
   const {data}=supabase.storage.from("family").getPublicUrl(fileName);
 
-  await supabase.from("images").upsert({
-    id:id,
-    url:data.publicUrl
-  });
+  await supabase.from("images").upsert({id:id,url:data.publicUrl});
 
   document.getElementById(id).src=data.publicUrl;
-}
+};
 
-/* LOAD IMAGES */
+/* LOAD */
 async function loadImages(){
   const {data}=await supabase.from("images").select("*");
-
   if(!data) return;
 
   data.forEach(row=>{
@@ -281,14 +269,14 @@ async function loadImages(){
 }
 
 /* ZOOM */
-function zoom(id){
+window.zoom=(id)=>{
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
-}
+};
 
-function closeAll(){
+window.closeAll=()=>{
   zoomBox.style.display="none";
-}
+};
 </script>
 
 </body>
