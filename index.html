@@ -6,7 +6,6 @@
   <style>
     body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
 
-    /* HEADER */
     header {
       background:linear-gradient(to right, red, purple);
       color:white;
@@ -17,35 +16,17 @@
       z-index:1000;
     }
 
-    .header-title {
-      font-size:28px;
-      font-weight:bold;
-      letter-spacing:2px;
-    }
+    .header-title {font-size:28px; font-weight:bold;}
+    .header-quote {font-size:14px; margin-top:5px; font-style:italic;}
 
-    .header-quote {
-      font-size:14px;
-      margin-top:5px;
-      font-style:italic;
-      opacity:0.9;
-    }
-
-    .layer {
-      display:flex;
-      justify-content:center;
-      flex-wrap:wrap;
-      margin:20px 0;
-    }
+    .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
 
     .card {
-      background:white;
-      margin:10px;
-      padding:10px;
+      background:white; margin:10px; padding:10px;
       width: clamp(140px, 22vw, 180px);
       border-radius:12px;
       box-shadow:0 4px 10px rgba(0,0,0,0.2);
       border:3px solid purple;
-      cursor:pointer;
     }
 
     img {
@@ -61,6 +42,7 @@
       border:2px solid red;
       padding:5px;
       border-radius:6px;
+      cursor:pointer;
     }
 
     .title {
@@ -74,24 +56,10 @@
     input {width:90%; padding:6px; margin:5px;}
     button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
 
-    .box {
-      background:white;
-      margin:20px auto;
-      padding:15px;
-      width:90%;
-      max-width:400px;
-      border-radius:10px;
-    }
+    .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
+    .comment {background:#fff; padding:10px; margin:5px; border-radius:8px;}
 
-    .comment {
-      background:#fff;
-      padding:10px;
-      margin:5px;
-      border-radius:8px;
-      text-align:left;
-    }
-
-    /* 🔥 HOLOGRAM ZOOM BOX */
+    /* ZOOM */
     #zoomBox {
       display:none;
       position:fixed;
@@ -100,18 +68,14 @@
       background:white;
       padding:25px;
       border-radius:12px;
-      box-shadow:0 0 25px rgba(0,0,0,0.6);
       z-index:1000;
     }
 
     #zoomBox img {
       width:50vw;
       max-width:500px;
-      height:auto;
       border-radius:12px;
-
-      transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
-      transition: transform 0.2s ease;
+      transition: transform 0.2s;
 
       box-shadow:
         0 0 20px rgba(255,0,255,0.6),
@@ -129,10 +93,22 @@
     }
 
     .family-bg {
-      background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
+      background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
       padding:20px 0;
       border-radius:12px;
       margin:10px;
+    }
+
+    /* PROFILE POPUP */
+    #profileBox {
+      display:none;
+      position:fixed;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      background:white;
+      padding:20px;
+      border-radius:12px;
+      z-index:1000;
     }
 
   </style>
@@ -146,8 +122,8 @@
 </header>
 
 <div id="loginBox" class="box">
-  <input id="user" placeholder="Username"><br>
-  <input id="pass" type="password" placeholder="Password"><br>
+  <input id="user"><br>
+  <input id="pass" type="password"><br>
   <button onclick="login()">Login</button>
 </div>
 
@@ -177,14 +153,26 @@
 
   <div id="overlay" onclick="closeAll()"></div>
 
+  <!-- ZOOM -->
   <div id="zoomBox">
     <img id="zoomImg"><br><br>
     <button onclick="deletePhoto()">Delete</button>
     <button onclick="closeAll()">Close</button>
   </div>
 
+  <!-- PROFILE -->
+  <div id="profileBox">
+    <h3 id="profileName"></h3>
+    <input id="birthday" placeholder="Birthday"><br>
+    <input id="address" placeholder="Address"><br>
+    <input id="contact" placeholder="Contact"><br>
+    <input id="email" placeholder="Email"><br>
+    <button onclick="saveProfile()">Save</button>
+    <button onclick="closeProfile()">Close</button>
+  </div>
+
   <div class="box">
-    <input id="comment" placeholder="Write something...">
+    <input id="comment">
     <button onclick="addComment()">Post</button>
     <div id="comments"></div>
   </div>
@@ -194,19 +182,18 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-const appFirebase = initializeApp({
+const db = getFirestore(initializeApp({
   apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   projectId:"family-web-10cb8"
-});
+}));
 
-const db = getFirestore(appFirebase);
+let currentUser="", currentZoom="", currentProfile="";
 
-let currentUser="", currentZoom="";
-
+/* LOGIN */
 if(localStorage.getItem("user")){
-  currentUser = localStorage.getItem("user");
+  currentUser=localStorage.getItem("user");
   loginBox.style.display="none";
   app.style.display="block";
 }
@@ -220,6 +207,7 @@ window.login=()=>{
   }
 };
 
+/* DATA */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -234,17 +222,18 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=10;i++){ gallery["gallery"+i]=["","","","",""]; }
 
+/* CREATE */
 function create(data){
-  Object.keys(data).forEach(layerKey=>{
-    const c=document.getElementById(layerKey);
+  Object.keys(data).forEach(layer=>{
+    const c=document.getElementById(layer);
 
-    data[layerKey].forEach((name,i)=>{
-      const id=layerKey+"_"+i;
+    data[layer].forEach((name,i)=>{
+      const id=layer+"_"+i;
 
       c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
-        <h4>${name||"Photo"}</h4>
+        <h4 onclick="openProfile('${name}','${id}')">${name||"Photo"}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
 
@@ -261,61 +250,36 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
+/* UPLOAD */
 window.upload=(e,id)=>{
-  const file=e.target.files[0];
-  if(!file) return;
-
   const reader=new FileReader();
-
-  reader.onload=function(){
-    const img=new Image();
-    img.src=reader.result;
-
-    img.onload=async function(){
-      const canvas=document.createElement("canvas");
-      const ctx=canvas.getContext("2d");
-
-      const scale=300/img.width;
-      canvas.width=300;
-      canvas.height=img.height*scale;
-
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-
-      const compressed=canvas.toDataURL("image/jpeg",0.7);
-
-      await setDoc(doc(db,"familyTree",id),{image:compressed});
-    };
-  };
-
-  reader.readAsDataURL(file);
+  reader.onload=()=>setDoc(doc(db,"familyTree",id),{image:reader.result});
+  reader.readAsDataURL(e.target.files[0]);
 };
 
+/* ZOOM + 3D */
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
+
   zoomBox.style.display="block";
   overlay.style.display="block";
+
+  zoomImg.onmousemove=(e)=>{
+    const rect=zoomImg.getBoundingClientRect();
+    const x=e.clientX-rect.left;
+    const y=e.clientY-rect.top;
+
+    const rx=-(y-rect.height/2)/10;
+    const ry=(x-rect.width/2)/10;
+
+    zoomImg.style.transform=`perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+  };
+
+  zoomImg.onmouseleave=()=>{
+    zoomImg.style.transform="perspective(1000px) rotateX(0) rotateY(0)";
+  };
 };
-
-/* 🔥 3D HOLOGRAM EFFECT */
-const zoomImage = document.getElementById("zoomImg");
-
-zoomImage.addEventListener("mousemove", (e) => {
-  const rect = zoomImage.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  const rotateX = -(y - rect.height/2) / 10;
-  const rotateY = (x - rect.width/2) / 10;
-
-  zoomImage.style.transform =
-    `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-});
-
-zoomImage.addEventListener("mouseleave", () => {
-  zoomImage.style.transform =
-    "perspective(1000px) rotateX(0deg) rotateY(0deg)";
-});
 
 window.deletePhoto=async()=>{
   await deleteDoc(doc(db,"familyTree",currentZoom));
@@ -323,9 +287,43 @@ window.deletePhoto=async()=>{
 
 window.closeAll=()=>{
   zoomBox.style.display="none";
+  profileBox.style.display="none";
   overlay.style.display="none";
 };
 
+/* PROFILE */
+window.openProfile=async(name,id)=>{
+  currentProfile=id;
+  profileBox.style.display="block";
+  overlay.style.display="block";
+  profileName.innerText=name;
+
+  const snap=await getDoc(doc(db,"profiles",id));
+  if(snap.exists()){
+    const d=snap.data();
+    birthday.value=d.birthday||"";
+    address.value=d.address||"";
+    contact.value=d.contact||"";
+    email.value=d.email||"";
+  }
+};
+
+window.saveProfile=async()=>{
+  await setDoc(doc(db,"profiles",currentProfile),{
+    birthday:birthday.value,
+    address:address.value,
+    contact:contact.value,
+    email:email.value
+  });
+  alert("Saved!");
+};
+
+window.closeProfile=()=>{
+  profileBox.style.display="none";
+  overlay.style.display="none";
+};
+
+/* COMMENTS */
 window.addComment=()=>{
   if(!comment.value) return;
 
