@@ -12,13 +12,23 @@
       color:white;
     }
 
+    /* 🔥 BIG HEADER */
     header {
       background:linear-gradient(to right, red, purple);
-      padding:15px;
-      font-size:22px;
+      padding:25px;
+      font-size:28px;
+      font-weight:bold;
+      letter-spacing:2px;
     }
 
-    /* LOGIN */
+    /* QUOTE */
+    .quote {
+      font-size:14px;
+      font-style:italic;
+      margin-top:8px;
+      opacity:0.8;
+    }
+
     #loginBox {
       margin:80px auto 10px;
       width:90%;
@@ -46,37 +56,26 @@
       margin-top:10px;
     }
 
-    #credit {
-      font-size:12px;
-      opacity:0.7;
-    }
+    #credit {font-size:12px; opacity:0.7;}
 
-    /* 🔥 FAMILY BACKGROUND (NEW) */
+    /* FAMILY BG */
     .family-section {
-      background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') no-repeat center;
-      background-size: cover;
-      padding:20px 10px;
+      background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
+      padding:20px;
       position:relative;
     }
 
     .family-section::before {
       content:"";
       position:absolute;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
+      width:100%; height:100%;
       background:rgba(0,0,0,0.6);
-      z-index:0;
+      top:0; left:0;
     }
 
-    .family-section > * {
-      position:relative;
-      z-index:1;
-    }
+    .family-section > * {position:relative; z-index:1;}
 
-    /* GRID */
-    .layer, .layer.fixed {
+    .layer {
       display:grid;
       grid-template-columns:repeat(4,150px);
       justify-content:center;
@@ -84,14 +83,12 @@
       margin:20px auto;
     }
 
-    /* CARD */
     .card {
       background:#1c1c1c;
       padding:10px;
       border-radius:12px;
       border:2px solid purple;
       width:150px;
-      box-shadow:0 0 10px rgba(255,0,255,0.3);
     }
 
     img {
@@ -118,44 +115,33 @@
       margin-top:20px;
     }
 
-    /* PAMANGKIN */
     .pamangkin-section {
-      background:repeating-linear-gradient(
-        45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px
-      );
+      background:repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px);
       padding:20px;
     }
 
-    /* GALLERY */
     .gallery-section {
       background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
       padding:20px;
     }
 
-    /* PROFILE */
-    #profileBox {
+    #profileBox, #zoomBox {
       display:none;
       position:fixed;
-      top:50%;
-      left:50%;
-      transform:translate(-50%,-50%);
-      background:white;
-      color:black;
-      padding:20px;
-      border-radius:12px;
       z-index:2000;
     }
 
-    /* ZOOM */
+    #profileBox {
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      background:white; color:black;
+      padding:20px; border-radius:12px;
+    }
+
     #zoomBox {
-      display:none;
-      position:fixed;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
+      top:0; left:0;
+      width:100%; height:100%;
       background:rgba(0,0,0,0.95);
-      z-index:1500;
       display:flex;
       justify-content:center;
       align-items:center;
@@ -166,7 +152,6 @@
       width:90%;
       max-width:900px;
       max-height:80vh;
-      object-fit:contain;
     }
 
   </style>
@@ -174,7 +159,10 @@
 
 <body>
 
-<header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
+<header>
+  🏡 LOZADA FAMILY ULTIMATE
+  <div class="quote">"Family is not an important thing. It's everything."</div>
+</header>
 
 <div id="loginBox">
   <h2>HI WELCOME</h2>
@@ -187,7 +175,6 @@
 
 <div id="app" style="display:none;">
 
-  <!-- 🔥 FAMILY WITH BACKGROUND -->
   <div class="family-section">
     <h2 class="title">FAMILY</h2>
     <div class="layer" id="layer1"></div>
@@ -195,24 +182,21 @@
     <div class="layer" id="layer3"></div>
   </div>
 
-  <!-- PAMANGKIN -->
   <div class="pamangkin-section">
     <h2 class="title">PAMANGKIN</h2>
-    <div class="layer fixed" id="pamangkin1"></div>
-    <div class="layer fixed" id="pamangkin2"></div>
+    <div class="layer" id="pamangkin1"></div>
+    <div class="layer" id="pamangkin2"></div>
   </div>
 
-  <!-- GALLERY -->
   <div class="gallery-section">
     <h2 class="title">GALLERY</h2>
-    <div class="layer fixed" id="gallery1"></div>
-    <div class="layer fixed" id="gallery2"></div>
-    <div class="layer fixed" id="gallery3"></div>
-    <div class="layer fixed" id="gallery4"></div>
-    <div class="layer fixed" id="gallery5"></div>
+    <div class="layer" id="gallery1"></div>
+    <div class="layer" id="gallery2"></div>
+    <div class="layer" id="gallery3"></div>
+    <div class="layer" id="gallery4"></div>
+    <div class="layer" id="gallery5"></div>
   </div>
 
-  <!-- PROFILE -->
   <div id="profileBox">
     <h3 id="profileName"></h3>
     <input id="birthday"><br>
@@ -223,11 +207,10 @@
     <button onclick="closeAll()">Close</button>
   </div>
 
-  <!-- ZOOM -->
   <div id="zoomBox">
     <img id="zoomImg">
     <div>
-      <button id="deleteBtn" onclick="deletePhoto()">Delete</button>
+      <button onclick="deletePhoto()">Delete</button>
       <button onclick="closeAll()">Close</button>
     </div>
   </div>
@@ -289,7 +272,7 @@ function create(data,type=""){
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
         <h4 ${click}>${name||"Photo"}</h4>
-        ${isAdmin ? `<input type="file" onchange="upload(event,'${id}')">` : ""}
+        <input type="file" onchange="upload(event,'${id}')">
       </div>`;
 
       onSnapshot(doc(db,"familyTree",id),(snap)=>{
@@ -306,7 +289,7 @@ create(pamangkin);
 create(gallery,"gallery");
 
 window.upload=(e,id)=>{
-  if(!isAdmin) return alert("Viewer only");
+  if(!isAdmin) return alert("Admin only");
 
   const r=new FileReader();
   r.onload=()=>setDoc(doc(db,"familyTree",id),{image:r.result});
@@ -317,8 +300,14 @@ window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
+};
 
-  deleteBtn.style.display = isAdmin ? "inline-block" : "none";
+window.deletePhoto=async()=>{
+  if(!isAdmin) return alert("Admin only");
+
+  await deleteDoc(doc(db,"familyTree",currentZoom));
+  document.getElementById(currentZoom).src="";
+  zoomBox.style.display="none";
 };
 
 window.openProfile=async(id,name)=>{
@@ -337,7 +326,7 @@ window.openProfile=async(id,name)=>{
 };
 
 window.saveProfile=()=>{
-  if(!isAdmin) return alert("Viewer only");
+  if(!isAdmin) return alert("Admin only");
 
   setDoc(doc(db,"profiles",currentProfile),{
     birthday:birthday.value,
@@ -345,14 +334,6 @@ window.saveProfile=()=>{
     contact:contact.value,
     email:email.value
   });
-};
-
-window.deletePhoto=async()=>{
-  if(!isAdmin) return alert("Viewer only");
-
-  await deleteDoc(doc(db,"familyTree",currentZoom));
-  document.getElementById(currentZoom).src="";
-  zoomBox.style.display="none";
 };
 
 window.closeAll=()=>{
