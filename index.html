@@ -15,16 +15,21 @@
       gap:20px;
     }
 
-    /* 🔥 LAYER 3 FIX (2x2) */
+    /* 🔥 LAYER 3 (ONE ROW - 4 MEMBERS) */
     #layer3 {
-      display:grid;
-      grid-template-columns: repeat(2, 140px);
+      display:flex;
       justify-content:center;
-      gap:15px;
+      flex-wrap:wrap;
+      gap:10px;
     }
 
     #layer3 .card {
-      width:140px;
+      width:120px;
+    }
+
+    #layer3 img {
+      height:80px;
+      aspect-ratio:auto;
     }
 
     .layer.fixed {
@@ -83,7 +88,7 @@
       margin:5px;
     }
 
-    /* 🔥 PROFILE POPUP FIX */
+    /* PROFILE */
     #profileBox {
       display:none;
       position:fixed;
@@ -99,7 +104,7 @@
       max-width:300px;
     }
 
-    /* 🔥 FULLSCREEN IMAGE */
+    /* FULLSCREEN IMAGE */
     #zoomBox {
       display:none;
       position:fixed;
@@ -196,7 +201,7 @@ window.login=()=>{
   }
 };
 
-// FAMILY STRUCTURE
+// FAMILY
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -260,7 +265,7 @@ window.zoom=(id)=>{
   zoomBox.style.display="flex";
 };
 
-// PROFILE (FIXED 🔥)
+// PROFILE
 window.openProfile=(id,name)=>{
   currentProfile=id;
   profileName.innerText=name;
