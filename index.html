@@ -169,7 +169,7 @@
 
 <header>
   <div class="header-title">LOZADA FAMILY ULTIMATE</div>
-  <div class="quote">"Family is everything."</div>
+  <div class="quote">"Family is not an important thing. It's everything."</div>
 </header>
 
 <div id="loginBox">
@@ -186,6 +186,7 @@
   <div class="family-section">
     <div class="content">
       <h2 class="title">FAMILY</h2>
+
       <div class="layer" id="layer1"></div>
       <div class="layer" id="layer2"></div>
       <div class="layer" id="layer3"></div>
@@ -209,43 +210,72 @@
 
 </div>
 
+<div id="profileBox">
+  <h3 id="profileName"></h3>
+  <input id="birthday"><br>
+  <input id="address"><br>
+  <input id="contact"><br>
+  <input id="email"><br>
+  <button onclick="saveProfile()">Save</button>
+  <button onclick="closeAll()">Close</button>
+</div>
+
 <div id="zoomBox">
   <img id="zoomImg">
+  <button onclick="deletePhoto()">Delete</button>
   <button onclick="closeAll()">Close</button>
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const db = getFirestore(initializeApp({
   apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   projectId:"family-web-10cb8"
 }));
 
+let currentZoom="", currentProfile="";
+
 window.login=()=>{
   loginBox.style.display="none";
+  credit.style.display="none";
   app.style.display="block";
 };
 
-const layers={ layer1:["A","B"], layer2:["C"], layer3:["D"] };
+const layers={
+  layer1:["DELIA LOZADA","JIMMY LOZADA"],
+  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
+  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
+};
+
+const pamangkin={
+  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
+  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
+};
+
+const gallery={};
+for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 
 function create(data){
   Object.keys(data).forEach(k=>{
     const c=document.getElementById(k);
+
     data[k].forEach((name,i)=>{
       const id=k+"_"+i;
+
       c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
-        <h4>${name}</h4>
+        <h4 onclick="openProfile('${id}','${name}')">${name}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
 
       onSnapshot(doc(db,"familyTree",id),(snap)=>{
         if(snap.exists()){
-          document.getElementById(id).src=snap.data().image+"?t="+Date.now();
+          document.getElementById(id).src =
+            snap.data().image + "?t=" + Date.now();
         }
       });
     });
@@ -253,25 +283,70 @@ function create(data){
 }
 
 create(layers);
+create(pamangkin);
+create(gallery);
 
+/* 🔥 FIXED UPLOAD */
 window.upload=async(e,id)=>{
   const file=e.target.files[0];
-  const r=new FileReader();
-  r.onload=async()=>{
+  if(!file) return;
+
+  const reader=new FileReader();
+
+  reader.onload=async()=>{
     await setDoc(doc(db,"familyTree",id),{
-      image:r.result,
+      image:reader.result,
       updated:Date.now()
     });
   };
-  r.readAsDataURL(file);
+
+  reader.readAsDataURL(file);
+};
+
+window.saveProfile=async()=>{
+  await setDoc(doc(db,"profiles",currentProfile),{
+    birthday:birthday.value,
+    address:address.value,
+    contact:contact.value,
+    email:email.value
+  },{ merge:true });
+  alert("Saved!");
+};
+
+window.openProfile=async(id,name)=>{
+  if(app.style.display==="none") return;
+
+  currentProfile=id;
+  profileName.innerText=name;
+  profileBox.style.display="block";
+
+  const snap=await getDoc(doc(db,"profiles",id));
+  if(snap.exists()){
+    const d=snap.data();
+    birthday.value=d.birthday||"";
+    address.value=d.address||"";
+    contact.value=d.contact||"";
+    email.value=d.email||"";
+  }
 };
 
 window.zoom=(id)=>{
+  if(app.style.display==="none") return;
+
+  currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
-window.closeAll=()=> zoomBox.style.display="none";
+window.deletePhoto=async()=>{
+  await deleteDoc(doc(db,"familyTree",currentZoom));
+  zoomBox.style.display="none";
+};
+
+window.closeAll=()=>{
+  zoomBox.style.display="none";
+  profileBox.style.display="none";
+};
 
 </script>
 
