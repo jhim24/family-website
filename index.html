@@ -4,13 +4,7 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {
-      font-family: Arial;
-      background:#111;
-      margin:0;
-      text-align:center;
-      color:white;
-    }
+    body {font-family: Arial; background:#111; margin:0; text-align:center; color:white;}
 
     header {
       background:linear-gradient(to right, red, purple);
@@ -62,10 +56,7 @@
       margin:30px auto;
     }
 
-    #layer1, #layer2, #layer3 {
-      gap:40px;
-      margin:40px auto;
-    }
+    #layer1,#layer2,#layer3 { gap:40px; margin:40px auto; }
 
     .card {
       background:#1c1c1c;
@@ -90,7 +81,6 @@
       border:2px solid red;
       padding:5px;
       border-radius:6px;
-      cursor:pointer;
     }
 
     .title {
@@ -102,13 +92,9 @@
     }
 
     .family-section {
-      position:relative;
       padding:20px 10px;
-      overflow:hidden;
       background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
     }
-
-    .content { position:relative; z-index:2; }
 
     .pamangkin-section {
       background:repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px);
@@ -139,7 +125,6 @@
       max-width:500px;
       border-radius:12px;
     }
-
   </style>
 </head>
 
@@ -147,7 +132,7 @@
 
 <header>
   <div class="header-title">LOZADA FAMILY ULTIMATE</div>
-  <div class="quote">"Family is not an important thing. It's everything."</div>
+  <div class="quote">"Family is everything."</div>
 </header>
 
 <div id="loginBox">
@@ -162,12 +147,10 @@
 <div id="app" style="display:none;">
 
   <div class="family-section">
-    <div class="content">
-      <h2 class="title">FAMILY</h2>
-      <div class="layer" id="layer1"></div>
-      <div class="layer" id="layer2"></div>
-      <div class="layer" id="layer3"></div>
-    </div>
+    <h2 class="title">FAMILY</h2>
+    <div class="layer" id="layer1"></div>
+    <div class="layer" id="layer2"></div>
+    <div class="layer" id="layer3"></div>
   </div>
 
   <div class="pamangkin-section">
@@ -195,10 +178,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
-const SUPABASE_URL = "https://farxyhjigvqzwjqrskte.supabase.co";
-const SUPABASE_KEY = "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(
+  "https://farxyhjigvqzwjqrskte.supabase.co",
+  "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB"
+);
 
 function login(){
   loginBox.style.display="none";
@@ -206,26 +189,24 @@ function login(){
   app.style.display="block";
 }
 
-const layers={
+const sections={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
-  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
-  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
+  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA","JERBOY LOZADA"],
+  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"],
+  pamangkin1:["A","B","C","D"],
+  pamangkin2:["E","F","G","H"]
 };
 
-const pamangkin={
-  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
-  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
-};
+for(let i=1;i<=5;i++){
+  sections["gallery"+i]=["","","",""];
+}
 
-const gallery={};
-for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
-
-function create(data){
-  Object.keys(data).forEach(k=>{
-    const c=document.getElementById(k);
-    data[k].forEach((name,i)=>{
+function create(){
+  Object.keys(sections).forEach(k=>{
+    const el=document.getElementById(k);
+    sections[k].forEach((name,i)=>{
       const id=k+"_"+i;
-      c.innerHTML+=`
+      el.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
         <h4>${name}</h4>
@@ -235,37 +216,52 @@ function create(data){
   });
 }
 
-create(layers);
-create(pamangkin);
-create(gallery);
+create();
 
 // UPLOAD
 async function upload(e,id){
-  const file=e.target.files[0];
-  if(!file)return;
+  try{
+    const file=e.target.files[0];
+    if(!file) return;
 
-  const fileName=id+"_"+Date.now();
+    const fileName=id+"_"+Date.now();
 
-  await supabase.storage.from("family").upload(fileName,file);
+    const {error}=await supabase.storage
+      .from("family")
+      .upload(fileName,file);
 
-  const {data}=supabase.storage.from("family").getPublicUrl(fileName);
-  const url=data.publicUrl;
+    if(error){ alert("Upload failed"); return; }
 
-  await supabase.from("images").upsert({id:id,url:url});
+    const {data}=supabase.storage.from("family").getPublicUrl(fileName);
 
-  document.getElementById(id).src=url;
+    await supabase.from("images").upsert({
+      id:id,
+      url:data.publicUrl
+    });
+
+    document.getElementById(id).src=data.publicUrl;
+
+    alert("Uploaded!");
+  }catch(err){
+    alert("Error!");
+    console.log(err);
+  }
 }
 
 // LOAD
 async function loadImages(){
-  const {data}=await supabase.from("images").select("*");
-  data.forEach(item=>{
-    const img=document.getElementById(item.id);
-    if(img) img.src=item.url;
+  const {data,error}=await supabase.from("images").select("*");
+
+  if(error){ console.log(error); return; }
+
+  data.forEach(row=>{
+    const img=document.getElementById(row.id);
+    if(img) img.src=row.url;
   });
 }
 
-loadImages();
+// AUTO LOAD
+setTimeout(loadImages,1000);
 
 // ZOOM
 function zoom(id){
