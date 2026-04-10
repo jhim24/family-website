@@ -4,9 +4,57 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {font-family: Arial; background:#111; margin:0; text-align:center; color:white;}
-    header {background:linear-gradient(to right, red, purple); padding:15px; font-size:22px;}
+    body {
+      font-family: Arial;
+      background:#111;
+      margin:0;
+      text-align:center;
+      color:white;
+    }
 
+    header {
+      background:linear-gradient(to right, red, purple);
+      padding:15px;
+      font-size:22px;
+    }
+
+    /* 🔥 LOGIN BOX FIX */
+    #loginBox {
+      margin:80px auto;
+      width:90%;
+      max-width:300px;
+      background:#1c1c1c;
+      padding:20px;
+      border-radius:12px;
+      border:2px solid purple;
+      box-shadow:0 0 15px rgba(255,0,255,0.3);
+    }
+
+    #loginBox h2 {
+      margin-bottom:15px;
+      color:#fff;
+    }
+
+    #loginBox input {
+      width:90%;
+      padding:8px;
+      margin:8px 0;
+      border-radius:6px;
+      border:none;
+      outline:none;
+    }
+
+    button {
+      padding:8px 15px;
+      background:purple;
+      color:white;
+      border:none;
+      border-radius:6px;
+      margin-top:10px;
+      cursor:pointer;
+    }
+
+    /* MAIN LAYOUT */
     .layer {
       display:flex;
       justify-content:center;
@@ -15,7 +63,7 @@
       gap:20px;
     }
 
-    /* 🔥 LAYER 3 (ONE ROW - 4 MEMBERS) */
+    /* LAYER 3 (4 INLINE) */
     #layer3 {
       display:flex;
       justify-content:center;
@@ -65,11 +113,9 @@
       border-radius:6px;
       margin:5px 0;
       cursor:pointer;
-      position:relative;
-      z-index:5;
     }
 
-    input {width:90%; margin-top:5px;}
+    input {width:90%;}
 
     .title {
       border:2px solid red;
@@ -77,15 +123,6 @@
       padding:6px 15px;
       border-radius:8px;
       margin-top:20px;
-    }
-
-    button {
-      padding:6px 10px;
-      background:purple;
-      color:white;
-      border:none;
-      border-radius:6px;
-      margin:5px;
     }
 
     /* PROFILE */
@@ -100,11 +137,9 @@
       padding:20px;
       border-radius:12px;
       z-index:2000;
-      width:90%;
-      max-width:300px;
     }
 
-    /* FULLSCREEN IMAGE */
+    /* ZOOM */
     #zoomBox {
       display:none;
       position:fixed;
@@ -133,9 +168,11 @@
 
 <header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
 
+<!-- 🔥 LOGIN -->
 <div id="loginBox">
-  <input id="user"><br>
-  <input id="pass" type="password"><br>
+  <h2>👋 HI WELCOME</h2>
+  <input id="user" placeholder="Username"><br>
+  <input id="pass" type="password" placeholder="Password"><br>
   <button onclick="login()">Login</button>
 </div>
 
@@ -196,25 +233,23 @@ let currentZoom="", currentProfile="";
 // LOGIN
 window.login=()=>{
   if(pass.value==="123"){
-    loginBox.style.display="none"; 
+    loginBox.style.display="none";
     app.style.display="block";
   }
 };
 
-// FAMILY
+// DATA
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
   layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
 };
 
-// PAMANGKIN
 const pamangkin={
   pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye","Sherwin"],
   pamangkin2:["Ashley","Union","Jazmine","Apple","Bjoy"]
 };
 
-// GALLERY
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
@@ -272,7 +307,7 @@ window.openProfile=(id,name)=>{
   profileBox.style.display="block";
 };
 
-// SAVE PROFILE
+// SAVE
 window.saveProfile=()=>{
   setDoc(doc(db,"profiles",currentProfile),{
     birthday:birthday.value,
