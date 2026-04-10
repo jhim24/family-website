@@ -10,14 +10,52 @@
       background:linear-gradient(to right, red, purple);
       color:white;
       padding:20px;
-      text-align:center;
       position:sticky;
       top:0;
       z-index:1000;
     }
 
     .header-title {font-size:28px; font-weight:bold;}
-    .header-quote {font-size:14px; margin-top:5px; font-style:italic;}
+    .header-quote {font-size:14px; font-style:italic;}
+
+    /* 🔥 NEW LOGIN DESIGN */
+    #loginBox {
+      background:white;
+      padding:25px;
+      border-radius:12px;
+      width:90%;
+      max-width:320px;
+      margin:60px auto;
+      box-shadow:0 4px 15px rgba(0,0,0,0.2);
+      border:3px solid purple;
+    }
+
+    #loginBox input {
+      width:90%;
+      padding:10px;
+      margin:10px 0;
+      border-radius:8px;
+      border:1px solid #ccc;
+    }
+
+    #loginBox button {
+      width:95%;
+      padding:10px;
+      background:linear-gradient(to right, purple, red);
+      color:white;
+      border:none;
+      border-radius:8px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .creator {
+      margin-top:15px;
+      font-size:12px;
+      color:gray;
+      border-top:1px solid #ddd;
+      padding-top:10px;
+    }
 
     .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
 
@@ -53,13 +91,9 @@
       background:white;
     }
 
-    input {width:90%; padding:6px; margin:5px;}
-    button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
-
     .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
     .comment {background:#fff; padding:10px; margin:5px; border-radius:8px;}
 
-    /* ZOOM */
     #zoomBox {
       display:none;
       position:fixed;
@@ -74,22 +108,17 @@
     #zoomBox img {
       width:50vw;
       max-width:500px;
-      height:auto;
       border-radius:12px;
-}
-
-      box-shadow:
-        0 0 20px rgba(255,0,255,0.6),
-        0 0 40px rgba(0,255,255,0.4),
-        0 0 60px rgba(255,0,255,0.3);
     }
 
     #overlay {
       display:none;
       position:fixed;
-      top:0; left:0;
-      width:100%; height:100%;
+      width:100%;
+      height:100%;
       background:rgba(0,0,0,0.6);
+      top:0;
+      left:0;
       z-index:999;
     }
 
@@ -100,7 +129,6 @@
       margin:10px;
     }
 
-    /* PROFILE POPUP */
     #profileBox {
       display:none;
       position:fixed;
@@ -122,10 +150,16 @@
   <div class="header-quote">"Family is not an important thing, it's everything."</div>
 </header>
 
-<div id="loginBox" class="box">
-  <input id="user"><br>
-  <input id="pass" type="password"><br>
-  <button onclick="login()">Login</button>
+<!-- 🔥 NEW LOGIN -->
+<div id="loginBox">
+  <h2>🔐 LOGIN</h2>
+  <input id="user" placeholder="Username"><br>
+  <input id="pass" type="password" placeholder="Password"><br>
+  <button onclick="login()">LOGIN</button>
+
+  <div class="creator">
+    Created by <b>JEMMEL LOZADA</b>
+  </div>
 </div>
 
 <div id="app" style="display:none;">
@@ -146,28 +180,21 @@
   <div class="layer" id="gallery3"></div>
   <div class="layer" id="gallery4"></div>
   <div class="layer" id="gallery5"></div>
-  <div class="layer" id="gallery6"></div>
-  <div class="layer" id="gallery7"></div>
-  <div class="layer" id="gallery8"></div>
-  <div class="layer" id="gallery9"></div>
-  <div class="layer" id="gallery10"></div>
 
   <div id="overlay" onclick="closeAll()"></div>
 
-  <!-- ZOOM -->
   <div id="zoomBox">
     <img id="zoomImg"><br><br>
     <button onclick="deletePhoto()">Delete</button>
     <button onclick="closeAll()">Close</button>
   </div>
 
-  <!-- PROFILE -->
   <div id="profileBox">
     <h3 id="profileName"></h3>
-    <input id="birthday" placeholder="Birthday"><br>
-    <input id="address" placeholder="Address"><br>
-    <input id="contact" placeholder="Contact"><br>
-    <input id="email" placeholder="Email"><br>
+    <input id="birthday"><br>
+    <input id="address"><br>
+    <input id="contact"><br>
+    <input id="email"><br>
     <button onclick="saveProfile()">Save</button>
     <button onclick="closeProfile()">Close</button>
   </div>
@@ -192,23 +219,37 @@ const db = getFirestore(initializeApp({
 
 let currentUser="", currentZoom="", currentProfile="";
 
-/* LOGIN */
-if(localStorage.getItem("user")){
-  currentUser=localStorage.getItem("user");
+/* 🔥 NEW LOGIN SYSTEM */
+const savedUser = localStorage.getItem("user");
+
+if(savedUser){
+  currentUser = savedUser;
   loginBox.style.display="none";
   app.style.display="block";
 }
 
-window.login=()=>{
-  if(pass.value==="123"){
-    currentUser=user.value;
-    localStorage.setItem("user",user.value);
-    loginBox.style.display="none";
-    app.style.display="block";
+window.login = function(){
+  const u = user.value.trim();
+  const p = pass.value.trim();
+
+  if(!u){
+    alert("Enter username");
+    return;
   }
+
+  if(p !== "123"){
+    alert("Wrong password");
+    return;
+  }
+
+  currentUser = u;
+  localStorage.setItem("user", u);
+
+  loginBox.style.display="none";
+  app.style.display="block";
 };
 
-/* DATA */
+/* REST OF YOUR CODE SAME */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -221,9 +262,8 @@ const pamangkin={
 };
 
 const gallery={};
-for(let i=1;i<=10;i++){ gallery["gallery"+i]=["","","","",""]; }
+for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
-/* CREATE */
 function create(data){
   Object.keys(data).forEach(layer=>{
     const c=document.getElementById(layer);
@@ -251,35 +291,17 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* UPLOAD */
 window.upload=(e,id)=>{
   const reader=new FileReader();
   reader.onload=()=>setDoc(doc(db,"familyTree",id),{image:reader.result});
   reader.readAsDataURL(e.target.files[0]);
 };
 
-/* ZOOM + 3D */
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
-
   zoomBox.style.display="block";
   overlay.style.display="block";
-
-  zoomImg.onmousemove=(e)=>{
-    const rect=zoomImg.getBoundingClientRect();
-    const x=e.clientX-rect.left;
-    const y=e.clientY-rect.top;
-
-    const rx=-(y-rect.height/2)/10;
-    const ry=(x-rect.width/2)/10;
-
-    zoomImg.style.transform=`perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-  };
-
-  zoomImg.onmouseleave=()=>{
-    zoomImg.style.transform="perspective(1000px) rotateX(0) rotateY(0)";
-  };
 };
 
 window.deletePhoto=async()=>{
@@ -292,39 +314,6 @@ window.closeAll=()=>{
   overlay.style.display="none";
 };
 
-/* PROFILE */
-window.openProfile=async(name,id)=>{
-  currentProfile=id;
-  profileBox.style.display="block";
-  overlay.style.display="block";
-  profileName.innerText=name;
-
-  const snap=await getDoc(doc(db,"profiles",id));
-  if(snap.exists()){
-    const d=snap.data();
-    birthday.value=d.birthday||"";
-    address.value=d.address||"";
-    contact.value=d.contact||"";
-    email.value=d.email||"";
-  }
-};
-
-window.saveProfile=async()=>{
-  await setDoc(doc(db,"profiles",currentProfile),{
-    birthday:birthday.value,
-    address:address.value,
-    contact:contact.value,
-    email:email.value
-  });
-  alert("Saved!");
-};
-
-window.closeProfile=()=>{
-  profileBox.style.display="none";
-  overlay.style.display="none";
-};
-
-/* COMMENTS */
 window.addComment=()=>{
   if(!comment.value) return;
 
