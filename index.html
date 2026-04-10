@@ -66,6 +66,15 @@
     }
 
     #zoomBox img {width:250px;}
+
+    /* 🔥 FAMILY BACKGROUND */
+    .family-bg {
+      background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
+      padding:20px 0;
+      border-radius:12px;
+      margin:10px;
+    }
+
   </style>
 </head>
 
@@ -83,14 +92,19 @@
 <!-- APP -->
 <div id="app" style="display:none;">
 
-  <div class="layer" id="layer1"></div>
-  <div class="layer" id="layer2"></div>
-  <div class="layer" id="layer3"></div>
+  <!-- 🔥 FAMILY WITH BACKGROUND -->
+  <div class="family-bg">
+    <div class="layer" id="layer1"></div>
+    <div class="layer" id="layer2"></div>
+    <div class="layer" id="layer3"></div>
+  </div>
 
+  <!-- PAMANGKIN -->
   <h2 class="title">PAMANGKIN</h2>
   <div class="layer" id="pamangkin1"></div>
   <div class="layer" id="pamangkin2"></div>
 
+  <!-- GALLERY -->
   <h2 class="title">GALLERY</h2>
   <div class="layer" id="gallery1"></div>
   <div class="layer" id="gallery2"></div>
@@ -124,9 +138,8 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-// 🔥 INIT FIREBASE
 const appFirebase = initializeApp({
   apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   projectId:"family-web-10cb8"
@@ -134,30 +147,26 @@ const appFirebase = initializeApp({
 
 const db = getFirestore(appFirebase);
 
-let currentUser="";
-let currentZoom="";
+let currentUser="", currentZoom="";
 
-// ✅ AUTO LOGIN
+// AUTO LOGIN
 const savedUser = localStorage.getItem("user");
 if(savedUser){
   currentUser = savedUser;
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("app").style.display="block";
+  loginBox.style.display="none";
+  app.style.display="block";
 }
 
-// ✅ LOGIN
+// LOGIN
 window.login = function(){
-  const u = document.getElementById("user").value.trim();
-  const p = document.getElementById("pass").value.trim();
+  const u = user.value.trim();
+  const p = pass.value.trim();
 
   if(u && p==="123"){
     currentUser = u;
     localStorage.setItem("user", u);
-
-    document.getElementById("loginBox").style.display="none";
-    document.getElementById("app").style.display="block";
-  } else {
-    alert("Wrong password");
+    loginBox.style.display="none";
+    app.style.display="block";
   }
 };
 
@@ -178,64 +187,35 @@ for(let i=1;i<=10;i++){
   gallery["gallery"+i]=["","","","",""];
 }
 
-// 🔥 CREATE FUNCTION (FIXED)
+// CREATE
 function create(data){
   Object.keys(data).forEach(layerKey=>{
-    const container = document.getElementById(layerKey);
+    const c=document.getElementById(layerKey);
 
     data[layerKey].forEach((name,i)=>{
-      const id = layerKey+"_"+i;
+      const id=layerKey+"_"+i;
 
-      const card = document.createElement("div");
-      card.className="card";
+      c.innerHTML+=`
+      <div class="card">
+        <img id="${id}" onclick="zoom('${id}')">
+        <h4>${name||"Photo"}</h4>
+        <input type="file" onchange="upload(event,'${id}')">
+      </div>`;
 
-      card.innerHTML = `
-        <img id="${id}">
-        <h4>${name || "Photo"}</h4>
-        <input type="file">
-      `;
-
-      // upload
-      card.querySelector("input").addEventListener("change",(e)=>{
-        upload(e,id);
-      });
-
-      // zoom
-      card.querySelector("img").addEventListener("click",()=>{
-        zoom(id);
-      });
-
-      container.appendChild(card);
-
-      // ✅ INITIAL LOAD FIX
-      loadImage(id);
-
-      // ✅ REALTIME LISTENER
       onSnapshot(doc(db,"familyTree",id),(snap)=>{
         if(snap.exists()){
-          document.getElementById(id).src = snap.data().image;
+          document.getElementById(id).src=snap.data().image;
         }
       });
     });
   });
 }
 
-// 🔥 LOAD IMAGE (IMPORTANT FIX)
-async function loadImage(id){
-  const ref = doc(db,"familyTree",id);
-  const snap = await getDoc(ref);
-
-  if(snap.exists()){
-    document.getElementById(id).src = snap.data().image;
-  }
-}
-
-// INIT
 create(layers);
 create(pamangkin);
 create(gallery);
 
-// 🔥 UPLOAD FIX (COMPRESSED + SAFE)
+// UPLOAD
 window.upload = (e, id) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -270,50 +250,42 @@ window.upload = (e, id) => {
 };
 
 // ZOOM
-window.zoom = function(id){
+window.zoom=(id)=>{
   currentZoom=id;
-  document.getElementById("zoomImg").src = document.getElementById(id).src;
-  document.getElementById("zoomBox").style.display="block";
-  document.getElementById("overlay").style.display="block";
+  zoomImg.src=document.getElementById(id).src;
+  zoomBox.style.display="block";
+  overlay.style.display="block";
 };
 
 // DELETE
-window.deletePhoto = async function(){
+window.deletePhoto=async()=>{
   await deleteDoc(doc(db,"familyTree",currentZoom));
-  document.getElementById(currentZoom).src="";
 };
 
 // CLOSE
-window.closeAll = function(){
-  document.getElementById("zoomBox").style.display="none";
-  document.getElementById("overlay").style.display="none";
+window.closeAll=()=>{
+  zoomBox.style.display="none";
+  overlay.style.display="none";
 };
 
 // COMMENTS
-window.addComment = function(){
-  const text = document.getElementById("comment").value;
-  if(!text) return;
+window.addComment=()=>{
+  if(!comment.value) return;
 
   addDoc(collection(db,"comments"),{
-    name: currentUser,
-    text:text,
+    name:currentUser,
+    text:comment.value,
     time:Date.now()
   });
 
-  document.getElementById("comment").value="";
+  comment.value="";
 };
 
 onSnapshot(query(collection(db,"comments"),orderBy("time")),(snap)=>{
-  const commentsDiv = document.getElementById("comments");
-  commentsDiv.innerHTML="";
-
+  comments.innerHTML="";
   snap.forEach(d=>{
-    const c = d.data();
-    commentsDiv.innerHTML += `
-      <div class="comment">
-        <b>${c.name}</b><br>${c.text}
-      </div>
-    `;
+    let c=d.data();
+    comments.innerHTML+=`<div class="comment"><b>${c.name}</b><br>${c.text}</div>`;
   });
 });
 
