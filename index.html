@@ -12,7 +12,6 @@
       color:white;
     }
 
-    /* 🔥 ORIGINAL HEADER RESTORED */
     header {
       background:linear-gradient(to right, red, purple);
       padding:15px;
@@ -24,7 +23,6 @@
       opacity:0.8;
     }
 
-    /* 🔥 ORIGINAL LOGIN RESTORED */
     #loginBox {
       margin:80px auto 10px;
       width:90%;
@@ -55,11 +53,9 @@
     #credit {
       font-size:12px;
       opacity:0.7;
-      margin-top:5px;
     }
 
-    /* 🔥 ORIGINAL GRID */
-    .layer, .layer.fixed {
+    .layer {
       display:grid;
       grid-template-columns:repeat(4,150px);
       justify-content:center;
@@ -94,31 +90,29 @@
 
     .title {
       border:2px solid red;
-      display:inline-block;
       padding:6px 15px;
       border-radius:8px;
+      display:inline-block;
       margin-top:20px;
     }
 
-    /* 🔥 FAMILY VIDEO SAFE */
+    /* VIDEO BG */
     .family-section {
       position:relative;
+      padding:20px;
       overflow:hidden;
-      padding:20px 10px;
       background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
     }
 
     .family-video {
       position:absolute;
-      top:0;
-      left:0;
       width:100%;
       height:100%;
       object-fit:cover;
       z-index:0;
     }
 
-    .family-overlay {
+    .overlay {
       position:absolute;
       width:100%;
       height:100%;
@@ -126,47 +120,30 @@
       z-index:1;
     }
 
-    .family-content {
+    .content {
       position:relative;
       z-index:2;
     }
 
-    /* PAMANGKIN */
     .pamangkin-section {
-      background:repeating-linear-gradient(
-        45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px
-      );
-      padding:20px 10px;
+      background:repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px);
+      padding:20px;
     }
 
-    /* GALLERY */
     .gallery-section {
       background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-      padding:20px 10px;
+      padding:20px;
     }
 
-    /* PROFILE + ZOOM */
-    #profileBox, #zoomBox {
+    #zoomBox, #profileBox {
       display:none;
       position:fixed;
       z-index:2000;
     }
 
-    #profileBox {
-      top:50%;
-      left:50%;
-      transform:translate(-50%,-50%);
-      background:white;
-      color:black;
-      padding:20px;
-      border-radius:12px;
-    }
-
     #zoomBox {
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
+      top:0; left:0;
+      width:100%; height:100%;
       background:rgba(0,0,0,0.95);
       display:flex;
       justify-content:center;
@@ -174,9 +151,15 @@
       flex-direction:column;
     }
 
-    #zoomBox img {
-      width:90%;
-      max-width:900px;
+    #zoomBox img {width:90%;}
+
+    #profileBox {
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      background:white;
+      color:black;
+      padding:20px;
+      border-radius:12px;
     }
 
   </style>
@@ -191,8 +174,8 @@
 
 <div id="loginBox">
   <h2>HI WELCOME</h2>
-  <input id="user" placeholder="Username"><br>
-  <input id="pass" type="password" placeholder="Password"><br>
+  <input id="user"><br>
+  <input id="pass" type="password"><br>
   <button onclick="login()">Login</button>
 </div>
 
@@ -200,18 +183,15 @@
 
 <div id="app" style="display:none;">
 
-  <!-- 🔥 FAMILY (WITH VIDEO SAFE) -->
   <div class="family-section">
 
-    <video id="bgVideo" class="family-video" autoplay muted loop playsinline>
-      <source id="bgSource"
-        src="https://cdn.coverr.co/videos/coverr-modern-house-with-pool-1573/1080p.mp4"
-        type="video/mp4">
+    <video id="bgVideo" class="family-video" autoplay muted loop>
+      <source id="bgSource" src="https://cdn.coverr.co/videos/coverr-modern-house-with-pool-1573/1080p.mp4">
     </video>
 
-    <div class="family-overlay"></div>
+    <div class="overlay"></div>
 
-    <div class="family-content">
+    <div class="content">
       <h2 class="title">FAMILY</h2>
       <button onclick="nextVideo()">Next Background</button>
 
@@ -222,44 +202,128 @@
 
   </div>
 
-  <!-- PAMANGKIN -->
   <div class="pamangkin-section">
     <h2 class="title">PAMANGKIN</h2>
-    <div class="layer fixed" id="pamangkin1"></div>
-    <div class="layer fixed" id="pamangkin2"></div>
+    <div class="layer" id="pamangkin1"></div>
+    <div class="layer" id="pamangkin2"></div>
   </div>
 
-  <!-- GALLERY -->
   <div class="gallery-section">
     <h2 class="title">GALLERY</h2>
-    <div class="layer fixed" id="gallery1"></div>
-    <div class="layer fixed" id="gallery2"></div>
-    <div class="layer fixed" id="gallery3"></div>
-    <div class="layer fixed" id="gallery4"></div>
-    <div class="layer fixed" id="gallery5"></div>
+    <div class="layer" id="gallery1"></div>
+    <div class="layer" id="gallery2"></div>
+    <div class="layer" id="gallery3"></div>
+    <div class="layer" id="gallery4"></div>
+    <div class="layer" id="gallery5"></div>
   </div>
 
 </div>
 
-<script>
-let videos=[
+<div id="zoomBox">
+  <img id="zoomImg">
+  <button onclick="deletePhoto()">Delete</button>
+  <button onclick="closeAll()">Close</button>
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const db = getFirestore(initializeApp({
+  apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
+  projectId:"family-web-10cb8"
+}));
+
+let currentZoom="";
+
+// VIDEO
+let vids=[
   "https://cdn.coverr.co/videos/coverr-modern-house-with-pool-1573/1080p.mp4",
   "https://cdn.coverr.co/videos/coverr-luxury-home-exterior-2605/1080p.mp4"
 ];
 
 let i=0;
+window.nextVideo=()=>{
+  i=(i+1)%vids.length;
+  bgSource.src=vids[i];
+  bgVideo.load();
+};
 
-function nextVideo(){
-  i=(i+1)%videos.length;
-  document.getElementById("bgSource").src=videos[i];
-  document.getElementById("bgVideo").load();
+// LOGIN
+window.login=()=>{
+  loginBox.style.display="none";
+  credit.style.display="none";
+  app.style.display="block";
+};
+
+// DATA
+const layers={
+  layer1:["DELIA LOZADA","JIMMY LOZADA"],
+  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
+  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
+};
+
+const pamangkin={
+  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
+  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
+};
+
+const gallery={};
+for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
+
+// CREATE UI
+function create(data){
+  Object.keys(data).forEach(k=>{
+    const c=document.getElementById(k);
+
+    data[k].forEach((name,i)=>{
+      const id=k+"_"+i;
+
+      c.innerHTML+=`
+      <div class="card">
+        <img id="${id}" onclick="zoom('${id}')">
+        <h4>${name}</h4>
+        <input type="file" onchange="upload(event,'${id}')">
+      </div>`;
+
+      onSnapshot(doc(db,"familyTree",id),(snap)=>{
+        if(snap.exists()){
+          document.getElementById(id).src=snap.data().image;
+        }
+      });
+    });
+  });
 }
 
-function login(){
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("credit").style.display="none";
-  document.getElementById("app").style.display="block";
-}
+create(layers);
+create(pamangkin);
+create(gallery);
+
+// UPLOAD
+window.upload=(e,id)=>{
+  const r=new FileReader();
+  r.onload=()=>setDoc(doc(db,"familyTree",id),{image:r.result});
+  r.readAsDataURL(e.target.files[0]);
+};
+
+// ZOOM
+window.zoom=(id)=>{
+  currentZoom=id;
+  zoomImg.src=document.getElementById(id).src;
+  zoomBox.style.display="flex";
+};
+
+// DELETE
+window.deletePhoto=async()=>{
+  await deleteDoc(doc(db,"familyTree",currentZoom));
+};
+
+// CLOSE
+window.closeAll=()=>{
+  zoomBox.style.display="none";
+};
+
 </script>
 
 </body>
