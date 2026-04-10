@@ -362,6 +362,14 @@ window.openProfile=async(id,name)=>{
 };
 
 window.zoom=(id)=>{
+  if(app.style.display==="none") return;
+
+  currentZoom=id;
+  zoomImg.src=document.getElementById(id).src;
+
+  zoomBox.style.display="flex";
+  zoomBox.style.zIndex="1500"; // 🔥 lalabas lang pag click
+};
   if(app.style.display==="none") return; // 🔥 block if not logged in
 
   currentZoom=id;
@@ -375,6 +383,10 @@ window.deletePhoto=async()=>{
 };
 
 window.closeAll=()=>{
+  zoomBox.style.display="none";
+  zoomBox.style.zIndex="-1"; // 🔥 balik sa likod
+  profileBox.style.display="none";
+};
   zoomBox.style.display="none";
   profileBox.style.display="none";
 };
