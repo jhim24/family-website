@@ -4,13 +4,7 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {
-      font-family: Arial;
-      background:#111;
-      margin:0;
-      text-align:center;
-      color:white;
-    }
+    body {font-family: Arial; background:#111; margin:0; text-align:center; color:white;}
 
     header {
       background:linear-gradient(to right, red, purple);
@@ -52,8 +46,6 @@
       cursor:pointer;
     }
 
-    #credit { font-size:12px; opacity:0.7; margin-top:5px; }
-
     .layer, .layer.fixed {
       display:grid;
       grid-template-columns:repeat(4,180px);
@@ -62,18 +54,12 @@
       margin:30px auto;
     }
 
-    #layer1, #layer2, #layer3 {
-      gap:40px;
-      margin:40px auto;
-    }
-
     .card {
       background:#1c1c1c;
       padding:12px;
       border-radius:14px;
       border:2px solid purple;
       width:180px;
-      box-shadow:0 0 10px rgba(255,0,255,0.3);
     }
 
     img {
@@ -90,7 +76,6 @@
       border:2px solid red;
       padding:5px;
       border-radius:6px;
-      cursor:pointer;
     }
 
     .title {
@@ -101,38 +86,6 @@
       margin-top:20px;
     }
 
-    .family-section {
-      position:relative;
-      padding:20px 10px;
-      overflow:hidden;
-      background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
-    }
-
-    .content { position:relative; z-index:2; }
-
-    .pamangkin-section {
-      background:repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px);
-      padding:20px;
-    }
-
-    .gallery-section {
-      background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-      padding:20px;
-    }
-
-    #profileBox {
-      display:none;
-      position:fixed;
-      top:50%;
-      left:50%;
-      transform:translate(-50%,-50%);
-      background:#222;
-      padding:20px;
-      border-radius:12px;
-      z-index:2000;
-    }
-
-    /* 🔥 UPDATED ZOOM (HALF VIEW) */
     #zoomBox {
       display:none;
       position:fixed;
@@ -141,7 +94,6 @@
       width:100%;
       height:100%;
       background:rgba(0,0,0,0.8);
-      z-index:1500;
       justify-content:center;
       align-items:center;
       flex-direction:column;
@@ -151,13 +103,7 @@
       width:60%;
       max-width:500px;
       border-radius:12px;
-      box-shadow:0 0 20px rgba(255,0,255,0.5);
     }
-
-    #zoomBox button {
-      margin-top:10px;
-    }
-
   </style>
 </head>
 
@@ -170,96 +116,31 @@
 
 <div id="loginBox">
   <h2>HI WELCOME</h2>
-  <input id="user"><br>
-  <input id="pass" type="password"><br>
   <button onclick="login()">Login</button>
 </div>
 
-<div id="credit">CREATED BY: JEMMEL LOZADA</div>
-
 <div id="app" style="display:none;">
 
-  <div class="family-section">
-    <div class="content">
-      <h2 class="title">FAMILY</h2>
-      <div class="layer" id="layer1"></div>
-      <div class="layer" id="layer2"></div>
-      <div class="layer" id="layer3"></div>
-    </div>
-  </div>
+  <h2 class="title">FAMILY</h2>
+  <div class="layer" id="layer1"></div>
 
-  <div class="pamangkin-section">
-    <h2 class="title">PAMANGKIN</h2>
-    <div class="layer fixed" id="pamangkin1"></div>
-    <div class="layer fixed" id="pamangkin2"></div>
-  </div>
-
-  <div class="gallery-section">
-    <h2 class="title">GALLERY</h2>
-    <div class="layer fixed" id="gallery1"></div>
-    <div class="layer fixed" id="gallery2"></div>
-    <div class="layer fixed" id="gallery3"></div>
-    <div class="layer fixed" id="gallery4"></div>
-    <div class="layer fixed" id="gallery5"></div>
-  </div>
-
-</div>
-
-<div id="profileBox">
-  <h3 id="profileName"></h3>
-  <input id="birthday"><br>
-  <input id="address"><br>
-  <input id="contact"><br>
-  <input id="email"><br>
-  <button onclick="saveProfile()">Save</button>
-  <button onclick="closeAll()">Close</button>
 </div>
 
 <div id="zoomBox">
   <img id="zoomImg">
-  <button onclick="deletePhoto()">Delete</button>
   <button onclick="closeAll()">Close</button>
 </div>
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, getDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-import { getStorage, ref, uploadBytes, getDownloadURL } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
-
-const appFirebase = initializeApp({
-  apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
-  projectId:"family-web-10cb8",
-  storageBucket:"family-web-10cb8.appspot.com"
-});
-
-const db = getFirestore(appFirebase);
-const storage = getStorage(appFirebase);
-
-let currentZoom="", currentProfile="";
+<script>
 
 window.login=()=>{
   loginBox.style.display="none";
-  credit.style.display="none";
   app.style.display="block";
 };
 
-const layers={
-  layer1:["DELIA LOZADA","JIMMY LOZADA"],
-  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
-  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
+const data={
+  layer1:["DELIA LOZADA","JIMMY LOZADA","JEMMEL LOZADA","JISA LOZADA"]
 };
-
-const pamangkin={
-  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
-  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
-};
-
-const gallery={};
-for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 
 function create(data){
   Object.keys(data).forEach(k=>{
@@ -271,79 +152,54 @@ function create(data){
       c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
-        <h4 onclick="openProfile('${id}','${name}')">${name}</h4>
+        <h4>${name}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
 
-      onSnapshot(doc(db,"familyTree",id),(snap)=>{
-        if(snap.exists()){
-          document.getElementById(id).src = snap.data().image;
-        }
-      });
+      /* LOAD SAVED IMAGE */
+      const saved = localStorage.getItem(id);
+      if(saved){
+        document.getElementById(id).src = saved;
+      }
     });
   });
 }
 
-create(layers);
-create(pamangkin);
-create(gallery);
+create(data);
 
-window.upload = async(e, id) => {
-  const file = e.target.files[0];
-  if (!file) return;
+/* 🔥 CLOUDINARY UPLOAD */
+window.upload = async(e,id)=>{
+  const file=e.target.files[0];
+  if(!file) return;
 
-  const storageRef = ref(storage, "photos/" + id + "_" + Date.now());
+  const formData=new FormData();
+  formData.append("file",file);
+  formData.append("upload_preset","family_upload"); // palitan kung iba
 
-  await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(storageRef);
-
-  await setDoc(doc(db, "familyTree", id), {
-    image: url,
-    updated: Date.now()
+  const res = await fetch("https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload",{
+    method:"POST",
+    body:formData
   });
+
+  const data = await res.json();
+
+  const url = data.secure_url;
+
+  document.getElementById(id).src = url;
+
+  /* SAVE LOCAL */
+  localStorage.setItem(id,url);
 
   alert("Upload success!");
 };
 
-window.saveProfile=async()=>{
-  await setDoc(doc(db,"profiles",currentProfile),{
-    birthday:birthday.value,
-    address:address.value,
-    contact:contact.value,
-    email:email.value
-  },{ merge:true });
-  alert("Saved!");
-};
-
-window.openProfile=async(id,name)=>{
-  currentProfile=id;
-  profileName.innerText=name;
-  profileBox.style.display="block";
-
-  const snap=await getDoc(doc(db,"profiles",id));
-  if(snap.exists()){
-    const d=snap.data();
-    birthday.value=d.birthday||"";
-    address.value=d.address||"";
-    contact.value=d.contact||"";
-    email.value=d.email||"";
-  }
-};
-
 window.zoom=(id)=>{
-  currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
-window.deletePhoto=async()=>{
-  await deleteDoc(doc(db,"familyTree",currentZoom));
-  zoomBox.style.display="none";
-};
-
 window.closeAll=()=>{
   zoomBox.style.display="none";
-  profileBox.style.display="none";
 };
 
 </script>
