@@ -132,6 +132,7 @@
       z-index:2000;
     }
 
+    /* 🔥 UPDATED ZOOM (HALF VIEW) */
     #zoomBox {
       display:none;
       position:fixed;
@@ -152,6 +153,11 @@
       border-radius:12px;
       box-shadow:0 0 20px rgba(255,0,255,0.5);
     }
+
+    #zoomBox button {
+      margin-top:10px;
+    }
+
   </style>
 </head>
 
@@ -215,25 +221,32 @@
   <button onclick="closeAll()">Close</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script type="module">
 
-<script>
-const supabase = window.supabase.createClient(
-  "https://farxyhjigvqzwjqrskte.supabase.co",
-  "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB"
-);
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, getDoc } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+import { getStorage, ref, uploadBytes, getDownloadURL } 
+from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
+
+const appFirebase = initializeApp({
+  apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
+  projectId:"family-web-10cb8",
+  storageBucket:"family-web-10cb8.appspot.com"
+});
+
+const db = getFirestore(appFirebase);
+const storage = getStorage(appFirebase);
 
 let currentZoom="", currentProfile="";
 
-/* LOGIN FIX */
-function login(){
-  document.getElementById("loginBox").style.display="none";
-  document.getElementById("credit").style.display="none";
-  document.getElementById("app").style.display="block";
-  loadImages();
-}
+window.login=()=>{
+  loginBox.style.display="none";
+  credit.style.display="none";
+  app.style.display="block";
+};
 
-/* DATA */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -248,7 +261,6 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 
-/* CREATE */
 function create(data){
   Object.keys(data).forEach(k=>{
     const c=document.getElementById(k);
@@ -262,6 +274,12 @@ function create(data){
         <h4 onclick="openProfile('${id}','${name}')">${name}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
+
+      onSnapshot(doc(db,"familyTree",id),(snap)=>{
+        if(snap.exists()){
+          document.getElementById(id).src = snap.data().image;
+        }
+      });
     });
   });
 }
@@ -270,68 +288,64 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* UPLOAD */
-async function upload(e,id){
-  const file=e.target.files[0];
-  if(!file) return;
+window.upload = async(e, id) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-  const fileName=id+"_"+Date.now();
+  const storageRef = ref(storage, "photos/" + id + "_" + Date.now());
 
-  await supabase.storage.from("family").upload(fileName,file);
+  await uploadBytes(storageRef, file);
+  const url = await getDownloadURL(storageRef);
 
-  const {data}=supabase.storage.from("family").getPublicUrl(fileName);
-
-  await supabase.from("images").upsert({id:id,url:data.publicUrl});
-
-  document.getElementById(id).src=data.publicUrl;
-}
-
-/* LOAD */
-async function loadImages(){
-  const {data}=await supabase.from("images").select("*");
-  if(!data) return;
-
-  data.forEach(row=>{
-    const img=document.getElementById(row.id);
-    if(img) img.src=row.url;
+  await setDoc(doc(db, "familyTree", id), {
+    image: url,
+    updated: Date.now()
   });
-}
 
-/* PROFILE */
-async function saveProfile(){
-  await supabase.from("profiles").upsert({
-    id:currentProfile,
+  alert("Upload success!");
+};
+
+window.saveProfile=async()=>{
+  await setDoc(doc(db,"profiles",currentProfile),{
     birthday:birthday.value,
     address:address.value,
     contact:contact.value,
     email:email.value
-  });
-}
+  },{ merge:true });
+  alert("Saved!");
+};
 
-async function openProfile(id,name){
+window.openProfile=async(id,name)=>{
   currentProfile=id;
   profileName.innerText=name;
   profileBox.style.display="block";
-}
 
-/* ZOOM */
-function zoom(id){
+  const snap=await getDoc(doc(db,"profiles",id));
+  if(snap.exists()){
+    const d=snap.data();
+    birthday.value=d.birthday||"";
+    address.value=d.address||"";
+    contact.value=d.contact||"";
+    email.value=d.email||"";
+  }
+};
+
+window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
-}
+};
 
-/* DELETE */
-async function deletePhoto(){
-  await supabase.from("images").delete().eq("id",currentZoom);
-  document.getElementById(currentZoom).src="";
+window.deletePhoto=async()=>{
+  await deleteDoc(doc(db,"familyTree",currentZoom));
   zoomBox.style.display="none";
-}
+};
 
-function closeAll(){
+window.closeAll=()=>{
   zoomBox.style.display="none";
   profileBox.style.display="none";
-}
+};
+
 </script>
 
 </body>
