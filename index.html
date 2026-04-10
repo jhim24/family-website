@@ -55,13 +55,11 @@
 
     #credit {font-size:12px; opacity:0.7;}
 
-    /* 🔥 FAMILY VIDEO BACKGROUND */
+    /* VIDEO BG */
     .family-section {
       position:relative;
       padding:20px;
       overflow:hidden;
-
-      /* fallback image */
       background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
     }
 
@@ -75,17 +73,15 @@
       z-index:0;
     }
 
-    .family-overlay {
+    .overlay {
       position:absolute;
-      top:0;
-      left:0;
       width:100%;
       height:100%;
       background:rgba(0,0,0,0.6);
       z-index:1;
     }
 
-    .family-content {
+    .content {
       position:relative;
       z-index:2;
     }
@@ -109,7 +105,6 @@
     img {
       width:100%;
       aspect-ratio:16/9;
-      object-fit:cover;
       border-radius:8px;
       cursor:pointer;
     }
@@ -193,16 +188,15 @@
 
 <div id="app" style="display:none;">
 
-  <!-- 🔥 FAMILY VIDEO BACKGROUND -->
   <div class="family-section">
 
-    <video class="family-video" autoplay muted loop playsinline>
-      <source src="https://cdn.coverr.co/videos/coverr-luxury-modern-house-1570/1080p.mp4" type="video/mp4">
+    <video id="bgVideo" class="family-video" autoplay muted loop playsinline>
+      <source src="https://cdn.coverr.co/videos/coverr-modern-house-with-pool-1573/1080p.mp4" type="video/mp4">
     </video>
 
-    <div class="family-overlay"></div>
+    <div class="overlay"></div>
 
-    <div class="family-content">
+    <div class="content">
       <h2 class="title">FAMILY</h2>
       <div class="layer" id="layer1"></div>
       <div class="layer" id="layer2"></div>
@@ -211,14 +205,12 @@
 
   </div>
 
-  <!-- PAMANGKIN -->
   <div class="pamangkin-section">
     <h2 class="title">PAMANGKIN</h2>
     <div class="layer" id="pamangkin1"></div>
     <div class="layer" id="pamangkin2"></div>
   </div>
 
-  <!-- GALLERY -->
   <div class="gallery-section">
     <h2 class="title">GALLERY</h2>
     <div class="layer" id="gallery1"></div>
@@ -228,7 +220,6 @@
     <div class="layer" id="gallery5"></div>
   </div>
 
-  <!-- PROFILE -->
   <div id="profileBox">
     <h3 id="profileName"></h3>
     <input id="birthday"><br>
@@ -239,7 +230,6 @@
     <button onclick="closeAll()">Close</button>
   </div>
 
-  <!-- ZOOM -->
   <div id="zoomBox">
     <img id="zoomImg">
     <div>
@@ -263,6 +253,7 @@ const db = getFirestore(initializeApp({
 let currentZoom="", currentProfile="";
 let isAdmin=false;
 
+// LOGIN
 window.login=()=>{
   if(user.value==="admin" && pass.value==="123"){
     isAdmin=true;
@@ -275,6 +266,7 @@ window.login=()=>{
   }
 };
 
+// DATA
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -289,6 +281,7 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 
+// CREATE UI
 function create(data,type=""){
   Object.keys(data).forEach(layerKey=>{
     const c=document.getElementById(layerKey);
@@ -321,6 +314,7 @@ create(layers);
 create(pamangkin);
 create(gallery,"gallery");
 
+// UPLOAD
 window.upload=(e,id)=>{
   if(!isAdmin) return alert("Admin only");
 
@@ -329,12 +323,14 @@ window.upload=(e,id)=>{
   r.readAsDataURL(e.target.files[0]);
 };
 
+// ZOOM
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
+// DELETE
 window.deletePhoto=async()=>{
   if(!isAdmin) return alert("Admin only");
 
@@ -343,6 +339,7 @@ window.deletePhoto=async()=>{
   zoomBox.style.display="none";
 };
 
+// PROFILE
 window.openProfile=async(id,name)=>{
   currentProfile=id;
   profileName.innerText=name;
