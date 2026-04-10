@@ -7,17 +7,31 @@
     body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
     header {background:linear-gradient(to right, red, purple); color:white; padding:15px; font-size:22px;}
 
-    .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
-
-    .card {
-      background:white; margin:10px; padding:10px; width:150px;
-      border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.2);
-      border:3px solid purple; cursor:pointer;
+    .layer {
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin:20px 0;
     }
 
+    /* 🔥 RESPONSIVE CARD */
+    .card {
+      background:white;
+      margin:10px;
+      padding:10px;
+
+      width: clamp(140px, 22vw, 180px);
+
+      border-radius:12px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.2);
+      border:3px solid purple;
+      cursor:pointer;
+    }
+
+    /* 🔥 RESPONSIVE IMAGE */
     img {
       width:100%;
-      height:120px;
+      height: clamp(110px, 18vw, 150px);
       object-fit:cover;
       border-radius:8px;
       background:#ddd;
@@ -41,8 +55,22 @@
     input {width:90%; padding:6px; margin:5px;}
     button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
 
-    .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
-    .comment {background:#fff; padding:10px; margin:5px; border-radius:8px; text-align:left;}
+    .box {
+      background:white;
+      margin:20px auto;
+      padding:15px;
+      width:90%;
+      max-width:400px;
+      border-radius:10px;
+    }
+
+    .comment {
+      background:#fff;
+      padding:10px;
+      margin:5px;
+      border-radius:8px;
+      text-align:left;
+    }
 
     #zoomBox {
       display:none;
@@ -65,7 +93,9 @@
       z-index:999;
     }
 
-    #zoomBox img {width:250px;}
+    #zoomBox img {
+      width:260px;
+    }
 
     /* 🔥 FAMILY BACKGROUND */
     .family-bg {
@@ -92,7 +122,7 @@
 <!-- APP -->
 <div id="app" style="display:none;">
 
-  <!-- 🔥 FAMILY WITH BACKGROUND -->
+  <!-- FAMILY -->
   <div class="family-bg">
     <div class="layer" id="layer1"></div>
     <div class="layer" id="layer2"></div>
@@ -158,13 +188,13 @@ if(savedUser){
 }
 
 // LOGIN
-window.login = function(){
-  const u = user.value.trim();
-  const p = pass.value.trim();
+window.login=()=>{
+  const u=user.value.trim();
+  const p=pass.value.trim();
 
   if(u && p==="123"){
-    currentUser = u;
-    localStorage.setItem("user", u);
+    currentUser=u;
+    localStorage.setItem("user",u);
     loginBox.style.display="none";
     app.style.display="block";
   }
@@ -183,9 +213,7 @@ const pamangkin={
 };
 
 const gallery={};
-for(let i=1;i<=10;i++){
-  gallery["gallery"+i]=["","","","",""];
-}
+for(let i=1;i<=10;i++){ gallery["gallery"+i]=["","","","",""]; }
 
 // CREATE
 function create(data){
@@ -216,32 +244,32 @@ create(pamangkin);
 create(gallery);
 
 // UPLOAD
-window.upload = (e, id) => {
-  const file = e.target.files[0];
-  if (!file) return;
+window.upload=(e,id)=>{
+  const file=e.target.files[0];
+  if(!file) return;
 
-  const reader = new FileReader();
+  const reader=new FileReader();
 
-  reader.onload = function () {
-    const img = new Image();
-    img.src = reader.result;
+  reader.onload=function(){
+    const img=new Image();
+    img.src=reader.result;
 
-    img.onload = async function () {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
+    img.onload=async function(){
+      const canvas=document.createElement("canvas");
+      const ctx=canvas.getContext("2d");
 
-      const maxWidth = 300;
-      const scale = maxWidth / img.width;
+      const maxWidth=300;
+      const scale=maxWidth/img.width;
 
-      canvas.width = maxWidth;
-      canvas.height = img.height * scale;
+      canvas.width=maxWidth;
+      canvas.height=img.height*scale;
 
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
-      const compressed = canvas.toDataURL("image/jpeg", 0.7);
+      const compressed=canvas.toDataURL("image/jpeg",0.7);
 
       await setDoc(doc(db,"familyTree",id),{
-        image: compressed
+        image:compressed
       });
     };
   };
