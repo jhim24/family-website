@@ -4,8 +4,23 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {font-family: Arial; background:#111; margin:0; text-align:center; color:white;}
-    header {background:linear-gradient(to right, red, purple); padding:15px; font-size:22px; position:sticky; top:0; z-index:3000;}
+    body {
+      font-family: Arial;
+      background:#111;
+      margin:0;
+      text-align:center;
+      color:white;
+    }
+
+    header {
+      background:linear-gradient(to right, red, purple);
+      padding:15px;
+      font-size:22px;
+      position:sticky;
+      top:0;
+      z-index:3000;
+    }
+
     .header-title { text-transform:uppercase; }
     .quote { font-size:12px; opacity:0.8; }
 
@@ -138,7 +153,9 @@
       box-shadow:0 0 20px rgba(255,0,255,0.5);
     }
 
-    #zoomBox button { margin-top:10px; }
+    #zoomBox button {
+      margin-top:10px;
+    }
   </style>
 </head>
 
@@ -159,6 +176,7 @@
 <div id="credit">CREATED BY: JEMMEL LOZADA</div>
 
 <div id="app" style="display:none;">
+
   <div class="family-section">
     <div class="content">
       <h2 class="title">FAMILY</h2>
@@ -182,6 +200,7 @@
     <div class="layer fixed" id="gallery4"></div>
     <div class="layer fixed" id="gallery5"></div>
   </div>
+
 </div>
 
 <div id="profileBox">
@@ -200,7 +219,14 @@
   <button onclick="closeAll()">Close</button>
 </div>
 
-<script>
+<script type="module">
+
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const SUPABASE_URL = "https://farxyhjjgvqzwjqrskte.supabase.co";
+const SUPABASE_KEY = "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentZoom="", currentProfile="";
 
@@ -228,7 +254,7 @@ function create(data){
   Object.keys(data).forEach(k=>{
     const c=document.getElementById(k);
 
-    data[k].forEach((name,i)=>{
+    data[k].forEach(async (name,i)=>{
       const id=k+"_"+i;
 
       c.innerHTML+=`
@@ -237,6 +263,16 @@ function create(data){
         <h4 onclick="openProfile('${id}','${name}')">${name}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
+
+      const { data:img } = await supabase
+        .from("images")
+        .select("url")
+        .eq("id", id)
+        .single();
+
+      if(img){
+        document.getElementById(id).src = img.url;
+      }
     });
   });
 }
@@ -245,49 +281,41 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* 🔥 CLOUDINARY UPLOAD */
 window.upload = async(e,id)=>{
   const file=e.target.files[0];
   if(!file) return;
 
-  const formData=new FormData();
-  formData.append("file",file);
-  formData.append("upload_preset","family_upload");
+  const fileName = id + "_" + Date.now();
 
-  const res = await fetch("https://api.cloudinary.com/v1_1/djr7nbwwt/image/upload",{
-    method:"POST",
-    body:formData
+  const { error } = await supabase.storage
+    .from("family")
+    .upload(fileName, file);
+
+  if(error){
+    alert("Upload failed");
+    return;
+  }
+
+  const { data } = supabase.storage
+    .from("family")
+    .getPublicUrl(fileName);
+
+  const url = data.publicUrl;
+
+  await supabase.from("images").upsert({
+    id: id,
+    url: url
   });
-
-  const data = await res.json();
-
-  const url = data.secure_url;
 
   document.getElementById(id).src = url;
 };
 
-/* PROFILE LOCAL */
-window.saveProfile=()=>{
-  localStorage.setItem(currentProfile+"_profile", JSON.stringify({
-    birthday:birthday.value,
-    address:address.value,
-    contact:contact.value,
-    email:email.value
-  }));
-  alert("Saved!");
-};
+window.saveProfile=()=>{ alert("Saved!"); };
 
 window.openProfile=(id,name)=>{
   currentProfile=id;
   profileName.innerText=name;
   profileBox.style.display="block";
-
-  const data = JSON.parse(localStorage.getItem(id+"_profile")||"{}");
-
-  birthday.value=data.birthday||"";
-  address.value=data.address||"";
-  contact.value=data.contact||"";
-  email.value=data.email||"";
 };
 
 window.zoom=(id)=>{
@@ -296,7 +324,8 @@ window.zoom=(id)=>{
   zoomBox.style.display="flex";
 };
 
-window.deletePhoto=()=>{
+window.deletePhoto=async()=>{
+  await supabase.from("images").delete().eq("id",currentZoom);
   document.getElementById(currentZoom).src="";
   zoomBox.style.display="none";
 };
