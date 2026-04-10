@@ -24,7 +24,7 @@
     .card:hover {transform:translateY(-5px);}
 
     .card.pamangkin {width:180px;}
-    .card.gallery {width:200px;} /* 🔥 bigger gallery */
+    .card.gallery {width:200px;}
 
     img {
       width:100%;
@@ -196,9 +196,9 @@ const pamangkin={
   pamangkin2:["Ashley","Union","Jazmine","Apple","Bjoy"]
 };
 
-// GALLERY (5 LANG)
+// 🔥 GALLERY (5 PHOTOS EACH LAYER)
 const gallery={};
-for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","","",""]; }
+for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
 // CREATE
 function create(data,type=""){
@@ -208,11 +208,9 @@ function create(data,type=""){
     data[layerKey].forEach((name,i)=>{
       const id=layerKey+"_"+i;
 
-      let titleClick = "";
-
-      // ❌ WALANG PROFILE SA GALLERY
+      let titleClick="";
       if(type !== "gallery"){
-        titleClick = `onclick="openProfile('${id}','${name}')"`;
+        titleClick=`onclick="openProfile('${id}','${name}')"`;
       }
 
       c.innerHTML+=`
