@@ -10,20 +10,27 @@
       background:linear-gradient(to right, red, purple);
       color:white;
       padding:20px;
-      text-align:center;
       position:sticky;
       top:0;
       z-index:1000;
     }
 
     .header-title {font-size:28px; font-weight:bold;}
-    .header-quote {font-size:14px; margin-top:5px; font-style:italic;}
+    .header-quote {font-size:14px; font-style:italic;}
 
-    .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
+    /* 🔥 FLEX AUTO ADJUST */
+    .layer {
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:10px;
+      margin:20px 0;
+    }
 
     .card {
-      background:white; margin:10px; padding:10px;
-      width: clamp(140px, 22vw, 180px);
+      background:white;
+      padding:10px;
+      width:clamp(140px, 22vw, 180px);
       border-radius:12px;
       box-shadow:0 4px 10px rgba(0,0,0,0.2);
       border:3px solid purple;
@@ -31,7 +38,7 @@
 
     img {
       width:100%;
-      height: clamp(110px, 18vw, 150px);
+      height:clamp(110px, 18vw, 150px);
       object-fit:cover;
       border-radius:8px;
       background:#ddd;
@@ -56,10 +63,45 @@
     input {width:90%; padding:6px; margin:5px;}
     button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
 
-    .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
-    .comment {background:#fff; padding:10px; margin:5px; border-radius:8px;}
+    .box {
+      background:white;
+      margin:20px auto;
+      padding:15px;
+      width:90%;
+      max-width:400px;
+      border-radius:10px;
+    }
 
-    /* 🔥 ZOOM */
+    .comment {
+      background:#fff;
+      padding:10px;
+      margin:5px;
+      border-radius:8px;
+    }
+
+    /* 🔥 BACKGROUNDS */
+    .family-bg {
+      background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
+      padding:20px 0;
+      border-radius:12px;
+      margin:10px;
+    }
+
+    .pamangkin-bg {
+      background:linear-gradient(to right, #ffe0e0, #ffd6ff);
+      padding:15px;
+      border-radius:12px;
+      margin:10px;
+    }
+
+    .gallery-bg {
+      background:linear-gradient(to right, #d0f0ff, #e0fff5);
+      padding:15px;
+      border-radius:12px;
+      margin:10px;
+    }
+
+    /* ZOOM */
     #zoomBox {
       display:none;
       position:fixed;
@@ -75,11 +117,8 @@
     #zoomBox img {
       width:70vw;
       max-width:700px;
-      height:auto;
       border-radius:12px;
-
-      transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
-      transition: transform 0.2s ease;
+      transition:0.2s;
 
       box-shadow:
         0 0 20px rgba(255,0,255,0.6),
@@ -90,17 +129,11 @@
     #overlay {
       display:none;
       position:fixed;
-      top:0; left:0;
-      width:100%; height:100%;
+      width:100%;
+      height:100%;
       background:rgba(0,0,0,0.6);
+      top:0; left:0;
       z-index:999;
-    }
-
-    .family-bg {
-      background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
-      padding:20px 0;
-      border-radius:12px;
-      margin:10px;
     }
 
     #profileBox {
@@ -132,27 +165,29 @@
 
 <div id="app" style="display:none;">
 
+  <!-- FAMILY -->
   <div class="family-bg">
     <div class="layer" id="layer1"></div>
     <div class="layer" id="layer2"></div>
     <div class="layer" id="layer3"></div>
   </div>
 
+  <!-- PAMANGKIN -->
   <h2 class="title">PAMANGKIN</h2>
-  <div class="layer" id="pamangkin1"></div>
-  <div class="layer" id="pamangkin2"></div>
+  <div class="pamangkin-bg">
+    <div class="layer" id="pamangkin1"></div>
+    <div class="layer" id="pamangkin2"></div>
+  </div>
 
+  <!-- GALLERY -->
   <h2 class="title">GALLERY</h2>
-  <div class="layer" id="gallery1"></div>
-  <div class="layer" id="gallery2"></div>
-  <div class="layer" id="gallery3"></div>
-  <div class="layer" id="gallery4"></div>
-  <div class="layer" id="gallery5"></div>
-  <div class="layer" id="gallery6"></div>
-  <div class="layer" id="gallery7"></div>
-  <div class="layer" id="gallery8"></div>
-  <div class="layer" id="gallery9"></div>
-  <div class="layer" id="gallery10"></div>
+  <div class="gallery-bg">
+    <div class="layer" id="gallery1"></div>
+    <div class="layer" id="gallery2"></div>
+    <div class="layer" id="gallery3"></div>
+    <div class="layer" id="gallery4"></div>
+    <div class="layer" id="gallery5"></div>
+  </div>
 
   <div id="overlay" onclick="closeAll()"></div>
 
@@ -166,14 +201,15 @@
   <!-- PROFILE -->
   <div id="profileBox">
     <h3 id="profileName"></h3>
-    <input id="birthday" placeholder="Birthday"><br>
-    <input id="address" placeholder="Address"><br>
-    <input id="contact" placeholder="Contact"><br>
-    <input id="email" placeholder="Email"><br>
+    <input id="birthday"><br>
+    <input id="address"><br>
+    <input id="contact"><br>
+    <input id="email"><br>
     <button onclick="saveProfile()">Save</button>
     <button onclick="closeProfile()">Close</button>
   </div>
 
+  <!-- COMMENTS -->
   <div class="box">
     <input id="comment">
     <button onclick="addComment()">Post</button>
@@ -194,6 +230,7 @@ const db = getFirestore(initializeApp({
 
 let currentUser="", currentZoom="", currentProfile="";
 
+/* LOGIN */
 if(localStorage.getItem("user")){
   currentUser=localStorage.getItem("user");
   loginBox.style.display="none";
@@ -209,6 +246,7 @@ window.login=()=>{
   }
 };
 
+/* DATA */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -221,8 +259,9 @@ const pamangkin={
 };
 
 const gallery={};
-for(let i=1;i<=10;i++){ gallery["gallery"+i]=["","","","",""]; }
+for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
+/* CREATE */
 function create(data){
   Object.keys(data).forEach(layer=>{
     const c=document.getElementById(layer);
@@ -250,12 +289,14 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
+/* UPLOAD */
 window.upload=(e,id)=>{
   const reader=new FileReader();
   reader.onload=()=>setDoc(doc(db,"familyTree",id),{image:reader.result});
   reader.readAsDataURL(e.target.files[0]);
 };
 
+/* ZOOM */
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
@@ -268,10 +309,7 @@ window.zoom=(id)=>{
     const x=e.clientX-rect.left;
     const y=e.clientY-rect.top;
 
-    const rx=-(y-rect.height/2)/10;
-    const ry=(x-rect.width/2)/10;
-
-    zoomImg.style.transform=`perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    zoomImg.style.transform=`perspective(1000px) rotateX(${-(y-rect.height/2)/10}deg) rotateY(${(x-rect.width/2)/10}deg)`;
   };
 
   zoomImg.onmouseleave=()=>{
@@ -279,9 +317,7 @@ window.zoom=(id)=>{
   };
 };
 
-window.deletePhoto=async()=>{
-  await deleteDoc(doc(db,"familyTree",currentZoom));
-};
+window.deletePhoto=async()=>await deleteDoc(doc(db,"familyTree",currentZoom));
 
 window.closeAll=()=>{
   zoomBox.style.display="none";
@@ -289,6 +325,7 @@ window.closeAll=()=>{
   overlay.style.display="none";
 };
 
+/* PROFILE */
 window.openProfile=async(name,id)=>{
   currentProfile=id;
   profileBox.style.display="block";
@@ -315,11 +352,9 @@ window.saveProfile=async()=>{
   alert("Saved!");
 };
 
-window.closeProfile=()=>{
-  profileBox.style.display="none";
-  overlay.style.display="none";
-};
+window.closeProfile=()=>closeAll();
 
+/* COMMENTS */
 window.addComment=()=>{
   if(!comment.value) return;
 
