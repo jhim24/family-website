@@ -181,9 +181,33 @@
 
 <div id="credit">CREATED BY: JEMMEL LOZADA</div>
 
-<div id="app" style="display:none;"></div>
+<div id="app" style="display:none;">
 
-<div id="profileBox"></div>
+  <div class="family-section">
+    <div class="content">
+      <h2 class="title">FAMILY</h2>
+      <div class="layer" id="layer1"></div>
+      <div class="layer" id="layer2"></div>
+      <div class="layer" id="layer3"></div>
+    </div>
+  </div>
+
+  <div class="pamangkin-section">
+    <h2 class="title">PAMANGKIN</h2>
+    <div class="layer fixed" id="pamangkin1"></div>
+    <div class="layer fixed" id="pamangkin2"></div>
+  </div>
+
+  <div class="gallery-section">
+    <h2 class="title">GALLERY</h2>
+    <div class="layer fixed" id="gallery1"></div>
+    <div class="layer fixed" id="gallery2"></div>
+    <div class="layer fixed" id="gallery3"></div>
+    <div class="layer fixed" id="gallery4"></div>
+    <div class="layer fixed" id="gallery5"></div>
+  </div>
+
+</div>
 
 <div id="zoomBox">
   <img id="zoomImg">
@@ -193,58 +217,61 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const db = getFirestore(initializeApp({
   apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   projectId:"family-web-10cb8"
 }));
 
-let currentZoom="";
-
 window.login=()=>{
   loginBox.style.display="none";
-  credit.style.display="none";
   app.style.display="block";
 };
 
-/* 🔥 FIXED UPLOAD */
-window.upload=async(e,id)=>{
-  try{
-    const file = e.target.files[0];
-    if(!file){
-      alert("No file selected ❌");
-      return;
-    }
+const layers={ layer1:["A","B"], layer2:["C"], layer3:["D"] };
 
-    const reader = new FileReader();
+function create(data){
+  Object.keys(data).forEach(k=>{
+    const c=document.getElementById(k);
+    data[k].forEach((name,i)=>{
+      const id=k+"_"+i;
+      c.innerHTML+=`
+      <div class="card">
+        <img id="${id}" onclick="zoom('${id}')">
+        <h4>${name}</h4>
+        <input type="file" onchange="upload(event,'${id}')">
+      </div>`;
 
-    reader.onload=async()=>{
-      await setDoc(doc(db,"familyTree",id),{
-        image: reader.result,
-        updated: Date.now()
+      onSnapshot(doc(db,"familyTree",id),(snap)=>{
+        if(snap.exists()){
+          document.getElementById(id).src=snap.data().image+"?t="+Date.now();
+        }
       });
+    });
+  });
+}
 
-      alert("Uploaded successfully ✅");
-    };
+create(layers);
 
-    reader.readAsDataURL(file);
-
-  }catch(err){
-    console.log(err);
-    alert("Upload failed ❌");
-  }
+window.upload=async(e,id)=>{
+  const file=e.target.files[0];
+  const r=new FileReader();
+  r.onload=async()=>{
+    await setDoc(doc(db,"familyTree",id),{
+      image:r.result,
+      updated:Date.now()
+    });
+  };
+  r.readAsDataURL(file);
 };
 
 window.zoom=(id)=>{
-  currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
-window.closeAll=()=>{
-  zoomBox.style.display="none";
-};
+window.closeAll=()=> zoomBox.style.display="none";
 
 </script>
 
