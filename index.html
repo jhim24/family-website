@@ -12,7 +12,6 @@
       color:white;
     }
 
-    /* HEADER */
     header {
       background:linear-gradient(to right, red, purple);
       padding:25px;
@@ -23,10 +22,8 @@
     .quote {
       font-size:14px;
       opacity:0.8;
-      margin-top:5px;
     }
 
-    /* LOGIN (FIXED STYLE) */
     #loginBox {
       margin:80px auto;
       width:90%;
@@ -51,17 +48,16 @@
       color:white;
       border:none;
       border-radius:6px;
+      margin-top:10px;
     }
 
     #credit {font-size:12px; opacity:0.7;}
 
-    /* 🔥 FAMILY VIDEO WITH FALLBACK */
+    /* 🔥 FAMILY VIDEO */
     .family-section {
       position:relative;
       overflow:hidden;
       padding:20px;
-
-      /* fallback image */
       background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
     }
 
@@ -75,23 +71,19 @@
       z-index:0;
     }
 
-    /* overlay */
-    .family-overlay {
+    .overlay {
       position:absolute;
       width:100%;
       height:100%;
       background:rgba(0,0,0,0.6);
-      top:0;
-      left:0;
       z-index:1;
     }
 
-    .family-content {
+    .content {
       position:relative;
       z-index:2;
     }
 
-    /* GRID */
     .layer {
       display:grid;
       grid-template-columns:repeat(4,150px);
@@ -111,7 +103,6 @@
     img {
       width:100%;
       aspect-ratio:16/9;
-      object-fit:cover;
       border-radius:8px;
       cursor:pointer;
     }
@@ -126,53 +117,9 @@
 
     .title {
       border:2px solid red;
-      display:inline-block;
       padding:6px 15px;
       border-radius:8px;
-      margin-top:20px;
-    }
-
-    .pamangkin-section {
-      background:repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px);
-      padding:20px;
-    }
-
-    .gallery-section {
-      background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-      padding:20px;
-    }
-
-    #profileBox, #zoomBox {
-      display:none;
-      position:fixed;
-      z-index:2000;
-    }
-
-    #profileBox {
-      top:50%;
-      left:50%;
-      transform:translate(-50%,-50%);
-      background:white;
-      color:black;
-      padding:20px;
-      border-radius:12px;
-    }
-
-    #zoomBox {
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      background:rgba(0,0,0,0.95);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      flex-direction:column;
-    }
-
-    #zoomBox img {
-      width:90%;
-      max-width:900px;
+      display:inline-block;
     }
 
   </style>
@@ -196,19 +143,20 @@
 
 <div id="app" style="display:none;">
 
-  <!-- 🔥 FAMILY VIDEO FIXED -->
+  <!-- 🔥 FAMILY VIDEO -->
   <div class="family-section">
 
-    <!-- VIDEO -->
-    <video class="family-video" autoplay muted loop playsinline>
-      <source src="https://www.w3schools.com/howto/rain.mp4" type="video/mp4">
-    </video>
+    <video id="bgVideo" class="family-video" autoplay muted loop playsinline></video>
 
-    <!-- overlay -->
-    <div class="family-overlay"></div>
+    <div class="overlay"></div>
 
-    <div class="family-content">
+    <div class="content">
       <h2 class="title">FAMILY</h2>
+
+      <!-- 🔥 UPLOAD BUTTON -->
+      <br>
+      <input type="file" accept="video/*" onchange="uploadVideo(event)">
+
       <div class="layer" id="layer1"></div>
       <div class="layer" id="layer2"></div>
       <div class="layer" id="layer3"></div>
@@ -216,162 +164,62 @@
 
   </div>
 
-  <!-- PAMANGKIN -->
-  <div class="pamangkin-section">
-    <h2 class="title">PAMANGKIN</h2>
-    <div class="layer" id="pamangkin1"></div>
-    <div class="layer" id="pamangkin2"></div>
-  </div>
-
-  <!-- GALLERY -->
-  <div class="gallery-section">
-    <h2 class="title">GALLERY</h2>
-    <div class="layer" id="gallery1"></div>
-    <div class="layer" id="gallery2"></div>
-    <div class="layer" id="gallery3"></div>
-    <div class="layer" id="gallery4"></div>
-    <div class="layer" id="gallery5"></div>
-  </div>
-
-  <!-- PROFILE -->
-  <div id="profileBox">
-    <h3 id="profileName"></h3>
-    <input id="birthday"><br>
-    <input id="address"><br>
-    <input id="contact"><br>
-    <input id="email"><br>
-    <button onclick="saveProfile()">Save</button>
-    <button onclick="closeAll()">Close</button>
-  </div>
-
-  <!-- ZOOM -->
-  <div id="zoomBox">
-    <img id="zoomImg">
-    <div>
-      <button onclick="deletePhoto()">Delete</button>
-      <button onclick="closeAll()">Close</button>
-    </div>
-  </div>
-
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-const db = getFirestore(initializeApp({
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+const app = initializeApp({
   apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   projectId:"family-web-10cb8"
-}));
+});
 
-let currentZoom="", currentProfile="";
+const db = getFirestore(app);
+
 let isAdmin=false;
 
+// LOGIN
 window.login=()=>{
-  if(user.value==="admin" && pass.value==="123") isAdmin=true;
+  if(user.value==="admin" && pass.value==="123"){
+    isAdmin=true;
+  }
 
   if(pass.value==="123"){
     loginBox.style.display="none";
     credit.style.display="none";
     app.style.display="block";
+    loadVideo();
   }
 };
 
-const layers={
-  layer1:["DELIA LOZADA","JIMMY LOZADA"],
-  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
-  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
-};
-
-const pamangkin={
-  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
-  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
-};
-
-const gallery={};
-for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
-
-function create(data,type=""){
-  Object.keys(data).forEach(layerKey=>{
-    const c=document.getElementById(layerKey);
-
-    data[layerKey].forEach((name,i)=>{
-      const id=layerKey+"_"+i;
-
-      let click="";
-      if(type!=="gallery"){
-        click=`onclick="openProfile('${id}','${name}')"`
-      }
-
-      c.innerHTML+=`
-      <div class="card">
-        <img id="${id}" onclick="zoom('${id}')">
-        <h4 ${click}>${name||"Photo"}</h4>
-        <input type="file" onchange="upload(event,'${id}')">
-      </div>`;
-
-      onSnapshot(doc(db,"familyTree",id),(snap)=>{
-        if(snap.exists()){
-          document.getElementById(id).src=snap.data().image;
-        }
-      });
-    });
-  });
+// 🔥 LOAD SAVED VIDEO
+async function loadVideo(){
+  const snap = await getDoc(doc(db,"settings","bgVideo"));
+  if(snap.exists()){
+    bgVideo.src = snap.data().url;
+  }
 }
 
-create(layers);
-create(pamangkin);
-create(gallery,"gallery");
-
-window.upload=(e,id)=>{
-  if(!isAdmin) return alert("Admin only");
-  const r=new FileReader();
-  r.onload=()=>setDoc(doc(db,"familyTree",id),{image:r.result});
-  r.readAsDataURL(e.target.files[0]);
-};
-
-window.zoom=(id)=>{
-  currentZoom=id;
-  zoomImg.src=document.getElementById(id).src;
-  zoomBox.style.display="flex";
-};
-
-window.deletePhoto=async()=>{
-  if(!isAdmin) return alert("Admin only");
-  await deleteDoc(doc(db,"familyTree",currentZoom));
-  document.getElementById(currentZoom).src="";
-  zoomBox.style.display="none";
-};
-
-window.openProfile=async(id,name)=>{
-  currentProfile=id;
-  profileName.innerText=name;
-  profileBox.style.display="block";
-
-  const snap = await getDoc(doc(db,"profiles",id));
-  if(snap.exists()){
-    const d=snap.data();
-    birthday.value=d.birthday||"";
-    address.value=d.address||"";
-    contact.value=d.contact||"";
-    email.value=d.email||"";
-  }
-};
-
-window.saveProfile=()=>{
+// 🔥 UPLOAD VIDEO
+window.uploadVideo=(e)=>{
   if(!isAdmin) return alert("Admin only");
 
-  setDoc(doc(db,"profiles",currentProfile),{
-    birthday:birthday.value,
-    address:address.value,
-    contact:contact.value,
-    email:email.value
-  });
-};
+  const file = e.target.files[0];
+  const reader = new FileReader();
 
-window.closeAll=()=>{
-  zoomBox.style.display="none";
-  profileBox.style.display="none";
+  reader.onload = async ()=>{
+    const videoData = reader.result;
+
+    bgVideo.src = videoData;
+
+    await setDoc(doc(db,"settings","bgVideo"),{
+      url: videoData
+    });
+  };
+
+  reader.readAsDataURL(file);
 };
 
 </script>
