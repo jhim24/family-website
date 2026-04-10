@@ -16,17 +16,20 @@
       z-index:1000;
     }
 
-    .header-title {font-size:28px; font-weight:bold;}
+    .header-title {font-size:28px; font-weight:bold; letter-spacing:2px;}
     .header-quote {font-size:14px; margin-top:5px; font-style:italic;}
 
     .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
 
     .card {
-      background:white; margin:10px; padding:10px;
+      background:white;
+      margin:10px;
+      padding:10px;
       width: clamp(140px, 22vw, 180px);
       border-radius:12px;
       box-shadow:0 4px 10px rgba(0,0,0,0.2);
       border:3px solid purple;
+      cursor:pointer;
     }
 
     img {
@@ -42,7 +45,6 @@
       border:2px solid red;
       padding:5px;
       border-radius:6px;
-      cursor:pointer;
     }
 
     .title {
@@ -56,8 +58,22 @@
     input {width:90%; padding:6px; margin:5px;}
     button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
 
-    .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
-    .comment {background:#fff; padding:10px; margin:5px; border-radius:8px;}
+    .box {
+      background:white;
+      margin:20px auto;
+      padding:15px;
+      width:90%;
+      max-width:400px;
+      border-radius:10px;
+    }
+
+    .comment {
+      background:#fff;
+      padding:10px;
+      margin:5px;
+      border-radius:8px;
+      text-align:left;
+    }
 
     #zoomBox {
       display:none;
@@ -86,21 +102,10 @@
     }
 
     .family-bg {
-      background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
+      background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
       padding:20px 0;
       border-radius:12px;
       margin:10px;
-    }
-
-    #profileBox {
-      display:none;
-      position:fixed;
-      top:50%; left:50%;
-      transform:translate(-50%,-50%);
-      background:white;
-      padding:20px;
-      border-radius:12px;
-      z-index:1000;
     }
 
   </style>
@@ -113,13 +118,14 @@
   <div class="header-quote">"Family is not an important thing, it's everything."</div>
 </header>
 
-<!-- ORIGINAL LOGIN UI (UNCHANGED) -->
+<!-- LOGIN -->
 <div id="loginBox" class="box">
   <input id="user" placeholder="Username"><br>
   <input id="pass" type="password" placeholder="Password"><br>
   <button onclick="login()">Login</button>
 </div>
 
+<!-- APP -->
 <div id="app" style="display:none;">
 
   <div class="family-bg">
@@ -147,18 +153,8 @@
     <button onclick="closeAll()">Close</button>
   </div>
 
-  <div id="profileBox">
-    <h3 id="profileName"></h3>
-    <input id="birthday"><br>
-    <input id="address"><br>
-    <input id="contact"><br>
-    <input id="email"><br>
-    <button onclick="saveProfile()">Save</button>
-    <button onclick="closeProfile()">Close</button>
-  </div>
-
   <div class="box">
-    <input id="comment">
+    <input id="comment" placeholder="Write something...">
     <button onclick="addComment()">Post</button>
     <div id="comments"></div>
   </div>
@@ -168,37 +164,31 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const db = getFirestore(initializeApp({
   apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   projectId:"family-web-10cb8"
 }));
 
-let currentUser="", currentZoom="", currentProfile="";
+let currentUser="", currentZoom="";
 
-/* 🔥 UPDATED LOGIN ONLY */
-const savedUser = localStorage.getItem("user");
-
-if(savedUser){
-  currentUser = savedUser;
-  loginBox.style.display="none";
-  app.style.display="block";
-}
+/* 🔥 NEW LOGIN (MANUAL ONLY) */
+loginBox.style.display="block";
+app.style.display="none";
 
 window.login = function(){
   const u = user.value.trim();
   const p = pass.value.trim();
 
-  if(!u){
-    alert("Enter username");
+  if(!u || !p){
+    alert("Enter username and password");
     return;
   }
 
   // ADMIN
   if(u === "admin" && p === "1234"){
     currentUser = "ADMIN";
-    localStorage.setItem("user","ADMIN");
     loginBox.style.display="none";
     app.style.display="block";
     return;
@@ -207,16 +197,15 @@ window.login = function(){
   // USER
   if(p === "123"){
     currentUser = u;
-    localStorage.setItem("user",u);
     loginBox.style.display="none";
     app.style.display="block";
     return;
   }
 
-  alert("Wrong username or password");
+  alert("Wrong login ❌");
 };
 
-/* REST SAME */
+/* DATA */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -232,16 +221,16 @@ const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
 function create(data){
-  Object.keys(data).forEach(layer=>{
-    const c=document.getElementById(layer);
+  Object.keys(data).forEach(layerKey=>{
+    const c=document.getElementById(layerKey);
 
-    data[layer].forEach((name,i)=>{
-      const id=layer+"_"+i;
+    data[layerKey].forEach((name,i)=>{
+      const id=layerKey+"_"+i;
 
       c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
-        <h4 onclick="openProfile('${name}','${id}')">${name||"Photo"}</h4>
+        <h4>${name||"Photo"}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
 
@@ -275,37 +264,8 @@ window.deletePhoto=async()=>await deleteDoc(doc(db,"familyTree",currentZoom));
 
 window.closeAll=()=>{
   zoomBox.style.display="none";
-  profileBox.style.display="none";
   overlay.style.display="none";
 };
-
-window.openProfile=async(name,id)=>{
-  currentProfile=id;
-  profileBox.style.display="block";
-  overlay.style.display="block";
-  profileName.innerText=name;
-
-  const snap=await getDoc(doc(db,"profiles",id));
-  if(snap.exists()){
-    const d=snap.data();
-    birthday.value=d.birthday||"";
-    address.value=d.address||"";
-    contact.value=d.contact||"";
-    email.value=d.email||"";
-  }
-};
-
-window.saveProfile=async()=>{
-  await setDoc(doc(db,"profiles",currentProfile),{
-    birthday:birthday.value,
-    address:address.value,
-    contact:contact.value,
-    email:email.value
-  });
-  alert("Saved!");
-};
-
-window.closeProfile=()=>closeAll();
 
 window.addComment=()=>{
   if(!comment.value) return;
