@@ -51,11 +51,13 @@
       color:white;
       border:none;
       border-radius:6px;
+      margin:5px;
+      cursor:pointer;
     }
 
     #credit {font-size:12px; opacity:0.7;}
 
-    /* VIDEO BG */
+    /* 🔥 VIDEO BG */
     .family-section {
       position:relative;
       padding:20px;
@@ -71,7 +73,11 @@
       height:100%;
       object-fit:cover;
       z-index:0;
+      opacity:1;
+      transition:opacity 1s ease;
     }
+
+    .fade-out {opacity:0;}
 
     .overlay {
       position:absolute;
@@ -86,20 +92,22 @@
       z-index:2;
     }
 
+    /* 🧊 GLASS EFFECT */
+    .card {
+      background:rgba(28,28,28,0.7);
+      backdrop-filter:blur(5px);
+      padding:10px;
+      border-radius:12px;
+      border:2px solid purple;
+      width:150px;
+    }
+
     .layer {
       display:grid;
       grid-template-columns:repeat(4,150px);
       justify-content:center;
       gap:20px;
       margin:20px auto;
-    }
-
-    .card {
-      background:#1c1c1c;
-      padding:10px;
-      border-radius:12px;
-      border:2px solid purple;
-      width:150px;
     }
 
     img {
@@ -122,6 +130,10 @@
       padding:6px 15px;
       border-radius:8px;
       display:inline-block;
+    }
+
+    .controls {
+      margin-top:10px;
     }
 
     .pamangkin-section {
@@ -190,14 +202,18 @@
 
   <div class="family-section">
 
-    <video id="bgVideo" class="family-video" autoplay muted loop playsinline>
-      <source src="https://cdn.coverr.co/videos/coverr-modern-house-with-pool-1573/1080p.mp4" type="video/mp4">
-    </video>
+    <video id="bgVideo" class="family-video" autoplay muted loop playsinline></video>
 
     <div class="overlay"></div>
 
     <div class="content">
       <h2 class="title">FAMILY</h2>
+
+      <!-- 🔥 CONTROLS -->
+      <div class="controls">
+        <button onclick="nextVideo()">Next Video</button>
+      </div>
+
       <div class="layer" id="layer1"></div>
       <div class="layer" id="layer2"></div>
       <div class="layer" id="layer3"></div>
@@ -253,20 +269,49 @@ const db = getFirestore(initializeApp({
 let currentZoom="", currentProfile="";
 let isAdmin=false;
 
+// 🔥 VIDEO LIST
+const videos=[
+  "https://cdn.coverr.co/videos/coverr-modern-house-with-pool-1573/1080p.mp4",
+  "https://cdn.coverr.co/videos/coverr-luxury-home-exterior-2605/1080p.mp4",
+  "https://cdn.coverr.co/videos/coverr-luxury-modern-house-1570/1080p.mp4"
+];
+
+let vidIndex=0;
+
+function loadVideo(){
+  const v=document.getElementById("bgVideo");
+  v.classList.add("fade-out");
+
+  setTimeout(()=>{
+    v.src=videos[vidIndex];
+    v.load();
+    v.classList.remove("fade-out");
+  },500);
+}
+
+window.nextVideo=()=>{
+  vidIndex=(vidIndex+1)%videos.length;
+  loadVideo();
+};
+
+// AUTO ROTATE
+setInterval(()=>{
+  vidIndex=(vidIndex+1)%videos.length;
+  loadVideo();
+},10000);
+
 // LOGIN
 window.login=()=>{
-  if(user.value==="admin" && pass.value==="123"){
-    isAdmin=true;
-  }
+  if(user.value==="admin" && pass.value==="123") isAdmin=true;
 
   if(pass.value==="123"){
     loginBox.style.display="none";
     credit.style.display="none";
     app.style.display="block";
+    loadVideo();
   }
 };
 
-// DATA
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -281,7 +326,6 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 
-// CREATE UI
 function create(data,type=""){
   Object.keys(data).forEach(layerKey=>{
     const c=document.getElementById(layerKey);
@@ -314,32 +358,26 @@ create(layers);
 create(pamangkin);
 create(gallery,"gallery");
 
-// UPLOAD
 window.upload=(e,id)=>{
   if(!isAdmin) return alert("Admin only");
-
   const r=new FileReader();
   r.onload=()=>setDoc(doc(db,"familyTree",id),{image:r.result});
   r.readAsDataURL(e.target.files[0]);
 };
 
-// ZOOM
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
-// DELETE
 window.deletePhoto=async()=>{
   if(!isAdmin) return alert("Admin only");
-
   await deleteDoc(doc(db,"familyTree",currentZoom));
   document.getElementById(currentZoom).src="";
   zoomBox.style.display="none";
 };
 
-// PROFILE
 window.openProfile=async(id,name)=>{
   currentProfile=id;
   profileName.innerText=name;
