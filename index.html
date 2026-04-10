@@ -7,14 +7,9 @@
     body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
     header {background:linear-gradient(to right, red, purple); color:white; padding:15px; font-size:22px;}
 
-    .layer {
-      display:flex;
-      justify-content:center;
-      flex-wrap:wrap;
-      margin:20px 0;
-    }
+    .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
 
-    /* 🔥 ORIGINAL CARD STYLE (FLOATING + BORDER) */
+    /* FLOATING CARD */
     .card {
       background:white;
       margin:12px;
@@ -27,19 +22,10 @@
       transition:0.3s;
     }
 
-    .card:hover {
-      transform:translateY(-5px);
-    }
+    .card:hover {transform:translateY(-5px);}
 
-    /* PAMANGKIN (SLIGHTLY BIGGER) */
-    .card.pamangkin {
-      width:180px;
-    }
-
-    /* GALLERY (SLIGHTLY BIGGER) */
-    .card.gallery {
-      width:180px;
-    }
+    .card.pamangkin {width:180px;}
+    .card.gallery {width:180px;}
 
     img {
       width:100%;
@@ -56,6 +42,7 @@
       padding:5px;
       border-radius:6px;
       background:#fff;
+      cursor:pointer;
     }
 
     .title {
@@ -89,7 +76,7 @@
       border-left:4px solid purple;
     }
 
-    #zoomBox {
+    #profileBox, #zoomBox {
       display:none;
       position:fixed;
       top:50%; left:50%;
@@ -110,11 +97,7 @@
       z-index:999;
     }
 
-    #zoomBox img {
-      width:250px;
-      height:auto;
-    }
-
+    #zoomBox img {width:250px; height:auto;}
   </style>
 </head>
 
@@ -123,14 +106,14 @@
 <header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
 
 <div id="loginBox" class="box">
-  <input id="user"><br>
-  <input id="pass" type="password"><br>
+  <input id="user" placeholder="Username"><br>
+  <input id="pass" type="password" placeholder="Password"><br>
   <button onclick="login()">Login</button>
 </div>
 
 <div id="app" style="display:none;">
 
-  <!-- FAMILY (UNCHANGED STRUCTURE) -->
+  <!-- FAMILY -->
   <div class="layer" id="layer1"></div>
   <div class="layer" id="layer2"></div>
   <div class="layer" id="layer3"></div>
@@ -150,6 +133,17 @@
 
   <div id="overlay" onclick="closeAll()"></div>
 
+  <!-- PROFILE -->
+  <div id="profileBox">
+    <h3 id="profileName"></h3>
+    <input id="birthday" placeholder="Birthday"><br>
+    <input id="address" placeholder="Address"><br>
+    <input id="contact" placeholder="Contact"><br>
+    <input id="email" placeholder="Email"><br>
+    <button onclick="saveProfile()">Save</button>
+    <button onclick="closeAll()">Close</button>
+  </div>
+
   <!-- ZOOM -->
   <div id="zoomBox">
     <img id="zoomImg"><br>
@@ -159,7 +153,7 @@
 
   <!-- COMMENTS -->
   <div class="box">
-    <input id="comment">
+    <input id="comment" placeholder="Write comment...">
     <button onclick="addComment()">Post</button>
     <div id="comments"></div>
   </div>
@@ -176,7 +170,7 @@ const db = getFirestore(initializeApp({
   projectId:"family-web-10cb8"
 }));
 
-let currentUser="", currentZoom="";
+let currentUser="", currentZoom="", currentProfile="";
 
 // LOGIN
 if(localStorage.getItem("user")){
@@ -190,7 +184,7 @@ window.login=()=>{
   }
 };
 
-// 🔥 ORIGINAL FAMILY STRUCTURE (BINALIK)
+// FAMILY (ORIGINAL)
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -207,7 +201,7 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","","",""]; }
 
-// CREATE FUNCTION (UNCHANGED LOGIC)
+// CREATE
 function create(data,type=""){
   Object.keys(data).forEach(layerKey=>{
     const c=document.getElementById(layerKey);
@@ -218,7 +212,7 @@ function create(data,type=""){
       c.innerHTML+=`
       <div class="card ${type}">
         <img id="${id}" onclick="zoom('${id}')">
-        <h4>${name||"Photo"}</h4>
+        <h4 onclick="openProfile('${id}','${name}')">${name||"Photo"}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
 
@@ -231,7 +225,6 @@ function create(data,type=""){
   });
 }
 
-// APPLY (same structure)
 create(layers);
 create(pamangkin,"pamangkin");
 create(gallery,"gallery");
@@ -256,9 +249,42 @@ window.deletePhoto=async()=>{
   await deleteDoc(doc(db,"familyTree",currentZoom));
 };
 
+// PROFILE
+window.openProfile=(id,name)=>{
+  currentProfile=id;
+  profileName.innerText=name;
+  profileBox.style.display="block";
+  overlay.style.display="block";
+
+  onSnapshot(doc(db,"profiles",id),(snap)=>{
+    if(snap.exists()){
+      let d=snap.data();
+      birthday.value=d.birthday||"";
+      address.value=d.address||"";
+      contact.value=d.contact||"";
+      email.value=d.email||"";
+    }else{
+      birthday.value="";
+      address.value="";
+      contact.value="";
+      email.value="";
+    }
+  });
+};
+
+window.saveProfile=()=>{
+  setDoc(doc(db,"profiles",currentProfile),{
+    birthday:birthday.value,
+    address:address.value,
+    contact:contact.value,
+    email:email.value
+  });
+};
+
 // CLOSE
 window.closeAll=()=>{
   zoomBox.style.display="none";
+  profileBox.style.display="none";
   overlay.style.display="none";
 };
 
