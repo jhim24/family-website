@@ -132,13 +132,13 @@
 
 <header>
   <div class="header-title">LOZADA FAMILY ULTIMATE</div>
-  <div class="quote">"Family is everything."</div>
+  <div class="quote">"Family is not an important thing. It's everything."</div>
 </header>
 
 <div id="loginBox">
   <h2>HI WELCOME</h2>
-  <input id="user"><br>
-  <input id="pass" type="password"><br>
+  <input id="user" placeholder="Username"><br>
+  <input id="pass" type="password" placeholder="Password"><br>
   <button onclick="login()">Login</button>
 </div>
 
@@ -183,12 +183,22 @@ const supabase = window.supabase.createClient(
   "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB"
 );
 
+/* 🔐 LOGIN FIX */
 function login(){
-  loginBox.style.display="none";
-  credit.style.display="none";
-  app.style.display="block";
+  const u = user.value.trim();
+  const p = pass.value.trim();
+
+  if(u === "admin" && p === "1234"){
+    loginBox.style.display="none";
+    credit.style.display="none";
+    app.style.display="block";
+    loadImages();
+  } else {
+    alert("Wrong username/password!");
+  }
 }
 
+/* DATA */
 const sections={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA","JERBOY LOZADA"],
@@ -201,6 +211,7 @@ for(let i=1;i<=5;i++){
   sections["gallery"+i]=["","","",""];
 }
 
+/* CREATE UI */
 function create(){
   Object.keys(sections).forEach(k=>{
     const el=document.getElementById(k);
@@ -215,44 +226,38 @@ function create(){
     });
   });
 }
-
 create();
 
-// UPLOAD
+/* UPLOAD */
 async function upload(e,id){
-  try{
-    const file=e.target.files[0];
-    if(!file) return;
+  const file=e.target.files[0];
+  if(!file) return;
 
-    const fileName=id+"_"+Date.now();
+  const fileName=id+"_"+Date.now();
 
-    const {error}=await supabase.storage
-      .from("family")
-      .upload(fileName,file);
+  const {error}=await supabase.storage.from("family").upload(fileName,file);
 
-    if(error){ alert("Upload failed"); return; }
-
-    const {data}=supabase.storage.from("family").getPublicUrl(fileName);
-
-    await supabase.from("images").upsert({
-      id:id,
-      url:data.publicUrl
-    });
-
-    document.getElementById(id).src=data.publicUrl;
-
-    alert("Uploaded!");
-  }catch(err){
-    alert("Error!");
-    console.log(err);
+  if(error){
+    alert("Upload failed!");
+    console.log(error);
+    return;
   }
+
+  const {data}=supabase.storage.from("family").getPublicUrl(fileName);
+
+  await supabase.from("images").upsert({
+    id:id,
+    url:data.publicUrl
+  });
+
+  document.getElementById(id).src=data.publicUrl;
+
+  alert("Upload success!");
 }
 
-// LOAD
+/* LOAD IMAGES */
 async function loadImages(){
-  const {data,error}=await supabase.from("images").select("*");
-
-  if(error){ console.log(error); return; }
+  const {data}=await supabase.from("images").select("*");
 
   data.forEach(row=>{
     const img=document.getElementById(row.id);
@@ -260,10 +265,7 @@ async function loadImages(){
   });
 }
 
-// AUTO LOAD
-setTimeout(loadImages,1000);
-
-// ZOOM
+/* ZOOM */
 function zoom(id){
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
