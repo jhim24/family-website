@@ -59,7 +59,7 @@
     .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
     .comment {background:#fff; padding:10px; margin:5px; border-radius:8px;}
 
-    /* ZOOM */
+    /* 🔥 ZOOM */
     #zoomBox {
       display:none;
       position:fixed;
@@ -69,13 +69,17 @@
       padding:25px;
       border-radius:12px;
       z-index:1000;
+      max-width:90%;
     }
 
     #zoomBox img {
-      width:50vw;
-      max-width:500px;
+      width:70vw;
+      max-width:700px;
+      height:auto;
       border-radius:12px;
-      transition: transform 0.2s;
+
+      transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+      transition: transform 0.2s ease;
 
       box-shadow:
         0 0 20px rgba(255,0,255,0.6),
@@ -99,7 +103,6 @@
       margin:10px;
     }
 
-    /* PROFILE POPUP */
     #profileBox {
       display:none;
       position:fixed;
@@ -191,7 +194,6 @@ const db = getFirestore(initializeApp({
 
 let currentUser="", currentZoom="", currentProfile="";
 
-/* LOGIN */
 if(localStorage.getItem("user")){
   currentUser=localStorage.getItem("user");
   loginBox.style.display="none";
@@ -207,7 +209,6 @@ window.login=()=>{
   }
 };
 
-/* DATA */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -222,7 +223,6 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=10;i++){ gallery["gallery"+i]=["","","","",""]; }
 
-/* CREATE */
 function create(data){
   Object.keys(data).forEach(layer=>{
     const c=document.getElementById(layer);
@@ -250,14 +250,12 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* UPLOAD */
 window.upload=(e,id)=>{
   const reader=new FileReader();
   reader.onload=()=>setDoc(doc(db,"familyTree",id),{image:reader.result});
   reader.readAsDataURL(e.target.files[0]);
 };
 
-/* ZOOM + 3D */
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
@@ -291,7 +289,6 @@ window.closeAll=()=>{
   overlay.style.display="none";
 };
 
-/* PROFILE */
 window.openProfile=async(name,id)=>{
   currentProfile=id;
   profileBox.style.display="block";
@@ -323,7 +320,6 @@ window.closeProfile=()=>{
   overlay.style.display="none";
 };
 
-/* COMMENTS */
 window.addComment=()=>{
   if(!comment.value) return;
 
