@@ -4,7 +4,13 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {font-family: Arial; background:#111; margin:0; text-align:center; color:white;}
+    body {
+      font-family: Arial;
+      background:#111;
+      margin:0;
+      text-align:center;
+      color:white;
+    }
 
     header {
       background:linear-gradient(to right, red, purple);
@@ -46,6 +52,8 @@
       cursor:pointer;
     }
 
+    #credit { font-size:12px; opacity:0.7; margin-top:5px; }
+
     .layer, .layer.fixed {
       display:grid;
       grid-template-columns:repeat(4,180px);
@@ -54,12 +62,18 @@
       margin:30px auto;
     }
 
+    #layer1, #layer2, #layer3 {
+      gap:40px;
+      margin:40px auto;
+    }
+
     .card {
       background:#1c1c1c;
       padding:12px;
       border-radius:14px;
       border:2px solid purple;
       width:180px;
+      box-shadow:0 0 10px rgba(255,0,255,0.3);
     }
 
     img {
@@ -76,6 +90,7 @@
       border:2px solid red;
       padding:5px;
       border-radius:6px;
+      cursor:pointer;
     }
 
     .title {
@@ -86,6 +101,37 @@
       margin-top:20px;
     }
 
+    .family-section {
+      position:relative;
+      padding:20px 10px;
+      overflow:hidden;
+      background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
+    }
+
+    .content { position:relative; z-index:2; }
+
+    .pamangkin-section {
+      background:repeating-linear-gradient(45deg,#1a1a1a,#1a1a1a 10px,#222 10px,#222 20px);
+      padding:20px;
+    }
+
+    .gallery-section {
+      background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      padding:20px;
+    }
+
+    #profileBox {
+      display:none;
+      position:fixed;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      background:#222;
+      padding:20px;
+      border-radius:12px;
+      z-index:2000;
+    }
+
     #zoomBox {
       display:none;
       position:fixed;
@@ -94,6 +140,7 @@
       width:100%;
       height:100%;
       background:rgba(0,0,0,0.8);
+      z-index:1500;
       justify-content:center;
       align-items:center;
       flex-direction:column;
@@ -116,14 +163,49 @@
 
 <div id="loginBox">
   <h2>HI WELCOME</h2>
+  <input id="user"><br>
+  <input id="pass" type="password"><br>
   <button onclick="login()">Login</button>
 </div>
 
+<div id="credit">CREATED BY: JEMMEL LOZADA</div>
+
 <div id="app" style="display:none;">
 
-  <h2 class="title">FAMILY</h2>
-  <div class="layer" id="layer1"></div>
+  <div class="family-section">
+    <div class="content">
+      <h2 class="title">FAMILY</h2>
+      <div class="layer" id="layer1"></div>
+      <div class="layer" id="layer2"></div>
+      <div class="layer" id="layer3"></div>
+    </div>
+  </div>
 
+  <div class="pamangkin-section">
+    <h2 class="title">PAMANGKIN</h2>
+    <div class="layer fixed" id="pamangkin1"></div>
+    <div class="layer fixed" id="pamangkin2"></div>
+  </div>
+
+  <div class="gallery-section">
+    <h2 class="title">GALLERY</h2>
+    <div class="layer fixed" id="gallery1"></div>
+    <div class="layer fixed" id="gallery2"></div>
+    <div class="layer fixed" id="gallery3"></div>
+    <div class="layer fixed" id="gallery4"></div>
+    <div class="layer fixed" id="gallery5"></div>
+  </div>
+
+</div>
+
+<div id="profileBox">
+  <h3 id="profileName"></h3>
+  <input id="birthday"><br>
+  <input id="address"><br>
+  <input id="contact"><br>
+  <input id="email"><br>
+  <button onclick="saveProfile()">Save</button>
+  <button onclick="closeAll()">Close</button>
 </div>
 
 <div id="zoomBox">
@@ -133,14 +215,27 @@
 
 <script>
 
+let currentZoom="";
+
 window.login=()=>{
   loginBox.style.display="none";
+  credit.style.display="none";
   app.style.display="block";
 };
 
-const data={
-  layer1:["DELIA LOZADA","JIMMY LOZADA","JEMMEL LOZADA","JISA LOZADA"]
+const layers={
+  layer1:["DELIA LOZADA","JIMMY LOZADA"],
+  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
+  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
 };
+
+const pamangkin={
+  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
+  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
+};
+
+const gallery={};
+for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 
 function create(data){
   Object.keys(data).forEach(k=>{
@@ -156,7 +251,6 @@ function create(data){
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
 
-      /* LOAD SAVED IMAGE */
       const saved = localStorage.getItem(id);
       if(saved){
         document.getElementById(id).src = saved;
@@ -165,7 +259,9 @@ function create(data){
   });
 }
 
-create(data);
+create(layers);
+create(pamangkin);
+create(gallery);
 
 /* 🔥 CLOUDINARY UPLOAD */
 window.upload = async(e,id)=>{
@@ -174,7 +270,7 @@ window.upload = async(e,id)=>{
 
   const formData=new FormData();
   formData.append("file",file);
-  formData.append("upload_preset","family_upload"); // palitan kung iba
+  formData.append("upload_preset","family_upload");
 
   const res = await fetch("https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload",{
     method:"POST",
@@ -186,20 +282,18 @@ window.upload = async(e,id)=>{
   const url = data.secure_url;
 
   document.getElementById(id).src = url;
-
-  /* SAVE LOCAL */
   localStorage.setItem(id,url);
-
-  alert("Upload success!");
 };
 
 window.zoom=(id)=>{
+  currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
 window.closeAll=()=>{
   zoomBox.style.display="none";
+  profileBox.style.display="none";
 };
 
 </script>
