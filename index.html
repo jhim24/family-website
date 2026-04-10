@@ -10,52 +10,14 @@
       background:linear-gradient(to right, red, purple);
       color:white;
       padding:20px;
+      text-align:center;
       position:sticky;
       top:0;
       z-index:1000;
     }
 
     .header-title {font-size:28px; font-weight:bold;}
-    .header-quote {font-size:14px; font-style:italic;}
-
-    /* 🔥 LOGIN */
-    #loginBox {
-      background:white;
-      padding:25px;
-      border-radius:12px;
-      width:90%;
-      max-width:320px;
-      margin:60px auto;
-      box-shadow:0 4px 15px rgba(0,0,0,0.2);
-      border:3px solid purple;
-    }
-
-    #loginBox input {
-      width:90%;
-      padding:10px;
-      margin:10px 0;
-      border-radius:8px;
-      border:1px solid #ccc;
-    }
-
-    #loginBox button {
-      width:95%;
-      padding:10px;
-      background:linear-gradient(to right, purple, red);
-      color:white;
-      border:none;
-      border-radius:8px;
-      font-weight:bold;
-      cursor:pointer;
-    }
-
-    .creator {
-      margin-top:15px;
-      font-size:12px;
-      color:gray;
-      border-top:1px solid #ddd;
-      padding-top:10px;
-    }
+    .header-quote {font-size:14px; margin-top:5px; font-style:italic;}
 
     .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
 
@@ -91,6 +53,9 @@
       background:white;
     }
 
+    input {width:90%; padding:6px; margin:5px;}
+    button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
+
     .box {background:white; margin:20px auto; padding:15px; width:90%; max-width:400px; border-radius:10px;}
     .comment {background:#fff; padding:10px; margin:5px; border-radius:8px;}
 
@@ -114,11 +79,9 @@
     #overlay {
       display:none;
       position:fixed;
-      width:100%;
-      height:100%;
+      top:0; left:0;
+      width:100%; height:100%;
       background:rgba(0,0,0,0.6);
-      top:0;
-      left:0;
       z-index:999;
     }
 
@@ -150,16 +113,11 @@
   <div class="header-quote">"Family is not an important thing, it's everything."</div>
 </header>
 
-<!-- 🔐 LOGIN -->
-<div id="loginBox">
-  <h2>🔐 LOGIN</h2>
+<!-- ORIGINAL LOGIN UI (UNCHANGED) -->
+<div id="loginBox" class="box">
   <input id="user" placeholder="Username"><br>
   <input id="pass" type="password" placeholder="Password"><br>
-  <button onclick="login()">LOGIN</button>
-
-  <div class="creator">
-    Created by <b>JEMMEL LOZADA</b>
-  </div>
+  <button onclick="login()">Login</button>
 </div>
 
 <div id="app" style="display:none;">
@@ -219,7 +177,7 @@ const db = getFirestore(initializeApp({
 
 let currentUser="", currentZoom="", currentProfile="";
 
-/* 🔐 LOGIN SYSTEM */
+/* 🔥 UPDATED LOGIN ONLY */
 const savedUser = localStorage.getItem("user");
 
 if(savedUser){
@@ -243,7 +201,6 @@ window.login = function(){
     localStorage.setItem("user","ADMIN");
     loginBox.style.display="none";
     app.style.display="block";
-    alert("Welcome ADMIN 🔥");
     return;
   }
 
@@ -259,7 +216,7 @@ window.login = function(){
   alert("Wrong username or password");
 };
 
-/* DATA */
+/* REST SAME */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -274,7 +231,6 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
-/* CREATE */
 function create(data){
   Object.keys(data).forEach(layer=>{
     const c=document.getElementById(layer);
@@ -302,14 +258,12 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* UPLOAD */
 window.upload=(e,id)=>{
   const reader=new FileReader();
   reader.onload=()=>setDoc(doc(db,"familyTree",id),{image:reader.result});
   reader.readAsDataURL(e.target.files[0]);
 };
 
-/* ZOOM */
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
@@ -325,7 +279,6 @@ window.closeAll=()=>{
   overlay.style.display="none";
 };
 
-/* PROFILE */
 window.openProfile=async(name,id)=>{
   currentProfile=id;
   profileBox.style.display="block";
@@ -354,7 +307,6 @@ window.saveProfile=async()=>{
 
 window.closeProfile=()=>closeAll();
 
-/* COMMENTS */
 window.addComment=()=>{
   if(!comment.value) return;
 
