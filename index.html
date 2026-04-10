@@ -50,16 +50,19 @@
 
     #zoomBox img {
       width:250px;
-      height:auto;
     }
 
+    /* 🔥 VIDEO FRAME (UPDATED) */
     .slideshow {
-      width:90%;
-      max-width:300px;
+      width:95%;
+      max-width:450px;
       margin:20px auto;
+      background:black;
+      padding:10px;
+      border-radius:12px;
     }
 
-    .slideshow img {
+    video {
       width:100%;
       border-radius:10px;
     }
@@ -79,21 +82,22 @@
 
 <div id="app" style="display:none;">
 
-  <!-- FAMILY -->
   <div class="layer" id="layer1"></div>
   <div class="layer" id="layer2"></div>
   <div class="layer" id="layer3"></div>
 
-  <!-- PAMANGKIN -->
   <h2 class="title">PAMANGKIN</h2>
   <div class="layer" id="pamangkin1"></div>
   <div class="layer" id="pamangkin2"></div>
 
-  <!-- 🔥 AUTO SLIDESHOW -->
-  <h2 class="title">GALLERY SLIDESHOW</h2>
+  <!-- 🔥 VIDEO SLIDESHOW -->
+  <h2 class="title">VIDEO SLIDESHOW</h2>
   <div class="slideshow">
-    <img id="slideImg">
+    <video id="slideVideo" autoplay muted loop controls></video>
   </div>
+
+  <!-- upload video -->
+  <input type="file" accept="video/*" onchange="uploadVideo(event)">
 
   <!-- GALLERY -->
   <h2 class="title">GALLERY</h2>
@@ -110,7 +114,6 @@
 
   <div id="overlay" onclick="closeAll()"></div>
 
-  <!-- PROFILE -->
   <div id="profileBox">
     <h3 id="profileName"></h3>
     <input id="birthday"><br>
@@ -121,14 +124,12 @@
     <button onclick="closeAll()">Close</button>
   </div>
 
-  <!-- 🔥 ZOOM -->
   <div id="zoomBox">
     <img id="zoomImg"><br>
     <button onclick="deletePhoto()">Delete</button>
     <button onclick="closeAll()">Close</button>
   </div>
 
-  <!-- COMMENTS -->
   <div class="box">
     <input id="comment">
     <button onclick="addComment()">Post</button>
@@ -147,7 +148,7 @@ const db = getFirestore(initializeApp({
   projectId:"family-web-10cb8"
 }));
 
-let currentUser="", currentProfile="", currentZoom="";
+let currentUser="", currentZoom="";
 
 // LOGIN
 if(localStorage.getItem("user")){
@@ -161,7 +162,33 @@ window.login=()=>{
   }
 };
 
-// DATA
+// 🔥 VIDEO SYSTEM
+let videos=[];
+let vIndex=0;
+
+onSnapshot(doc(db,"videos","main"),(snap)=>{
+  if(snap.exists()){
+    videos=snap.data().list || [];
+  }
+});
+
+setInterval(()=>{
+  if(videos.length>0){
+    slideVideo.src=videos[vIndex % videos.length];
+    vIndex++;
+  }
+},5000);
+
+window.uploadVideo=(e)=>{
+  const r=new FileReader();
+  r.onload=async()=>{
+    videos.push(r.result);
+    await setDoc(doc(db,"videos","main"),{list:videos});
+  };
+  r.readAsDataURL(e.target.files[0]);
+};
+
+// EXISTING CODE (UNCHANGED)
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -175,9 +202,6 @@ const pamangkin={
 
 const gallery={};
 for(let i=1;i<=10;i++){ gallery["gallery"+i]=["","","","","",""]; }
-
-// CREATE
-let slideImages=[];
 
 function create(data){
   Object.keys(data).forEach(layerKey=>{
@@ -195,12 +219,7 @@ function create(data){
 
       onSnapshot(doc(db,"familyTree",id),(snap)=>{
         if(snap.exists()){
-          const img=snap.data().image;
-          document.getElementById(id).src=img;
-
-          if(!slideImages.includes(img)){
-            slideImages.push(img);
-          }
+          document.getElementById(id).src=snap.data().image;
         }
       });
     });
@@ -211,14 +230,12 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-// UPLOAD
 window.upload=(e,id)=>{
   const r=new FileReader();
   r.onload=()=>setDoc(doc(db,"familyTree",id),{image:r.result});
   r.readAsDataURL(e.target.files[0]);
 };
 
-// ZOOM
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
@@ -226,27 +243,15 @@ window.zoom=(id)=>{
   overlay.style.display="block";
 };
 
-// DELETE
 window.deletePhoto=async()=>{
   await deleteDoc(doc(db,"familyTree",currentZoom));
-  zoomImg.src="";
 };
 
-// CLOSE
 window.closeAll=()=>{
   profileBox.style.display="none";
   zoomBox.style.display="none";
   overlay.style.display="none";
 };
-
-// SLIDESHOW
-let index=0;
-setInterval(()=>{
-  if(slideImages.length>0){
-    slideImg.src=slideImages[index % slideImages.length];
-    index++;
-  }
-},2000);
 
 // COMMENTS
 window.addComment=()=>{
