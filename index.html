@@ -121,7 +121,7 @@
     <button onclick="closeAll()">Close</button>
   </div>
 
-  <!-- 🔥 ZOOM -->
+  <!-- ZOOM -->
   <div id="zoomBox">
     <img id="zoomImg"><br>
     <button onclick="deletePhoto()">Delete</button>
@@ -140,14 +140,14 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, deleteDoc, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const db = getFirestore(initializeApp({
   apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   projectId:"family-web-10cb8"
 }));
 
-let currentUser="", currentProfile="", currentZoom="";
+let currentUser="", currentZoom="";
 
 // LOGIN
 if(localStorage.getItem("user")){
@@ -161,16 +161,17 @@ window.login=()=>{
   }
 };
 
-// DATA
+// FAMILY
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
   layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
 };
 
+// 🔥 FIXED PAMANGKIN (BALANCED)
 const pamangkin={
-  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye","Sherwin","Bjoy"],
-  pamangkin2:["Ashley","Union","Jazmine","Apple"]
+  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye","Sherwin"],
+  pamangkin2:["Ashley","Union","Jazmine","Apple","Bjoy"]
 };
 
 const gallery={};
