@@ -62,48 +62,29 @@
     }
 
     #layer3 {
-      display:flex;
       justify-content:center;
-      flex-wrap:wrap;
-      gap:10px;
     }
 
-    #layer3 .card {width:120px;}
-    #layer3 img {height:80px; aspect-ratio:auto;}
-
-    /* 🔥 PAMANGKIN BACKGROUND (TEXTILE STYLE) */
-    .pamangkin-section {
-      background:
-        repeating-linear-gradient(
-          45deg,
-          #1a1a1a,
-          #1a1a1a 10px,
-          #222 10px,
-          #222 20px
-        );
-      padding:20px 10px;
-      margin-top:20px;
-      border-top:2px solid purple;
-      border-bottom:2px solid purple;
+    #layer3 .card {
+      width:120px;
     }
 
-    /* 🔥 GALLERY BACKGROUND (GLASS + GRADIENT) */
-    .gallery-section {
-      background:linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      padding:20px 10px;
-      margin-top:20px;
-      border-top:2px solid red;
-      border-bottom:2px solid red;
+    #layer3 img {
+      height:80px;
+      aspect-ratio:auto;
     }
 
+    /* 🔥 PAMANGKIN (FIXED BALANCED) */
     .layer.fixed {
       display:flex;
       justify-content:center;
       flex-wrap:wrap;
       gap:20px;
-      padding:15px;
+      max-width:700px; /* 🔥 para hindi may solo */
+      margin:auto;
     }
 
+    /* CARDS */
     .card {
       background:#1c1c1c;
       padding:10px;
@@ -138,6 +119,24 @@
       padding:6px 15px;
       border-radius:8px;
       margin-top:20px;
+    }
+
+    /* PAMANGKIN BG */
+    .pamangkin-section {
+      background:repeating-linear-gradient(
+        45deg,
+        #1a1a1a,
+        #1a1a1a 10px,
+        #222 10px,
+        #222 20px
+      );
+      padding:20px 10px;
+    }
+
+    /* GALLERY BG */
+    .gallery-section {
+      background:linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      padding:20px 10px;
     }
 
     /* PROFILE */
@@ -200,14 +199,14 @@
   <div class="layer" id="layer2"></div>
   <div class="layer" id="layer3"></div>
 
-  <!-- 🔥 PAMANGKIN -->
+  <!-- PAMANGKIN -->
   <div class="pamangkin-section">
     <h2 class="title">PAMANGKIN</h2>
     <div class="layer fixed" id="pamangkin1"></div>
     <div class="layer fixed" id="pamangkin2"></div>
   </div>
 
-  <!-- 🔥 GALLERY -->
+  <!-- GALLERY -->
   <div class="gallery-section">
     <h2 class="title">GALLERY</h2>
     <div class="layer fixed" id="gallery1"></div>
