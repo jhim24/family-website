@@ -313,22 +313,28 @@ function create(data){
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
       onSnapshot(doc(db,"familyTree",id),(snap)=>{
-        if(snap.exists()){
-          document.getElementById(id).src=snap.data().image;
-        }
-      });
-    });
-  });
-}
+  if(snap.exists()){
+    const img = document.getElementById(id);
+    img.src = snap.data().image + "?t=" + new Date().getTime(); // 🔥 anti-cache
+  }
+});
 
 create(layers);
 create(pamangkin);
 create(gallery);
 
 window.upload=(e,id)=>{
-  const r=new FileReader();
-  r.onload=()=>setDoc(doc(db,"familyTree",id),{image:r.result});
-  r.readAsDataURL(e.target.files[0]);
+  const file = e.target.files[0];
+  const r = new FileReader();
+
+  r.onload=async()=>{
+    await setDoc(doc(db,"familyTree",id),{
+      image:r.result,
+      updated:Date.now() // 🔥 trigger update
+    });
+  };
+
+  r.readAsDataURL(file);
 };
 
 window.saveProfile=async()=>{
