@@ -4,21 +4,30 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {
-      font-family: Arial;
-      background:#f0f0f0;
-      margin:0;
-      text-align:center;
-    }
+    body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
 
+    /* HEADER */
     header {
       background:linear-gradient(to right, red, purple);
       color:white;
       padding:20px;
-      font-size:22px;
+      text-align:center;
       position:sticky;
       top:0;
-      z-index:300;
+      z-index:1000;
+    }
+
+    .header-title {
+      font-size:28px;
+      font-weight:bold;
+      letter-spacing:2px;
+    }
+
+    .header-quote {
+      font-size:14px;
+      margin-top:5px;
+      font-style:italic;
+      opacity:0.9;
     }
 
     .layer {
@@ -32,15 +41,16 @@
       background:white;
       margin:10px;
       padding:10px;
-      width:150px;
+      width: clamp(140px, 22vw, 180px);
       border-radius:12px;
       box-shadow:0 4px 10px rgba(0,0,0,0.2);
       border:3px solid purple;
+      cursor:pointer;
     }
 
     img {
       width:100%;
-      height:120px;
+      height: clamp(110px, 18vw, 150px);
       object-fit:cover;
       border-radius:8px;
       background:#ddd;
@@ -61,71 +71,16 @@
       background:white;
     }
 
-    input {width:90%; margin:5px;}
+    input {width:90%; padding:6px; margin:5px;}
     button {padding:6px 10px; background:purple; color:white; border:none; border-radius:5px;}
-
-    .pamangkin-bg {
-      background:linear-gradient(to right, #ffe0e0, #ffd6ff);
-      padding:15px;
-      border-radius:10px;
-      margin:10px;
-    }
-
-    .gallery-bg {
-      background:linear-gradient(to right, #d0f0ff, #e0fff5);
-      padding:15px;
-      border-radius:10px;
-      margin:10px;
-    }
-
-    /* 🔥 HOLOGRAM ZOOM */
-    #zoomBox {
-      display:none;
-      position:fixed;
-      top:50%;
-      left:50%;
-      transform:translate(-50%,-50%);
-      background:black;
-      padding:20px;
-      border-radius:15px;
-      z-index:1000;
-      box-shadow:
-        0 0 20px #ff00ff,
-        0 0 40px #00ffff,
-        0 0 60px #ff00ff;
-    }
-
-    #zoomImg {
-      width:50vw;
-      max-width:400px;
-      border-radius:12px;
-
-      transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
-      transition: transform 0.2s;
-
-      box-shadow:
-        0 0 20px rgba(255,0,255,0.8),
-        0 0 40px rgba(0,255,255,0.6),
-        0 0 60px rgba(255,0,255,0.4);
-    }
-
-    #overlay {
-      display:none;
-      position:fixed;
-      width:100%;
-      height:100%;
-      background:rgba(0,0,0,0.8);
-      top:0;
-      left:0;
-      z-index:999;
-    }
 
     .box {
       background:white;
       margin:20px auto;
-      padding:10px;
+      padding:15px;
       width:90%;
       max-width:400px;
+      border-radius:10px;
     }
 
     .comment {
@@ -135,14 +90,59 @@
       border-radius:8px;
       text-align:left;
     }
+
+    /* 🔥 HOLOGRAM ZOOM BOX */
+    #zoomBox {
+      display:none;
+      position:fixed;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      background:white;
+      padding:25px;
+      border-radius:12px;
+      box-shadow:0 0 25px rgba(0,0,0,0.6);
+      z-index:1000;
+    }
+
+    #zoomBox img {
+      width:50vw;
+      max-width:500px;
+      height:auto;
+      border-radius:12px;
+
+      transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+      transition: transform 0.2s ease;
+
+      box-shadow:
+        0 0 20px rgba(255,0,255,0.6),
+        0 0 40px rgba(0,255,255,0.4),
+        0 0 60px rgba(255,0,255,0.3);
+    }
+
+    #overlay {
+      display:none;
+      position:fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(0,0,0,0.6);
+      z-index:999;
+    }
+
+    .family-bg {
+      background: url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
+      padding:20px 0;
+      border-radius:12px;
+      margin:10px;
+    }
+
   </style>
 </head>
 
 <body>
 
 <header>
-  👨‍👩‍👧‍👦 LOZADA FAMILY ULTIMATE <br>
-  <small>"Family is not an important thing, it's everything."</small>
+  <div class="header-title">👨‍👩‍👧‍👦 LOZADA FAMILY ULTIMATE</div>
+  <div class="header-quote">"Family is not an important thing, it's everything."</div>
 </header>
 
 <div id="loginBox" class="box">
@@ -153,35 +153,38 @@
 
 <div id="app" style="display:none;">
 
-  <div class="layer" id="layer1"></div>
-  <div class="layer" id="layer2"></div>
-  <div class="layer" id="layer3"></div>
+  <div class="family-bg">
+    <div class="layer" id="layer1"></div>
+    <div class="layer" id="layer2"></div>
+    <div class="layer" id="layer3"></div>
+  </div>
 
   <h2 class="title">PAMANGKIN</h2>
-  <div class="pamangkin-bg">
-    <div class="layer" id="pamangkin1"></div>
-    <div class="layer" id="pamangkin2"></div>
-  </div>
+  <div class="layer" id="pamangkin1"></div>
+  <div class="layer" id="pamangkin2"></div>
 
   <h2 class="title">GALLERY</h2>
-  <div class="gallery-bg">
-    <div class="layer" id="gallery1"></div>
-    <div class="layer" id="gallery2"></div>
-    <div class="layer" id="gallery3"></div>
-    <div class="layer" id="gallery4"></div>
-    <div class="layer" id="gallery5"></div>
-  </div>
+  <div class="layer" id="gallery1"></div>
+  <div class="layer" id="gallery2"></div>
+  <div class="layer" id="gallery3"></div>
+  <div class="layer" id="gallery4"></div>
+  <div class="layer" id="gallery5"></div>
+  <div class="layer" id="gallery6"></div>
+  <div class="layer" id="gallery7"></div>
+  <div class="layer" id="gallery8"></div>
+  <div class="layer" id="gallery9"></div>
+  <div class="layer" id="gallery10"></div>
 
   <div id="overlay" onclick="closeAll()"></div>
 
   <div id="zoomBox">
-    <img id="zoomImg"><br>
+    <img id="zoomImg"><br><br>
     <button onclick="deletePhoto()">Delete</button>
     <button onclick="closeAll()">Close</button>
   </div>
 
   <div class="box">
-    <input id="comment">
+    <input id="comment" placeholder="Write something...">
     <button onclick="addComment()">Post</button>
     <div id="comments"></div>
   </div>
@@ -191,17 +194,19 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-const db = getFirestore(initializeApp({
+const appFirebase = initializeApp({
   apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
   projectId:"family-web-10cb8"
-}));
+});
+
+const db = getFirestore(appFirebase);
 
 let currentUser="", currentZoom="";
 
 if(localStorage.getItem("user")){
-  currentUser=localStorage.getItem("user");
+  currentUser = localStorage.getItem("user");
   loginBox.style.display="none";
   app.style.display="block";
 }
@@ -222,19 +227,19 @@ const layers={
 };
 
 const pamangkin={
-  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
-  pamangkin2:["Sherwin","Ashley","Union","Jazmine","Apple","Bjoy"]
+  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye","Sherwin"],
+  pamangkin2:["Ashley","Union","Jazmine","Apple","Bjoy"]
 };
 
 const gallery={};
-for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
+for(let i=1;i<=10;i++){ gallery["gallery"+i]=["","","","",""]; }
 
 function create(data){
-  Object.keys(data).forEach(layer=>{
-    const c=document.getElementById(layer);
+  Object.keys(data).forEach(layerKey=>{
+    const c=document.getElementById(layerKey);
 
-    data[layer].forEach((name,i)=>{
-      const id=layer+"_"+i;
+    data[layerKey].forEach((name,i)=>{
+      const id=layerKey+"_"+i;
 
       c.innerHTML+=`
       <div class="card">
@@ -242,8 +247,6 @@ function create(data){
         <h4>${name||"Photo"}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
-
-      loadImage(id);
 
       onSnapshot(doc(db,"familyTree",id),(snap)=>{
         if(snap.exists()){
@@ -254,23 +257,37 @@ function create(data){
   });
 }
 
-async function loadImage(id){
-  const snap=await getDoc(doc(db,"familyTree",id));
-  if(snap.exists()){
-    document.getElementById(id).src=snap.data().image;
-  }
-}
-
 create(layers);
 create(pamangkin);
 create(gallery);
 
 window.upload=(e,id)=>{
+  const file=e.target.files[0];
+  if(!file) return;
+
   const reader=new FileReader();
-  reader.onload=()=>{
-    setDoc(doc(db,"familyTree",id),{image:reader.result});
+
+  reader.onload=function(){
+    const img=new Image();
+    img.src=reader.result;
+
+    img.onload=async function(){
+      const canvas=document.createElement("canvas");
+      const ctx=canvas.getContext("2d");
+
+      const scale=300/img.width;
+      canvas.width=300;
+      canvas.height=img.height*scale;
+
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+      const compressed=canvas.toDataURL("image/jpeg",0.7);
+
+      await setDoc(doc(db,"familyTree",id),{image:compressed});
+    };
   };
-  reader.readAsDataURL(e.target.files[0]);
+
+  reader.readAsDataURL(file);
 };
 
 window.zoom=(id)=>{
@@ -278,15 +295,6 @@ window.zoom=(id)=>{
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="block";
   overlay.style.display="block";
-};
-
-window.deletePhoto=async()=>{
-  await deleteDoc(doc(db,"familyTree",currentZoom));
-};
-
-window.closeAll=()=>{
-  zoomBox.style.display="none";
-  overlay.style.display="none";
 };
 
 /* 🔥 3D HOLOGRAM EFFECT */
@@ -305,10 +313,19 @@ zoomImage.addEventListener("mousemove", (e) => {
 });
 
 zoomImage.addEventListener("mouseleave", () => {
-  zoomImage.style.transform = "perspective(1000px) rotateX(0) rotateY(0)";
+  zoomImage.style.transform =
+    "perspective(1000px) rotateX(0deg) rotateY(0deg)";
 });
 
-/* COMMENTS */
+window.deletePhoto=async()=>{
+  await deleteDoc(doc(db,"familyTree",currentZoom));
+};
+
+window.closeAll=()=>{
+  zoomBox.style.display="none";
+  overlay.style.display="none";
+};
+
 window.addComment=()=>{
   if(!comment.value) return;
 
