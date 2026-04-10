@@ -108,14 +108,6 @@
       background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
     }
 
-    .overlay {
-      position:absolute;
-      width:100%;
-      height:100%;
-      background:rgba(0,0,0,0.6);
-      z-index:1;
-    }
-
     .content { position:relative; z-index:2; }
 
     .pamangkin-section {
@@ -140,6 +132,7 @@
       z-index:2000;
     }
 
+    /* 🔥 UPDATED ZOOM (HALF VIEW) */
     #zoomBox {
       display:none;
       position:fixed;
@@ -147,12 +140,24 @@
       left:0;
       width:100%;
       height:100%;
-      background:rgba(0,0,0,0.95);
+      background:rgba(0,0,0,0.8);
       z-index:1500;
       justify-content:center;
       align-items:center;
       flex-direction:column;
     }
+
+    #zoomImg {
+      width:60%;
+      max-width:500px;
+      border-radius:12px;
+      box-shadow:0 0 20px rgba(255,0,255,0.5);
+    }
+
+    #zoomBox button {
+      margin-top:10px;
+    }
+
   </style>
 </head>
 
@@ -283,7 +288,6 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* 🔥 FIXED UPLOAD USING STORAGE */
 window.upload = async(e, id) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -312,8 +316,6 @@ window.saveProfile=async()=>{
 };
 
 window.openProfile=async(id,name)=>{
-  if(app.style.display==="none") return;
-
   currentProfile=id;
   profileName.innerText=name;
   profileBox.style.display="block";
