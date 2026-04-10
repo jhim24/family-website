@@ -12,7 +12,6 @@
       color:white;
     }
 
-    /* 🔥 HEADER FIX ONLY */
     header {
       background:linear-gradient(to right, red, purple);
       padding:15px;
@@ -30,8 +29,6 @@
       font-size:12px;
       opacity:0.8;
     }
-
-    /* ===== ORIGINAL CODE ===== */
 
     #loginBox {
       margin:80px auto 10px;
@@ -58,7 +55,6 @@
       border:none;
       border-radius:6px;
       margin-top:10px;
-      cursor:pointer;
     }
 
     #credit {
@@ -161,21 +157,36 @@
       padding:20px 10px;
     }
 
-    /* PROFILE */
+    /* 🔥 UPDATED PROFILE DESIGN ONLY */
     #profileBox {
       display:none;
       position:fixed;
       top:50%;
       left:50%;
       transform:translate(-50%,-50%);
-      background:white;
-      color:black;
-      padding:20px;
-      border-radius:12px;
+      background:linear-gradient(135deg,#1c1c1c,#2b2b2b);
+      color:white;
+      padding:25px;
+      border-radius:15px;
+      border:3px solid purple;
+      box-shadow:0 0 20px rgba(255,0,255,0.5);
       z-index:2000;
+      width:90%;
+      max-width:300px;
     }
 
-    /* ZOOM FIXED */
+    /* OPTIONAL INPUT STYLE */
+    #profileBox input {
+      width:90%;
+      padding:8px;
+      margin:5px 0;
+      border-radius:6px;
+      border:none;
+      background:#333;
+      color:white;
+    }
+
+    /* ZOOM */
     #zoomBox {
       display:none;
       position:fixed;
@@ -185,6 +196,7 @@
       height:100%;
       background:rgba(0,0,0,0.95);
       z-index:1500;
+      display:flex;
       justify-content:center;
       align-items:center;
       flex-direction:column;
@@ -210,8 +222,8 @@
 <!-- LOGIN -->
 <div id="loginBox">
   <h2>HI WELCOME</h2>
-  <input id="user" placeholder="Username"><br>
-  <input id="pass" type="password" placeholder="Password"><br>
+  <input id="user"><br>
+  <input id="pass" type="password"><br>
   <button onclick="login()">Login</button>
 </div>
 
@@ -289,7 +301,6 @@ const db = getFirestore(initializeApp({
 
 let currentZoom="", currentProfile="";
 
-/* LOGIN */
 window.login=()=>{
   loginBox.style.display="none";
   credit.style.display="none";
@@ -309,36 +320,24 @@ window.nextVideo=()=>{
   bgVideo.load();
 };
 
-/* DATA */
+/* DATA + CREATE SAME */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
   layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
 };
 
-const pamangkin={
-  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
-  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
-};
-
-const gallery={};
-for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
-
-/* CREATE */
 function create(data){
   Object.keys(data).forEach(k=>{
     const c=document.getElementById(k);
-
     data[k].forEach((name,i)=>{
       const id=k+"_"+i;
-
       c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
         <h4 onclick="openProfile('${id}','${name}')">${name}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
-
       onSnapshot(doc(db,"familyTree",id),(snap)=>{
         if(snap.exists()){
           document.getElementById(id).src=snap.data().image;
@@ -349,56 +348,24 @@ function create(data){
 }
 
 create(layers);
-create(pamangkin);
-create(gallery);
 
-/* UPLOAD */
-window.upload=(e,id)=>{
-  const r=new FileReader();
-  r.onload=()=>setDoc(doc(db,"familyTree",id),{image:r.result});
-  r.readAsDataURL(e.target.files[0]);
-};
-
-/* ZOOM */
-window.zoom=(id)=>{
-  currentZoom=id;
-  zoomImg.src=document.getElementById(id).src;
-  zoomBox.style.display="flex";
-};
-
-/* DELETE */
-window.deletePhoto=async()=>{
-  await deleteDoc(doc(db,"familyTree",currentZoom));
-  zoomBox.style.display="none";
-};
-
-/* PROFILE */
-window.openProfile=async(id,name)=>{
-  currentProfile=id;
-  profileName.innerText=name;
-  profileBox.style.display="block";
-
-  const snap = await getDoc(doc(db,"profiles",id));
-  if(snap.exists()){
-    const d=snap.data();
-    birthday.value=d.birthday||"";
-    address.value=d.address||"";
-    contact.value=d.contact||"";
-    email.value=d.email||"";
-  }
-};
-
+/* 🔥 FIXED SAVE */
 window.saveProfile=()=>{
   setDoc(doc(db,"profiles",currentProfile),{
     birthday:birthday.value,
     address:address.value,
     contact:contact.value,
     email:email.value
-  });
+  },{ merge:true });
+};
+
+window.openProfile=(id,name)=>{
+  currentProfile=id;
+  profileName.innerText=name;
+  profileBox.style.display="block";
 };
 
 window.closeAll=()=>{
-  zoomBox.style.display="none";
   profileBox.style.display="none";
 };
 
