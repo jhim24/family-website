@@ -18,9 +18,9 @@
       font-size:22px;
     }
 
-    /* 🔥 LOGIN BOX FIX */
+    /* LOGIN BOX */
     #loginBox {
-      margin:80px auto;
+      margin:80px auto 10px;
       width:90%;
       max-width:300px;
       background:#1c1c1c;
@@ -32,7 +32,6 @@
 
     #loginBox h2 {
       margin-bottom:15px;
-      color:#fff;
     }
 
     #loginBox input {
@@ -41,7 +40,6 @@
       margin:8px 0;
       border-radius:6px;
       border:none;
-      outline:none;
     }
 
     button {
@@ -54,7 +52,14 @@
       cursor:pointer;
     }
 
-    /* MAIN LAYOUT */
+    /* 🔥 CREATED BY */
+    #credit {
+      font-size:12px;
+      opacity:0.7;
+      margin-top:5px;
+    }
+
+    /* LAYOUT */
     .layer {
       display:flex;
       justify-content:center;
@@ -63,7 +68,6 @@
       gap:20px;
     }
 
-    /* LAYER 3 (4 INLINE) */
     #layer3 {
       display:flex;
       justify-content:center;
@@ -71,14 +75,8 @@
       gap:10px;
     }
 
-    #layer3 .card {
-      width:120px;
-    }
-
-    #layer3 img {
-      height:80px;
-      aspect-ratio:auto;
-    }
+    #layer3 .card {width:120px;}
+    #layer3 img {height:80px; aspect-ratio:auto;}
 
     .layer.fixed {
       display:flex;
@@ -93,7 +91,6 @@
       padding:10px;
       border-radius:12px;
       border:2px solid purple;
-      box-shadow:0 0 10px rgba(255,0,255,0.3);
       width:150px;
     }
 
@@ -111,7 +108,6 @@
       border:2px solid red;
       padding:5px;
       border-radius:6px;
-      margin:5px 0;
       cursor:pointer;
     }
 
@@ -168,7 +164,7 @@
 
 <header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
 
-<!-- 🔥 LOGIN -->
+<!-- LOGIN -->
 <div id="loginBox">
   <h2>👋 HI WELCOME</h2>
   <input id="user" placeholder="Username"><br>
@@ -176,19 +172,19 @@
   <button onclick="login()">Login</button>
 </div>
 
+<!-- 🔥 CREDIT -->
+<div id="credit">CREATED BY: JEMMEL LOZADA</div>
+
 <div id="app" style="display:none;">
 
-  <!-- FAMILY -->
   <div class="layer" id="layer1"></div>
   <div class="layer" id="layer2"></div>
   <div class="layer" id="layer3"></div>
 
-  <!-- PAMANGKIN -->
   <h2 class="title">PAMANGKIN</h2>
   <div class="layer fixed" id="pamangkin1"></div>
   <div class="layer fixed" id="pamangkin2"></div>
 
-  <!-- GALLERY -->
   <h2 class="title">GALLERY</h2>
   <div class="layer fixed" id="gallery1"></div>
   <div class="layer fixed" id="gallery2"></div>
@@ -196,7 +192,6 @@
   <div class="layer fixed" id="gallery4"></div>
   <div class="layer fixed" id="gallery5"></div>
 
-  <!-- PROFILE -->
   <div id="profileBox">
     <h3 id="profileName"></h3>
     <input id="birthday"><br>
@@ -207,7 +202,6 @@
     <button onclick="closeAll()">Close</button>
   </div>
 
-  <!-- ZOOM -->
   <div id="zoomBox">
     <img id="zoomImg">
     <div>
@@ -230,15 +224,14 @@ const db = getFirestore(initializeApp({
 
 let currentZoom="", currentProfile="";
 
-// LOGIN
 window.login=()=>{
   if(pass.value==="123"){
     loginBox.style.display="none";
+    credit.style.display="none"; // 🔥 hide credit after login
     app.style.display="block";
   }
 };
 
-// DATA
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -253,7 +246,6 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
-// CREATE
 function create(data,type=""){
   Object.keys(data).forEach(layerKey=>{
     const c=document.getElementById(layerKey);
@@ -286,28 +278,24 @@ create(layers);
 create(pamangkin,"pamangkin");
 create(gallery,"gallery");
 
-// UPLOAD
 window.upload=(e,id)=>{
   const r=new FileReader();
   r.onload=()=>setDoc(doc(db,"familyTree",id),{image:r.result});
   r.readAsDataURL(e.target.files[0]);
 };
 
-// ZOOM
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
-// PROFILE
 window.openProfile=(id,name)=>{
   currentProfile=id;
   profileName.innerText=name;
   profileBox.style.display="block";
 };
 
-// SAVE
 window.saveProfile=()=>{
   setDoc(doc(db,"profiles",currentProfile),{
     birthday:birthday.value,
@@ -317,12 +305,10 @@ window.saveProfile=()=>{
   });
 };
 
-// DELETE
 window.deletePhoto=async()=>{
   await deleteDoc(doc(db,"familyTree",currentZoom));
 };
 
-// CLOSE
 window.closeAll=()=>{
   zoomBox.style.display="none";
   profileBox.style.display="none";
