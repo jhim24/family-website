@@ -9,7 +9,6 @@
 
     .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
 
-    /* FLOATING CARD */
     .card {
       background:white;
       margin:12px;
@@ -25,11 +24,11 @@
     .card:hover {transform:translateY(-5px);}
 
     .card.pamangkin {width:180px;}
-    .card.gallery {width:180px;}
+    .card.gallery {width:200px;} /* 🔥 bigger gallery */
 
     img {
       width:100%;
-      height:130px;
+      height:140px;
       object-fit:cover;
       border-radius:8px;
       background:#ddd;
@@ -97,7 +96,7 @@
       z-index:999;
     }
 
-    #zoomBox img {width:250px; height:auto;}
+    #zoomBox img {width:250px;}
   </style>
 </head>
 
@@ -184,7 +183,7 @@ window.login=()=>{
   }
 };
 
-// FAMILY (ORIGINAL)
+// FAMILY
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -209,10 +208,17 @@ function create(data,type=""){
     data[layerKey].forEach((name,i)=>{
       const id=layerKey+"_"+i;
 
+      let titleClick = "";
+
+      // ❌ WALANG PROFILE SA GALLERY
+      if(type !== "gallery"){
+        titleClick = `onclick="openProfile('${id}','${name}')"`;
+      }
+
       c.innerHTML+=`
       <div class="card ${type}">
         <img id="${id}" onclick="zoom('${id}')">
-        <h4 onclick="openProfile('${id}','${name}')">${name||"Photo"}</h4>
+        <h4 ${titleClick}>${name||"Photo"}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
 
