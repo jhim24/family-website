@@ -5,7 +5,30 @@
 
   <style>
     body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
-    header {background:linear-gradient(to right, red, purple); color:white; padding:15px; font-size:22px;}
+
+    /* 🔥 HEADER UPGRADE */
+    header {
+      background:linear-gradient(to right, red, purple);
+      color:white;
+      padding:20px;
+      text-align:center;
+      position:sticky;
+      top:0;
+      z-index:1000;
+    }
+
+    .header-title {
+      font-size:28px;
+      font-weight:bold;
+      letter-spacing:2px;
+    }
+
+    .header-quote {
+      font-size:14px;
+      margin-top:5px;
+      font-style:italic;
+      opacity:0.9;
+    }
 
     .layer {
       display:flex;
@@ -14,21 +37,17 @@
       margin:20px 0;
     }
 
-    /* 🔥 RESPONSIVE CARD */
     .card {
       background:white;
       margin:10px;
       padding:10px;
-
       width: clamp(140px, 22vw, 180px);
-
       border-radius:12px;
       box-shadow:0 4px 10px rgba(0,0,0,0.2);
       border:3px solid purple;
       cursor:pointer;
     }
 
-    /* 🔥 RESPONSIVE IMAGE */
     img {
       width:100%;
       height: clamp(110px, 18vw, 150px);
@@ -72,16 +91,24 @@
       text-align:left;
     }
 
+    /* 🔥 BIG ZOOM */
     #zoomBox {
       display:none;
       position:fixed;
       top:50%; left:50%;
       transform:translate(-50%,-50%);
       background:white;
-      padding:20px;
+      padding:25px;
       border-radius:12px;
-      box-shadow:0 0 20px rgba(0,0,0,0.5);
+      box-shadow:0 0 25px rgba(0,0,0,0.6);
       z-index:1000;
+    }
+
+    #zoomBox img {
+      width:50vw;
+      max-width:500px;
+      height:auto;
+      border-radius:10px;
     }
 
     #overlay {
@@ -91,10 +118,6 @@
       width:100%; height:100%;
       background:rgba(0,0,0,0.6);
       z-index:999;
-    }
-
-    #zoomBox img {
-      width:260px;
     }
 
     /* 🔥 FAMILY BACKGROUND */
@@ -110,7 +133,10 @@
 
 <body>
 
-<header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
+<header>
+  <div class="header-title">👨‍👩‍👧‍👦 LOZADA FAMILY ULTIMATE</div>
+  <div class="header-quote">"Family is not an important thing, it's everything."</div>
+</header>
 
 <!-- LOGIN -->
 <div id="loginBox" class="box">
@@ -151,7 +177,7 @@
 
   <!-- ZOOM -->
   <div id="zoomBox">
-    <img id="zoomImg"><br>
+    <img id="zoomImg"><br><br>
     <button onclick="deletePhoto()">Delete</button>
     <button onclick="closeAll()">Close</button>
   </div>
