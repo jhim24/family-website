@@ -4,23 +4,8 @@
   <title>Lozada Family Ultimate</title>
 
   <style>
-    body {
-      font-family: Arial;
-      background:#111;
-      margin:0;
-      text-align:center;
-      color:white;
-    }
-
-    header {
-      background:linear-gradient(to right, red, purple);
-      padding:15px;
-      font-size:22px;
-      position:sticky;
-      top:0;
-      z-index:3000;
-    }
-
+    body {font-family: Arial; background:#111; margin:0; text-align:center; color:white;}
+    header {background:linear-gradient(to right, red, purple); padding:15px; font-size:22px; position:sticky; top:0; z-index:3000;}
     .header-title { text-transform:uppercase; }
     .quote { font-size:12px; opacity:0.8; }
 
@@ -153,9 +138,7 @@
       box-shadow:0 0 20px rgba(255,0,255,0.5);
     }
 
-    #zoomBox button {
-      margin-top:10px;
-    }
+    #zoomBox button { margin-top:10px; }
   </style>
 </head>
 
@@ -176,7 +159,6 @@
 <div id="credit">CREATED BY: JEMMEL LOZADA</div>
 
 <div id="app" style="display:none;">
-
   <div class="family-section">
     <div class="content">
       <h2 class="title">FAMILY</h2>
@@ -200,7 +182,6 @@
     <div class="layer fixed" id="gallery4"></div>
     <div class="layer fixed" id="gallery5"></div>
   </div>
-
 </div>
 
 <div id="profileBox">
@@ -256,11 +237,6 @@ function create(data){
         <h4 onclick="openProfile('${id}','${name}')">${name}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
-
-      const saved = localStorage.getItem(id);
-      if(saved){
-        document.getElementById(id).src = saved;
-      }
     });
   });
 }
@@ -269,29 +245,28 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* UPLOAD */
-window.upload = (e,id)=>{
-  const file = e.target.files[0];
+/* 🔥 CLOUDINARY UPLOAD */
+window.upload = async(e,id)=>{
+  const file=e.target.files[0];
   if(!file) return;
 
-  const reader = new FileReader();
+  const formData=new FormData();
+  formData.append("file",file);
+  formData.append("upload_preset","family_upload");
 
-  reader.onload = ()=>{
-    const base64 = reader.result;
+  const res = await fetch("https://api.cloudinary.com/v1_1/djr7nbwwt/image/upload",{
+    method:"POST",
+    body:formData
+  });
 
-    document.getElementById(id).src = base64;
+  const data = await res.json();
 
-    try{
-      localStorage.setItem(id, base64);
-    }catch{
-      alert("Storage full! Delete some photos.");
-    }
-  };
+  const url = data.secure_url;
 
-  reader.readAsDataURL(file);
+  document.getElementById(id).src = url;
 };
 
-/* PROFILE */
+/* PROFILE LOCAL */
 window.saveProfile=()=>{
   localStorage.setItem(currentProfile+"_profile", JSON.stringify({
     birthday:birthday.value,
@@ -315,16 +290,13 @@ window.openProfile=(id,name)=>{
   email.value=data.email||"";
 };
 
-/* ZOOM */
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
-/* DELETE */
 window.deletePhoto=()=>{
-  localStorage.removeItem(currentZoom);
   document.getElementById(currentZoom).src="";
   zoomBox.style.display="none";
 };
