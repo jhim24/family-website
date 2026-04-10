@@ -7,13 +7,20 @@
     body {font-family: Arial; background:#f0f0f0; margin:0; text-align:center;}
     header {background:linear-gradient(to right, red, purple); color:white; padding:15px; font-size:22px;}
 
-    .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
+    /* 🔥 RESPONSIVE GRID */
+    .layer {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));
+      gap:15px;
+      padding:10px;
+      justify-items:center;
+    }
 
     .card {
       background:white;
-      margin:12px;
       padding:10px;
-      width:150px;
+      width:100%;
+      max-width:220px;
       border-radius:12px;
       box-shadow:0 6px 15px rgba(0,0,0,0.3);
       border:3px solid purple;
@@ -23,8 +30,8 @@
 
     .card:hover {transform:translateY(-5px);}
 
-    .card.pamangkin {width:180px;}
-    .card.gallery {width:200px;}
+    .card.pamangkin {max-width:220px;}
+    .card.gallery {max-width:240px;}
 
     img {
       width:100%;
@@ -51,6 +58,7 @@
       border-radius:8px;
       background:white;
       box-shadow:0 3px 8px rgba(0,0,0,0.2);
+      margin-top:15px;
     }
 
     input {width:90%; padding:6px; margin:5px;}
@@ -85,6 +93,8 @@
       border-radius:12px;
       box-shadow:0 0 20px rgba(0,0,0,0.5);
       z-index:1000;
+      width:90%;
+      max-width:300px;
     }
 
     #overlay {
@@ -96,7 +106,13 @@
       z-index:999;
     }
 
-    #zoomBox img {width:250px;}
+    #zoomBox img {width:100%;}
+
+    /* 🔥 EXTRA MOBILE FIX */
+    @media (max-width:600px){
+      img {height:120px;}
+    }
+
   </style>
 </head>
 
@@ -196,7 +212,7 @@ const pamangkin={
   pamangkin2:["Ashley","Union","Jazmine","Apple","Bjoy"]
 };
 
-// 🔥 GALLERY (5 PHOTOS EACH LAYER)
+// GALLERY (5 photos bawat layer)
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
