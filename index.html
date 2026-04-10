@@ -18,11 +18,6 @@
       font-size:22px;
     }
 
-    .quote {
-      font-size:12px;
-      opacity:0.8;
-    }
-
     #loginBox {
       margin:80px auto 10px;
       width:90%;
@@ -96,7 +91,6 @@
       margin-top:20px;
     }
 
-    /* VIDEO BG */
     .family-section {
       position:relative;
       padding:20px;
@@ -135,26 +129,12 @@
       padding:20px;
     }
 
-    #zoomBox, #profileBox {
+    #profileBox {
       display:none;
       position:fixed;
       z-index:2000;
-    }
-
-    #zoomBox {
-      top:0; left:0;
-      width:100%; height:100%;
-      background:rgba(0,0,0,0.95);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      flex-direction:column;
-    }
-
-    #zoomBox img {width:90%;}
-
-    #profileBox {
-      top:50%; left:50%;
+      top:50%;
+      left:50%;
       transform:translate(-50%,-50%);
       background:white;
       color:black;
@@ -162,15 +142,32 @@
       border-radius:12px;
     }
 
+    /* 🔥 FIX LANG ITO */
+    #zoomBox {
+      display:none; /* ← eto lang binago */
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.95);
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+      z-index:2000;
+    }
+
+    #zoomBox img {
+      width:90%;
+      max-width:900px;
+    }
+
   </style>
 </head>
 
 <body>
 
-<header>
-  👨‍👩‍👧‍👦 Lozada Family Ultimate
-  <div class="quote">"Family is not an important thing. It's everything."</div>
-</header>
+<header>👨‍👩‍👧‍👦 Lozada Family Ultimate</header>
 
 <div id="loginBox">
   <h2>HI WELCOME</h2>
@@ -184,7 +181,6 @@
 <div id="app" style="display:none;">
 
   <div class="family-section">
-
     <video id="bgVideo" class="family-video" autoplay muted loop>
       <source id="bgSource" src="https://cdn.coverr.co/videos/coverr-modern-house-with-pool-1573/1080p.mp4">
     </video>
@@ -199,7 +195,6 @@
       <div class="layer" id="layer2"></div>
       <div class="layer" id="layer3"></div>
     </div>
-
   </div>
 
   <div class="pamangkin-section">
@@ -225,105 +220,12 @@
   <button onclick="closeAll()">Close</button>
 </div>
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-const db = getFirestore(initializeApp({
-  apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
-  projectId:"family-web-10cb8"
-}));
-
-let currentZoom="";
-
-// VIDEO
-let vids=[
-  "https://cdn.coverr.co/videos/coverr-modern-house-with-pool-1573/1080p.mp4",
-  "https://cdn.coverr.co/videos/coverr-luxury-home-exterior-2605/1080p.mp4"
-];
-
-let i=0;
-window.nextVideo=()=>{
-  i=(i+1)%vids.length;
-  bgSource.src=vids[i];
-  bgVideo.load();
-};
-
-// LOGIN
-window.login=()=>{
+<script>
+function login(){
   loginBox.style.display="none";
   credit.style.display="none";
   app.style.display="block";
-};
-
-// DATA
-const layers={
-  layer1:["DELIA LOZADA","JIMMY LOZADA"],
-  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
-  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
-};
-
-const pamangkin={
-  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
-  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
-};
-
-const gallery={};
-for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
-
-// CREATE UI
-function create(data){
-  Object.keys(data).forEach(k=>{
-    const c=document.getElementById(k);
-
-    data[k].forEach((name,i)=>{
-      const id=k+"_"+i;
-
-      c.innerHTML+=`
-      <div class="card">
-        <img id="${id}" onclick="zoom('${id}')">
-        <h4>${name}</h4>
-        <input type="file" onchange="upload(event,'${id}')">
-      </div>`;
-
-      onSnapshot(doc(db,"familyTree",id),(snap)=>{
-        if(snap.exists()){
-          document.getElementById(id).src=snap.data().image;
-        }
-      });
-    });
-  });
 }
-
-create(layers);
-create(pamangkin);
-create(gallery);
-
-// UPLOAD
-window.upload=(e,id)=>{
-  const r=new FileReader();
-  r.onload=()=>setDoc(doc(db,"familyTree",id),{image:r.result});
-  r.readAsDataURL(e.target.files[0]);
-};
-
-// ZOOM
-window.zoom=(id)=>{
-  currentZoom=id;
-  zoomImg.src=document.getElementById(id).src;
-  zoomBox.style.display="flex";
-};
-
-// DELETE
-window.deletePhoto=async()=>{
-  await deleteDoc(doc(db,"familyTree",currentZoom));
-};
-
-// CLOSE
-window.closeAll=()=>{
-  zoomBox.style.display="none";
-};
-
 </script>
 
 </body>
