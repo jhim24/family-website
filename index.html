@@ -52,39 +52,22 @@
       margin-top:5px;
     }
 
-    /* FAMILY */
-    .layer {
-      display:flex;
+    /* 🔥 MAIN GRID (4 PER ROW) */
+    .layer, .layer.fixed {
+      display:grid;
+      grid-template-columns:repeat(4, 150px);
       justify-content:center;
-      flex-wrap:wrap;
       gap:20px;
-      margin:20px 0;
+      margin:20px auto;
     }
 
-    #layer3 {
-      justify-content:center;
+    /* AUTO CENTER IF LESS THAN 4 */
+    .layer::after, .layer.fixed::after {
+      content:"";
+      grid-column:span 4;
     }
 
-    #layer3 .card {
-      width:120px;
-    }
-
-    #layer3 img {
-      height:80px;
-      aspect-ratio:auto;
-    }
-
-    /* 🔥 PAMANGKIN (FIXED BALANCED) */
-    .layer.fixed {
-      display:flex;
-      justify-content:center;
-      flex-wrap:wrap;
-      gap:20px;
-      max-width:700px; /* 🔥 para hindi may solo */
-      margin:auto;
-    }
-
-    /* CARDS */
+    /* CARD */
     .card {
       background:#1c1c1c;
       padding:10px;
@@ -163,6 +146,7 @@
       height:100%;
       background:rgba(0,0,0,0.95);
       z-index:1500;
+      display:flex;
       justify-content:center;
       align-items:center;
       flex-direction:column;
@@ -265,12 +249,12 @@ const layers={
 };
 
 const pamangkin={
-  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye","Sherwin"],
-  pamangkin2:["Ashley","Union","Jazmine","Apple","Bjoy"]
+  pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye"],
+  pamangkin2:["Sherwin","Ashley","Union","Jazmine"]
 };
 
 const gallery={};
-for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
+for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 
 function create(data,type=""){
   Object.keys(data).forEach(layerKey=>{
