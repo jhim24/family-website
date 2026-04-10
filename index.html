@@ -54,22 +54,19 @@
 
     #credit { font-size:12px; opacity:0.7; margin-top:5px; }
 
-    /* 🔥 UPDATED GRID */
     .layer, .layer.fixed {
-  display:grid;
-  grid-template-columns:repeat(4,180px);
-  justify-content:center;
-  gap:30px;
-  margin:30px auto;
-}
+      display:grid;
+      grid-template-columns:repeat(4,180px);
+      justify-content:center;
+      gap:30px;
+      margin:30px auto;
+    }
 
-/* 🔥 FAMILY ONLY SPACING */
-#layer1, #layer2, #layer3 {
-  gap:40px; /* mas maluwag */
-  margin:40px auto; /* dagdag space taas/baba */
-}
+    #layer1, #layer2, #layer3 {
+      gap:40px;
+      margin:40px auto;
+    }
 
-    /* 🔥 UPDATED CARD */
     .card {
       background:#1c1c1c;
       padding:12px;
@@ -79,15 +76,14 @@
       box-shadow:0 0 10px rgba(255,0,255,0.3);
     }
 
-    /* 🔥 IMAGE FIX */
     img {
-  width:100%;
-  aspect-ratio:16/9; /* 🔥 tamang proportion */
-  object-fit:cover;
-  border-radius:8px;
-  margin-bottom:8px;
-  cursor:pointer;
-}
+      width:100%;
+      aspect-ratio:16/9;
+      object-fit:cover;
+      border-radius:8px;
+      margin-bottom:8px;
+      cursor:pointer;
+    }
 
     h4 {
       font-size:12px;
@@ -167,19 +163,19 @@
       color:white;
     }
 
-#zoomBox {
-  display:none; /* 🔥 default hidden */
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.95);
-  z-index:1500;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-}
+    #zoomBox {
+      display:none;
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:rgba(0,0,0,0.95);
+      z-index:1500;
+      justify-content:center;
+      align-items:center;
+      flex-direction:column;
+    }
 
     #zoomBox img { width:90%; max-width:900px; }
 
@@ -272,18 +268,6 @@ window.login=()=>{
   app.style.display="block";
 };
 
-let vids=[
-  "https://cdn.coverr.co/videos/coverr-modern-house-with-pool-1573/1080p.mp4",
-  "https://cdn.coverr.co/videos/coverr-luxury-home-exterior-2605/1080p.mp4"
-];
-
-let i=0;
-window.nextVideo=()=>{
-  i=(i+1)%vids.length;
-  bgSource.src=vids[i];
-  bgVideo.load();
-};
-
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -296,44 +280,43 @@ const pamangkin={
 };
 
 const gallery={};
-for(let i=1;i<=5;i++){
-  gallery["gallery"+i]=["","","",""];
-}
+for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","",""]; }
 
 function create(data){
   Object.keys(data).forEach(k=>{
     const c=document.getElementById(k);
     data[k].forEach((name,i)=>{
       const id=k+"_"+i;
+
       c.innerHTML+=`
       <div class="card">
         <img id="${id}" onclick="zoom('${id}')">
         <h4 onclick="openProfile('${id}','${name}')">${name}</h4>
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
+
       onSnapshot(doc(db,"familyTree",id),(snap)=>{
-  if(snap.exists()){
-    const img = document.getElementById(id);
-    img.src = snap.data().image + "?t=" + new Date().getTime(); // 🔥 anti-cache
-  }
-});
+        if(snap.exists()){
+          document.getElementById(id).src =
+            snap.data().image + "?t=" + new Date().getTime();
+        }
+      });
+
+    });
+  });
+}
 
 create(layers);
 create(pamangkin);
 create(gallery);
 
 window.upload=(e,id)=>{
-  const file = e.target.files[0];
-  const r = new FileReader();
-
-  r.onload=async()=>{
-    await setDoc(doc(db,"familyTree",id),{
-      image:r.result,
-      updated:Date.now() // 🔥 trigger update
-    });
-  };
-
-  r.readAsDataURL(file);
+  const r=new FileReader();
+  r.onload=()=>setDoc(doc(db,"familyTree",id),{
+    image:r.result,
+    updated:Date.now()
+  });
+  r.readAsDataURL(e.target.files[0]);
 };
 
 window.saveProfile=async()=>{
@@ -347,6 +330,8 @@ window.saveProfile=async()=>{
 };
 
 window.openProfile=async(id,name)=>{
+  if(app.style.display==="none") return;
+
   currentProfile=id;
   profileName.innerText=name;
   profileBox.style.display="block";
@@ -366,14 +351,6 @@ window.zoom=(id)=>{
 
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
-
-  zoomBox.style.display="flex";
-  zoomBox.style.zIndex="1500"; // 🔥 lalabas lang pag click
-};
-  if(app.style.display==="none") return; // 🔥 block if not logged in
-
-  currentZoom=id;
-  zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
@@ -383,10 +360,6 @@ window.deletePhoto=async()=>{
 };
 
 window.closeAll=()=>{
-  zoomBox.style.display="none";
-  zoomBox.style.zIndex="-1"; // 🔥 balik sa likod
-  profileBox.style.display="none";
-};
   zoomBox.style.display="none";
   profileBox.style.display="none";
 };
