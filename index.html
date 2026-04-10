@@ -7,7 +7,6 @@
     body {font-family: Arial; background:#111; margin:0; text-align:center; color:white;}
     header {background:linear-gradient(to right, red, purple); padding:15px; font-size:22px;}
 
-    /* FAMILY */
     .layer {
       display:flex;
       justify-content:center;
@@ -15,7 +14,6 @@
       margin:20px 0;
     }
 
-    /* PAMANGKIN + GALLERY */
     .layer.fixed {
       display:flex;
       justify-content:center;
@@ -37,7 +35,6 @@
       width:150px;
     }
 
-    /* IMAGE FRAME (16:9) */
     img {
       width:100%;
       aspect-ratio:16/9;
@@ -77,7 +74,7 @@
       margin:5px;
     }
 
-    /* 🔥 FULLSCREEN ZOOM */
+    /* FULLSCREEN IMAGE */
     #zoomBox {
       display:none;
       position:fixed;
@@ -87,8 +84,6 @@
       height:100%;
       background:rgba(0,0,0,0.95);
       z-index:1000;
-
-      display:flex;
       flex-direction:column;
       justify-content:center;
       align-items:center;
@@ -100,15 +95,6 @@
       max-height:80vh;
       object-fit:contain;
       border-radius:10px;
-    }
-
-    #overlay {
-      display:none;
-      position:fixed;
-      top:0; left:0;
-      width:100%; height:100%;
-      background:rgba(0,0,0,0.6);
-      z-index:999;
     }
 
     #profileBox {
@@ -156,8 +142,6 @@
   <div class="layer fixed" id="gallery4"></div>
   <div class="layer fixed" id="gallery5"></div>
 
-  <div id="overlay" onclick="closeAll()"></div>
-
   <!-- PROFILE -->
   <div id="profileBox">
     <h3 id="profileName"></h3>
@@ -169,7 +153,7 @@
     <button onclick="closeAll()">Close</button>
   </div>
 
-  <!-- 🔥 FULLSCREEN ZOOM -->
+  <!-- ZOOM -->
   <div id="zoomBox">
     <img id="zoomImg">
     <div>
@@ -196,22 +180,25 @@ let currentUser="", currentZoom="", currentProfile="";
 window.login=()=>{
   if(pass.value==="123"){
     currentUser=user.value;
-    loginBox.style.display="none"; app.style.display="block";
+    loginBox.style.display="none"; 
+    app.style.display="block";
   }
 };
 
-// DATA
+// 🔥 UPDATED FAMILY STRUCTURE
 const layers={
-  layer1:["DELIA LOZADA","JIMMY LOZADA"],
-  layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
-  layer3:["JENADEL LOZADA","JEMMEL LOZADA","JIMDEL LOZADA","JISA LOZADA"]
+  layer1:["MOTHER","FATHER"],
+  layer2:["CHERRY GRACE","CHEVY","JERBOY"],
+  layer3:["JENADEL","JEMMEL","JIMDEL","JISA"]
 };
 
+// PAMANGKIN
 const pamangkin={
   pamangkin1:["Cherry Jane","Lyka Che","Sean Ryan","Rye","Sherwin"],
   pamangkin2:["Ashley","Union","Jazmine","Apple","Bjoy"]
 };
 
+// GALLERY
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
@@ -255,7 +242,7 @@ window.upload=(e,id)=>{
   r.readAsDataURL(e.target.files[0]);
 };
 
-// 🔥 ZOOM (FULLSCREEN)
+// ZOOM
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
@@ -272,7 +259,6 @@ window.openProfile=(id,name)=>{
   currentProfile=id;
   profileName.innerText=name;
   profileBox.style.display="block";
-  overlay.style.display="block";
 };
 
 window.saveProfile=()=>{
@@ -288,7 +274,6 @@ window.saveProfile=()=>{
 window.closeAll=()=>{
   zoomBox.style.display="none";
   profileBox.style.display="none";
-  overlay.style.display="none";
 };
 
 </script>
