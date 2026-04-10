@@ -132,7 +132,6 @@
       z-index:2000;
     }
 
-    /* 🔥 UPDATED ZOOM (HALF VIEW) */
     #zoomBox {
       display:none;
       position:fixed;
@@ -157,7 +156,6 @@
     #zoomBox button {
       margin-top:10px;
     }
-
   </style>
 </head>
 
@@ -221,23 +219,7 @@
   <button onclick="closeAll()">Close</button>
 </div>
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, getDoc } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-import { getStorage, ref, uploadBytes, getDownloadURL } 
-from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
-
-const appFirebase = initializeApp({
-  apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
-  projectId:"family-web-10cb8",
-  storageBucket:"family-web-10cb8.appspot.com"
-});
-
-const db = getFirestore(appFirebase);
-const storage = getStorage(appFirebase);
+<script>
 
 let currentZoom="", currentProfile="";
 
@@ -275,11 +257,10 @@ function create(data){
         <input type="file" onchange="upload(event,'${id}')">
       </div>`;
 
-      onSnapshot(doc(db,"familyTree",id),(snap)=>{
-        if(snap.exists()){
-          document.getElementById(id).src = snap.data().image;
-        }
-      });
+      const saved = localStorage.getItem(id);
+      if(saved){
+        document.getElementById(id).src = saved;
+      }
     });
   });
 }
@@ -288,56 +269,63 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-window.upload = async(e, id) => {
+/* UPLOAD */
+window.upload = (e,id)=>{
   const file = e.target.files[0];
-  if (!file) return;
+  if(!file) return;
 
-  const storageRef = ref(storage, "photos/" + id + "_" + Date.now());
+  const reader = new FileReader();
 
-  await uploadBytes(storageRef, file);
-  const url = await getDownloadURL(storageRef);
+  reader.onload = ()=>{
+    const base64 = reader.result;
 
-  await setDoc(doc(db, "familyTree", id), {
-    image: url,
-    updated: Date.now()
-  });
+    document.getElementById(id).src = base64;
 
-  alert("Upload success!");
+    try{
+      localStorage.setItem(id, base64);
+    }catch{
+      alert("Storage full! Delete some photos.");
+    }
+  };
+
+  reader.readAsDataURL(file);
 };
 
-window.saveProfile=async()=>{
-  await setDoc(doc(db,"profiles",currentProfile),{
+/* PROFILE */
+window.saveProfile=()=>{
+  localStorage.setItem(currentProfile+"_profile", JSON.stringify({
     birthday:birthday.value,
     address:address.value,
     contact:contact.value,
     email:email.value
-  },{ merge:true });
+  }));
   alert("Saved!");
 };
 
-window.openProfile=async(id,name)=>{
+window.openProfile=(id,name)=>{
   currentProfile=id;
   profileName.innerText=name;
   profileBox.style.display="block";
 
-  const snap=await getDoc(doc(db,"profiles",id));
-  if(snap.exists()){
-    const d=snap.data();
-    birthday.value=d.birthday||"";
-    address.value=d.address||"";
-    contact.value=d.contact||"";
-    email.value=d.email||"";
-  }
+  const data = JSON.parse(localStorage.getItem(id+"_profile")||"{}");
+
+  birthday.value=data.birthday||"";
+  address.value=data.address||"";
+  contact.value=data.contact||"";
+  email.value=data.email||"";
 };
 
+/* ZOOM */
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
 };
 
-window.deletePhoto=async()=>{
-  await deleteDoc(doc(db,"familyTree",currentZoom));
+/* DELETE */
+window.deletePhoto=()=>{
+  localStorage.removeItem(currentZoom);
+  document.getElementById(currentZoom).src="";
   zoomBox.style.display="none";
 };
 
