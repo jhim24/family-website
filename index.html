@@ -93,6 +93,7 @@
     }
 
     .family-section {
+      position:relative;
       padding:20px 10px;
       background:url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c') center/cover no-repeat;
     }
@@ -152,7 +153,7 @@
   <h2>HI WELCOME</h2>
   <input id="user"><br>
   <input id="pass" type="password"><br>
-  <button onclick="login()">Login</button>
+  <button id="loginBtn">Login</button>
 </div>
 
 <div id="credit">CREATED BY: JEMMEL LOZADA</div>
@@ -198,13 +199,13 @@ const supabase = window.supabase.createClient(
   "sb_publishable_8Y2S30GvFJBUT2hhozYRZg_JUsc31yB"
 );
 
-/* LOGIN FIX */
-window.login=function(){
+/* 🔥 LOGIN (GUARANTEED WORKING) */
+document.getElementById("loginBtn").addEventListener("click", function(){
   loginBox.style.display="none";
   credit.style.display="none";
   app.style.display="block";
   loadImages();
-};
+});
 
 /* DATA */
 const layers={
@@ -242,20 +243,21 @@ create(pamangkin);
 create(gallery);
 
 /* UPLOAD */
-window.upload=async(e,id)=>{
+async function upload(e,id){
   const file=e.target.files[0];
   if(!file) return;
 
   const fileName=id+"_"+Date.now();
 
-  await supabase.storage.from("family").upload(fileName,file);
+  const {error}=await supabase.storage.from("family").upload(fileName,file);
+  if(error){ alert("Upload failed"); return; }
 
   const {data}=supabase.storage.from("family").getPublicUrl(fileName);
 
   await supabase.from("images").upsert({id:id,url:data.publicUrl});
 
   document.getElementById(id).src=data.publicUrl;
-};
+}
 
 /* LOAD */
 async function loadImages(){
@@ -269,14 +271,14 @@ async function loadImages(){
 }
 
 /* ZOOM */
-window.zoom=(id)=>{
+function zoom(id){
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
-};
+}
 
-window.closeAll=()=>{
+function closeAll(){
   zoomBox.style.display="none";
-};
+}
 </script>
 
 </body>
