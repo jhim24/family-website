@@ -176,7 +176,7 @@
       height:100%;
       background:rgba(0,0,0,0.95);
       z-index:1500;
-      display:flex;
+      display:none;
       justify-content:center;
       align-items:center;
       flex-direction:column;
@@ -363,6 +363,8 @@ window.openProfile=async(id,name)=>{
 };
 
 window.zoom=(id)=>{
+  if(app.style.display==="none") return; // 🔥 block if not logged in
+
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
   zoomBox.style.display="flex";
