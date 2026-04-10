@@ -18,7 +18,7 @@
     .header-title {font-size:28px; font-weight:bold;}
     .header-quote {font-size:14px; font-style:italic;}
 
-    /* 🔥 NEW LOGIN DESIGN */
+    /* 🔥 LOGIN */
     #loginBox {
       background:white;
       padding:25px;
@@ -150,7 +150,7 @@
   <div class="header-quote">"Family is not an important thing, it's everything."</div>
 </header>
 
-<!-- 🔥 NEW LOGIN -->
+<!-- 🔐 LOGIN -->
 <div id="loginBox">
   <h2>🔐 LOGIN</h2>
   <input id="user" placeholder="Username"><br>
@@ -219,7 +219,7 @@ const db = getFirestore(initializeApp({
 
 let currentUser="", currentZoom="", currentProfile="";
 
-/* 🔥 NEW LOGIN SYSTEM */
+/* 🔐 LOGIN SYSTEM */
 const savedUser = localStorage.getItem("user");
 
 if(savedUser){
@@ -237,19 +237,29 @@ window.login = function(){
     return;
   }
 
-  if(p !== "123"){
-    alert("Wrong password");
+  // ADMIN
+  if(u === "admin" && p === "1234"){
+    currentUser = "ADMIN";
+    localStorage.setItem("user","ADMIN");
+    loginBox.style.display="none";
+    app.style.display="block";
+    alert("Welcome ADMIN 🔥");
     return;
   }
 
-  currentUser = u;
-  localStorage.setItem("user", u);
+  // USER
+  if(p === "123"){
+    currentUser = u;
+    localStorage.setItem("user",u);
+    loginBox.style.display="none";
+    app.style.display="block";
+    return;
+  }
 
-  loginBox.style.display="none";
-  app.style.display="block";
+  alert("Wrong username or password");
 };
 
-/* REST OF YOUR CODE SAME */
+/* DATA */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -264,6 +274,7 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
+/* CREATE */
 function create(data){
   Object.keys(data).forEach(layer=>{
     const c=document.getElementById(layer);
@@ -291,12 +302,14 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
+/* UPLOAD */
 window.upload=(e,id)=>{
   const reader=new FileReader();
   reader.onload=()=>setDoc(doc(db,"familyTree",id),{image:reader.result});
   reader.readAsDataURL(e.target.files[0]);
 };
 
+/* ZOOM */
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
@@ -304,9 +317,7 @@ window.zoom=(id)=>{
   overlay.style.display="block";
 };
 
-window.deletePhoto=async()=>{
-  await deleteDoc(doc(db,"familyTree",currentZoom));
-};
+window.deletePhoto=async()=>await deleteDoc(doc(db,"familyTree",currentZoom));
 
 window.closeAll=()=>{
   zoomBox.style.display="none";
@@ -314,6 +325,36 @@ window.closeAll=()=>{
   overlay.style.display="none";
 };
 
+/* PROFILE */
+window.openProfile=async(name,id)=>{
+  currentProfile=id;
+  profileBox.style.display="block";
+  overlay.style.display="block";
+  profileName.innerText=name;
+
+  const snap=await getDoc(doc(db,"profiles",id));
+  if(snap.exists()){
+    const d=snap.data();
+    birthday.value=d.birthday||"";
+    address.value=d.address||"";
+    contact.value=d.contact||"";
+    email.value=d.email||"";
+  }
+};
+
+window.saveProfile=async()=>{
+  await setDoc(doc(db,"profiles",currentProfile),{
+    birthday:birthday.value,
+    address:address.value,
+    contact:contact.value,
+    email:email.value
+  });
+  alert("Saved!");
+};
+
+window.closeProfile=()=>closeAll();
+
+/* COMMENTS */
 window.addComment=()=>{
   if(!comment.value) return;
 
