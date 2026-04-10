@@ -273,32 +273,29 @@ function create(data){
       </div>`;
 
       onSnapshot(doc(db,"familyTree",id),(snap)=>{
-        if(snap.exists()){
-          document.getElementById(id).src =
-            snap.data().image + "?t=" + Date.now();
-        }
-      });
-    });
-  });
-}
+  if(snap.exists()){
+    const img = document.getElementById(id);
+
+    if(img){
+      img.src = snap.data().image + "?t=" + Date.now(); // 🔥 anti-cache fix
+    }
+  }
+});
 
 create(layers);
 create(pamangkin);
 create(gallery);
 
 /* 🔥 FIXED UPLOAD */
-window.upload=async(e,id)=>{
-  const file=e.target.files[0];
-  if(!file) return;
+onSnapshot(doc(db,"familyTree",id),(snap)=>{
+  if(snap.exists()){
+    const img = document.getElementById(id);
 
-  const reader=new FileReader();
-
-  reader.onload=async()=>{
-    await setDoc(doc(db,"familyTree",id),{
-      image:reader.result,
-      updated:Date.now()
-    });
-  };
+    if(img){
+      img.src = snap.data().image + "?t=" + Date.now(); // 🔥 IMPORTANT
+    }
+  }
+});
 
   reader.readAsDataURL(file);
 };
