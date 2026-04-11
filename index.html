@@ -811,6 +811,15 @@ style="width:120px;height:120px;border-radius:50%;margin-bottom:15px;border:3px 
 `;
 
 document.body.appendChild(greetBox);
+  /* 🔥 FIX GREETING PANEL VISIBILITY */
+
+setInterval(()=>{
+  if(loginBox.style.display !== "none"){
+    greetBox.style.display = "flex"; // show if login visible
+  }else{
+    greetBox.style.display = "none"; // hide after login
+  }
+},500);
 </script>
 
 </body>
