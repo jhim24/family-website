@@ -292,21 +292,52 @@ window.addComment=()=>{
   addDoc(collection(db,"comments"),{
     name:currentUser,
     text:comment.value,
-    time:Date.now()
+    time:Date.now(),
+    likes:0 // NEW
   });
 
   comment.value="";
+};
+
+/* 🔥 NEW: LIKE + DELETE COMMENT SYSTEM */
+
+window.likeComment = async (id, currentLikes=0)=>{
+  await setDoc(doc(db,"comments",id),{
+    likes: currentLikes + 1
+  },{merge:true});
+};
+
+window.deleteComment = async (id)=>{
+  if(currentUser !== "ADMIN"){
+    alert("Admin only ❌");
+    return;
+  }
+
+  if(confirm("Delete this comment?")){
+    await deleteDoc(doc(db,"comments",id));
+  }
 };
 
 onSnapshot(query(collection(db,"comments"),orderBy("time")),(snap)=>{
   comments.innerHTML="";
   snap.forEach(d=>{
     let c=d.data();
-    comments.innerHTML+=`<div class="comment"><b>${c.name}</b><br>${c.text}</div>`;
+    let id=d.id;
+
+    comments.innerHTML+=`
+    <div class="comment">
+      <b>${c.name}</b><br>
+      ${c.text}<br><br>
+
+      👍 ${c.likes || 0}
+      <button onclick="likeComment('${id}', ${c.likes || 0})">Like</button>
+
+      ${currentUser==="ADMIN" ? `<button onclick="deleteComment('${id}')">Delete</button>` : ""}
+    </div>`;
   });
 });
 
-/* 🔒 ADDED LOCK SYSTEM */
+/* 🔒 LOCK SYSTEM (UNCHANGED) */
 
 const DEV_MODE = false;
 
