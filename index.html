@@ -782,6 +782,35 @@ setTimeout(()=>{
 
 /* STEP 3 */
 profileBtn.onclick = window.openProfileFixed;
+  /* 🔥 LOGIN LEFT GREETING PANEL */
+
+const greetBox = document.createElement("div");
+greetBox.style = `
+position:fixed;
+left:0;
+top:0;
+width:40%;
+height:100%;
+background:linear-gradient(to bottom right, purple, red);
+color:white;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:999;
+padding:20px;
+text-align:center;
+`;
+
+greetBox.innerHTML = `
+<img src="https://i.imgur.com/6VBx3io.png" 
+style="width:120px;height:120px;border-radius:50%;margin-bottom:15px;border:3px solid white;">
+
+<h2>Welcome to Lozada Family 💖</h2>
+<p>Stay connected with your loved ones</p>
+`;
+
+document.body.appendChild(greetBox);
 </script>
 
 </body>
