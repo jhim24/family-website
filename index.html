@@ -786,11 +786,12 @@ profileBtn.onclick = window.openProfileFixed;
   /* 🔥 LOGIN LEFT GREETING PANEL */
 
 const greetBox = document.createElement("div");
+
 greetBox.style = `
 position:fixed;
 left:0;
 top:0;
-width:30%;
+width:220px; /* ✅ mas maliit */
 height:100%;
 background:linear-gradient(to bottom right, purple, red);
 color:white;
@@ -801,24 +802,25 @@ align-items:center;
 z-index:999;
 padding:20px;
 text-align:center;
+box-shadow:2px 0 10px rgba(0,0,0,0.3);
 `;
 
 greetBox.innerHTML = `
 <img src="https://i.imgur.com/6VBx3io.png" 
-style="width:120px;height:120px;border-radius:50%;margin-bottom:15px;border:3px solid white;">
+style="width:100px;height:100px;border-radius:50%;margin-bottom:15px;border:3px solid white;">
 
-<h2>Welcome to Lozada Family 💖</h2>
-<p>Stay connected with your loved ones</p>
+<h2>Welcome 💖</h2>
+<p>Lozada Family</p>
 `;
 
 document.body.appendChild(greetBox);
-  /* 🔥 FIX GREETING PANEL VISIBILITY */
 
+/* AUTO SHOW / HIDE */
 setInterval(()=>{
   if(loginBox.style.display !== "none"){
-    greetBox.style.display = "flex"; // show if login visible
+    greetBox.style.display = "flex";
   }else{
-    greetBox.style.display = "none"; // hide after login
+    greetBox.style.display = "none";
   }
 },500);
 </script>
