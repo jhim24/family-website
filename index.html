@@ -726,6 +726,15 @@ onSnapshot(query(collection(db,"chat"),orderBy("time")),(snap)=>{
 window.closeProfile = () => {
   profileBox.style.display = "none";
 };
+  setTimeout(()=>{
+  const btns = profileBox.querySelectorAll("button");
+
+  btns.forEach(btn=>{
+    if(btn.innerText.includes("Close")){
+      btn.onclick = window.closeProfile;
+    }
+  });
+},1000);
 </script>
 
 </body>
