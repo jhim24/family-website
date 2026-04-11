@@ -201,7 +201,7 @@ const db = getFirestore(initializeApp({
 
 let currentUser="", currentRole="USER", currentZoom="";
 
-/* 🔥 MULTI USER SYSTEM */
+/* MULTI USER */
 const users = {
   "admin": {pass:"1234", role:"ADMIN"},
   "jena": {pass:"1111", role:"USER"},
@@ -225,7 +225,6 @@ window.login = function(){
   }
 };
 
-/* 🔥 HEADER USER + LOGOUT */
 function showUserUI(){
   const userLabel = document.createElement("div");
   userLabel.innerText = "👤 " + currentUser;
@@ -239,6 +238,7 @@ function showUserUI(){
   header.appendChild(logoutBtn);
 }
 
+/* DATA */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -253,6 +253,7 @@ const pamangkin={
 const gallery={};
 for(let i=1;i<=5;i++){ gallery["gallery"+i]=["","","","",""]; }
 
+/* CREATE */
 function create(data){
   Object.keys(data).forEach(layerKey=>{
     const c=document.getElementById(layerKey);
@@ -280,7 +281,7 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* 🔥 UPLOAD WITH USER TRACK */
+/* UPLOAD */
 window.upload = (e,id)=>{
   const file = e.target.files[0];
   if(!file) return;
@@ -295,7 +296,7 @@ window.upload = (e,id)=>{
   reader.readAsDataURL(file);
 };
 
-/* 🔥 DELETE */
+/* DELETE */
 window.deletePhoto = async () => {
   if(currentRole !== "ADMIN"){
     alert("Admin only ❌");
@@ -311,6 +312,7 @@ window.deletePhoto = async () => {
   overlay.style.display="none";
 };
 
+/* ZOOM */
 window.zoom=(id)=>{
   currentZoom=id;
   zoomImg.src=document.getElementById(id).src;
@@ -323,7 +325,7 @@ window.closeAll=()=>{
   overlay.style.display="none";
 };
 
-/* 🔥 COMMENTS WITH USER */
+/* COMMENTS */
 window.addComment=()=>{
   if(!comment.value) return;
 
@@ -361,6 +363,69 @@ onSnapshot(query(collection(db,"comments"),orderBy("time")),(snap)=>{
 
   comments.scrollTop = comments.scrollHeight;
 });
+
+/* 🔥 FULL FIX: PERSONAL INFO POPUP */
+
+const infoBox=document.createElement("div");
+infoBox.style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;border-radius:12px;z-index:1001;width:90%;max-width:350px;";
+infoBox.innerHTML=`
+<h3>Personal Info</h3>
+<input id="info_name" placeholder="Full Name"><br>
+<input id="info_address" placeholder="Address"><br>
+<input id="info_contact" placeholder="Contact Number"><br>
+<input id="info_email" placeholder="Email"><br>
+<input id="info_bday" type="date"><br><br>
+<button onclick="saveInfo()">Save</button>
+<button onclick="closeInfo()">Close</button>
+`;
+document.body.appendChild(infoBox);
+
+let currentPerson="";
+
+setTimeout(()=>{
+  document.querySelectorAll(".card h4").forEach(el=>{
+    el.onclick=()=>openInfo(el.innerText);
+  });
+},1500);
+
+window.openInfo=(name)=>{
+  currentPerson=name;
+  infoBox.style.display="block";
+  overlay.style.display="block";
+
+  onSnapshot(doc(db,"personInfo",name),(snap)=>{
+    if(snap.exists()){
+      let d=snap.data();
+      info_name.value=d.name||"";
+      info_address.value=d.address||"";
+      info_contact.value=d.contact||"";
+      info_email.value=d.email||"";
+      info_bday.value=d.bday||"";
+    }else{
+      info_name.value=name;
+      info_address.value="";
+      info_contact.value="";
+      info_email.value="";
+      info_bday.value="";
+    }
+  });
+};
+
+window.saveInfo=async ()=>{
+  await setDoc(doc(db,"personInfo",currentPerson),{
+    name:info_name.value,
+    address:info_address.value,
+    contact:info_contact.value,
+    email:info_email.value,
+    bday:info_bday.value
+  });
+  alert("Saved ✅");
+};
+
+window.closeInfo=()=>{
+  infoBox.style.display="none";
+  overlay.style.display="none";
+};
 
 </script>
 
