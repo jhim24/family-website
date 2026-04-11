@@ -292,52 +292,21 @@ window.addComment=()=>{
   addDoc(collection(db,"comments"),{
     name:currentUser,
     text:comment.value,
-    time:Date.now(),
-    likes:0 // NEW
+    time:Date.now()
   });
 
   comment.value="";
-};
-
-/* 🔥 NEW: LIKE + DELETE COMMENT SYSTEM */
-
-window.likeComment = async (id, currentLikes=0)=>{
-  await setDoc(doc(db,"comments",id),{
-    likes: currentLikes + 1
-  },{merge:true});
-};
-
-window.deleteComment = async (id)=>{
-  if(currentUser !== "ADMIN"){
-    alert("Admin only ❌");
-    return;
-  }
-
-  if(confirm("Delete this comment?")){
-    await deleteDoc(doc(db,"comments",id));
-  }
 };
 
 onSnapshot(query(collection(db,"comments"),orderBy("time")),(snap)=>{
   comments.innerHTML="";
   snap.forEach(d=>{
     let c=d.data();
-    let id=d.id;
-
-    comments.innerHTML+=`
-    <div class="comment">
-      <b>${c.name}</b><br>
-      ${c.text}<br><br>
-
-      👍 ${c.likes || 0}
-      <button onclick="likeComment('${id}', ${c.likes || 0})">Like</button>
-
-      ${currentUser==="ADMIN" ? `<button onclick="deleteComment('${id}')">Delete</button>` : ""}
-    </div>`;
+    comments.innerHTML+=`<div class="comment"><b>${c.name}</b><br>${c.text}</div>`;
   });
 });
 
-/* 🔒 LOCK SYSTEM (UNCHANGED) */
+/* 🔒 LOCK SYSTEM */
 
 const DEV_MODE = false;
 
@@ -366,6 +335,87 @@ function fallbackImage(img){
 setTimeout(()=>{
   document.querySelectorAll("img").forEach(fallbackImage);
 },1500);
+
+/* 🔥 NEW: PERSON INFO POPUP */
+
+const infoBox = document.createElement("div");
+infoBox.style = `
+display:none;
+position:fixed;
+top:50%;left:50%;
+transform:translate(-50%,-50%);
+background:white;
+padding:20px;
+border-radius:12px;
+z-index:1001;
+width:90%;
+max-width:350px;
+`;
+
+infoBox.innerHTML = `
+<h3>Personal Info</h3>
+<input id="info_name" placeholder="Full Name"><br>
+<input id="info_address" placeholder="Address"><br>
+<input id="info_contact" placeholder="Contact Number"><br>
+<input id="info_email" placeholder="Email"><br>
+<input id="info_bday" type="date"><br><br>
+<button onclick="saveInfo()">Save</button>
+<button onclick="closeInfo()">Close</button>
+`;
+
+document.body.appendChild(infoBox);
+
+let currentPerson="";
+
+setTimeout(()=>{
+  document.querySelectorAll(".card h4").forEach(el=>{
+    el.onclick = ()=>{
+      openInfo(el.innerText);
+    };
+  });
+},1500);
+
+window.openInfo = (name)=>{
+  currentPerson=name;
+  infoBox.style.display="block";
+  overlay.style.display="block";
+
+  onSnapshot(doc(db,"personInfo",name),(snap)=>{
+    if(snap.exists()){
+      let d=snap.data();
+      info_name.value=d.name||"";
+      info_address.value=d.address||"";
+      info_contact.value=d.contact||"";
+      info_email.value=d.email||"";
+      info_bday.value=d.bday||"";
+    }else{
+      info_name.value=name;
+      info_address.value="";
+      info_contact.value="";
+      info_email.value="";
+      info_bday.value="";
+    }
+  });
+};
+
+window.saveInfo = async ()=>{
+  if(!currentPerson) return;
+
+  await setDoc(doc(db,"personInfo",currentPerson),{
+    name:info_name.value,
+    address:info_address.value,
+    contact:info_contact.value,
+    email:info_email.value,
+    bday:info_bday.value
+  });
+
+  alert("Saved ✅");
+};
+
+window.closeInfo = ()=>{
+  infoBox.style.display="none";
+  overlay.style.display="none";
+};
 
 </script>
 
