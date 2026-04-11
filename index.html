@@ -83,6 +83,7 @@
       width:90%;
       max-width:350px;
       margin:50px auto;
+      margin-left:320px;
       color:white;
       box-shadow:0 0 20px rgba(128,0,128,0.6);
     }
@@ -138,6 +139,12 @@
       border-radius:12px;
       margin:10px;
     }
+    /* 📱 MOBILE FIX */
+@media(max-width:768px){
+  .login-box{
+    margin-left:0;
+  }
+}
   </style>
 </head>
 
@@ -783,7 +790,7 @@ greetBox.style = `
 position:fixed;
 left:0;
 top:0;
-width:40%;
+width:30%;
 height:100%;
 background:linear-gradient(to bottom right, purple, red);
 color:white;
