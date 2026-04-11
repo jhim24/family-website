@@ -143,7 +143,7 @@
 
 <body>
 
-<header>
+<header id="header">
   <div class="header-title">👨‍👩‍👧‍👦 LOZADA FAMILY ULTIMATE</div>
   <div class="header-quote">"Family is not an important thing, it's everything."</div>
 </header>
@@ -157,7 +157,6 @@
 </div>
 
 <div id="app" style="display:none;">
-
   <div class="family-bg">
     <div class="layer" id="layer1"></div>
     <div class="layer" id="layer2"></div>
@@ -188,7 +187,6 @@
     <button onclick="addComment()">Post</button>
     <div id="comments"></div>
   </div>
-
 </div>
 
 <script type="module">
@@ -201,22 +199,45 @@ const db = getFirestore(initializeApp({
   projectId:"family-web-10cb8"
 }));
 
-let currentUser="", currentZoom="";
+let currentUser="", currentRole="USER", currentZoom="";
+
+/* 🔥 MULTI USER SYSTEM */
+const users = {
+  "admin": {pass:"1234", role:"ADMIN"},
+  "jena": {pass:"1111", role:"USER"},
+  "jimmy": {pass:"2222", role:"USER"}
+};
 
 window.login = function(){
   const u = user.value.trim();
   const p = pass.value.trim();
 
-  if(u === "admin" && p === "1234"){
-    currentUser = "ADMIN";
-    console.log("Logged in as:", currentUser); // ADDED
+  if(users[u] && users[u].pass === p){
+    currentUser = u;
+    currentRole = users[u].role;
+
     loginBox.style.display="none";
     app.style.display="block";
-    return;
-  }
 
-  alert("Invalid login ❌");
+    showUserUI();
+  } else {
+    alert("Invalid login ❌");
+  }
 };
+
+/* 🔥 HEADER USER + LOGOUT */
+function showUserUI(){
+  const userLabel = document.createElement("div");
+  userLabel.innerText = "👤 " + currentUser;
+  userLabel.style="font-size:12px;margin-top:5px;";
+  header.appendChild(userLabel);
+
+  const logoutBtn = document.createElement("button");
+  logoutBtn.innerText="Logout";
+  logoutBtn.onclick=()=>location.reload();
+  logoutBtn.style="margin-top:5px;";
+  header.appendChild(logoutBtn);
+}
 
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
@@ -259,23 +280,24 @@ create(layers);
 create(pamangkin);
 create(gallery);
 
-/* 🔥 SAFE UPLOAD (ADDED WRAPPER) */
-const originalUpload = window.upload;
+/* 🔥 UPLOAD WITH USER TRACK */
 window.upload = (e,id)=>{
   const file = e.target.files[0];
   if(!file) return;
 
   const reader=new FileReader();
   reader.onload=()=>{
-    setDoc(doc(db,"familyTree",id),{image:reader.result});
+    setDoc(doc(db,"familyTree",id),{
+      image:reader.result,
+      uploadedBy: currentUser
+    });
   };
   reader.readAsDataURL(file);
 };
 
-/* 🔥 DELETE WITH CONFIRM + ADMIN CHECK */
-const originalDelete = window.deletePhoto;
+/* 🔥 DELETE */
 window.deletePhoto = async () => {
-  if(currentUser !== "ADMIN"){
+  if(currentRole !== "ADMIN"){
     alert("Admin only ❌");
     return;
   }
@@ -283,15 +305,10 @@ window.deletePhoto = async () => {
   if(!currentZoom) return;
   if(!confirm("Delete this photo?")) return;
 
-  try{
-    await deleteDoc(doc(db,"familyTree",currentZoom));
-    const img=document.getElementById(currentZoom);
-    if(img) img.src="";
-    zoomBox.style.display="none";
-    overlay.style.display="none";
-  }catch(e){
-    console.error(e);
-  }
+  await deleteDoc(doc(db,"familyTree",currentZoom));
+  document.getElementById(currentZoom).src="";
+  zoomBox.style.display="none";
+  overlay.style.display="none";
 };
 
 window.zoom=(id)=>{
@@ -306,6 +323,7 @@ window.closeAll=()=>{
   overlay.style.display="none";
 };
 
+/* 🔥 COMMENTS WITH USER */
 window.addComment=()=>{
   if(!comment.value) return;
 
@@ -324,7 +342,7 @@ window.likeComment = async (id, likes=0)=>{
 };
 
 window.deleteComment = async (id)=>{
-  if(currentUser!=="ADMIN") return alert("Admin only ❌");
+  if(currentRole!=="ADMIN") return alert("Admin only ❌");
   if(confirm("Delete?")) await deleteDoc(doc(db,"comments",id));
 };
 
@@ -337,88 +355,12 @@ onSnapshot(query(collection(db,"comments"),orderBy("time")),(snap)=>{
       <b>${c.name}</b><br>${c.text}<br><br>
       👍 ${c.likes||0}
       <button onclick="likeComment('${id}',${c.likes||0})">Like</button>
-      ${currentUser==="ADMIN"?`<button onclick="deleteComment('${id}')">Delete</button>`:""}
+      ${currentRole==="ADMIN"?`<button onclick="deleteComment('${id}')">Delete</button>`:""}
     </div>`;
   });
 
-  /* 🔥 AUTO SCROLL */
   comments.scrollTop = comments.scrollHeight;
 });
-
-const DEV_MODE=false;
-if(!DEV_MODE){
-  Object.freeze(layers);
-  Object.freeze(pamangkin);
-  Object.freeze(gallery);
-}
-
-setTimeout(()=>{
-  try{
-    Object.defineProperty(window,"create",{writable:false});
-    Object.defineProperty(window,"upload",{writable:false});
-    Object.defineProperty(window,"deletePhoto",{writable:false});
-  }catch(e){}
-},1000);
-
-const infoBox=document.createElement("div");
-infoBox.style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;border-radius:12px;z-index:1001;width:90%;max-width:350px;";
-infoBox.innerHTML=`
-<h3>Personal Info</h3>
-<input id="info_name" placeholder="Full Name"><br>
-<input id="info_address" placeholder="Address"><br>
-<input id="info_contact" placeholder="Contact Number"><br>
-<input id="info_email" placeholder="Email"><br>
-<input id="info_bday" type="date"><br><br>
-<button onclick="saveInfo()">Save</button>
-<button onclick="closeInfo()">Close</button>
-`;
-document.body.appendChild(infoBox);
-
-let currentPerson="";
-setTimeout(()=>{
-  document.querySelectorAll(".card h4").forEach(el=>{
-    el.onclick=()=>openInfo(el.innerText);
-  });
-},1500);
-
-window.openInfo=(name)=>{
-  currentPerson=name;
-  infoBox.style.display="block";
-  overlay.style.display="block";
-
-  onSnapshot(doc(db,"personInfo",name),(snap)=>{
-    if(snap.exists()){
-      let d=snap.data();
-      info_name.value=d.name||"";
-      info_address.value=d.address||"";
-      info_contact.value=d.contact||"";
-      info_email.value=d.email||"";
-      info_bday.value=d.bday||"";
-    }else{
-      info_name.value=name;
-      info_address.value="";
-      info_contact.value="";
-      info_email.value="";
-      info_bday.value="";
-    }
-  });
-};
-
-window.saveInfo=async ()=>{
-  await setDoc(doc(db,"personInfo",currentPerson),{
-    name:info_name.value,
-    address:info_address.value,
-    contact:info_contact.value,
-    email:info_email.value,
-    bday:info_bday.value
-  });
-  alert("Saved ✅");
-};
-
-window.closeInfo=()=>{
-  infoBox.style.display="none";
-  overlay.style.display="none";
-};
 
 </script>
 
