@@ -276,7 +276,18 @@ window.zoom=(id)=>{
   overlay.style.display="block";
 };
 
-window.deletePhoto=async()=>await deleteDoc(doc(db,"familyTree",currentZoom));
+window.deletePhoto = async () => {
+  if(!currentZoom) return;
+
+  await deleteDoc(doc(db,"familyTree",currentZoom));
+
+  // 🔥 CLEAR IMAGE SA UI
+  document.getElementById(currentZoom).src = "";
+
+  // 🔥 CLOSE POPUP
+  zoomBox.style.display="none";
+  overlay.style.display="none";
+};
 
 window.closeAll=()=>{
   zoomBox.style.display="none";
