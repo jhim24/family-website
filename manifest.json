@@ -1,0 +1,16 @@
+{
+  "name": "Lozada Family Ultimate",
+  "short_name": "Lozada",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "description": "Lozada Family App",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/6VBx3io.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
