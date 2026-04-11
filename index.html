@@ -75,7 +75,6 @@
       text-align:left;
     }
 
-    /* 🔥 NEW LOGIN DESIGN */
     .login-box {
       background:url('https://images.unsplash.com/photo-1614064641938-3bbee52942c7') center/cover no-repeat;
       border:4px solid purple;
@@ -150,7 +149,6 @@
   <div class="header-quote">"Family is not an important thing, it's everything."</div>
 </header>
 
-<!-- 🔥 NEW LOGIN -->
 <div id="loginBox" class="login-box">
   <h2>🔐 LOGIN</h2>
   <input id="user" placeholder="Username"><br>
@@ -206,7 +204,6 @@ const db = getFirestore(initializeApp({
 
 let currentUser="", currentZoom="";
 
-/* 🔐 NEW LOGIN */
 window.login = function(){
   const u = user.value.trim();
   const p = pass.value.trim();
@@ -221,7 +218,6 @@ window.login = function(){
   alert("Invalid login ❌");
 };
 
-/* REST CODE SAME */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -280,11 +276,7 @@ window.deletePhoto = async () => {
   if(!currentZoom) return;
 
   await deleteDoc(doc(db,"familyTree",currentZoom));
-
-  // 🔥 CLEAR IMAGE SA UI
   document.getElementById(currentZoom).src = "";
-
-  // 🔥 CLOSE POPUP
   zoomBox.style.display="none";
   overlay.style.display="none";
 };
@@ -313,6 +305,36 @@ onSnapshot(query(collection(db,"comments"),orderBy("time")),(snap)=>{
     comments.innerHTML+=`<div class="comment"><b>${c.name}</b><br>${c.text}</div>`;
   });
 });
+
+/* 🔒 ADDED LOCK SYSTEM */
+
+const DEV_MODE = false;
+
+if(!DEV_MODE){
+  Object.freeze(layers);
+  Object.freeze(pamangkin);
+  Object.freeze(gallery);
+}
+
+setTimeout(()=>{
+  try{
+    Object.defineProperty(window, "create", { writable: false });
+    Object.defineProperty(window, "upload", { writable: false });
+    Object.defineProperty(window, "deletePhoto", { writable: false });
+  }catch(e){}
+},1000);
+
+function safeRun(fn){
+  try{ fn(); }catch(e){ console.error("Protected Error:", e); }
+}
+
+function fallbackImage(img){
+  img.onerror = () => { img.src = ""; };
+}
+
+setTimeout(()=>{
+  document.querySelectorAll("img").forEach(fallbackImage);
+},1500);
 
 </script>
 
