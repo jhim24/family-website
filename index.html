@@ -194,7 +194,7 @@
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const db = getFirestore(initializeApp({
   apiKey:"AIzaSyCYjuZlpgE-Lci33e53014F7fRIid6u7Dg",
@@ -203,18 +203,8 @@ const db = getFirestore(initializeApp({
 
 let currentUser="", currentZoom="";
 
-/* 🔥 LEVEL 5 ADDITIONS START */
-
-/* SESSION */
-const savedUser = localStorage.getItem("user");
-if(savedUser){
-  currentUser = savedUser;
-  loginBox.style.display="none";
-  app.style.display="block";
-}
-
-/* MULTI USER LOGIN */
-window.login = async function(){
+/* LOGIN */
+window.login = function(){
   const u = user.value.trim();
   const p = pass.value.trim();
 
@@ -223,84 +213,106 @@ window.login = async function(){
     localStorage.setItem("user","ADMIN");
     loginBox.style.display="none";
     app.style.display="block";
-    setOnlineStatus();
     return;
   }
-
-  const userRef = doc(db,"users",u);
-  onSnapshot(userRef,(snap)=>{
-    if(!snap.exists()) return alert("User not found");
-    const d = snap.data();
-
-    if(d.password !== p) return alert("Wrong password");
-
-    currentUser = d.name || u;
-    localStorage.setItem("user",currentUser);
-
-    loginBox.style.display="none";
-    app.style.display="block";
-    setOnlineStatus();
-  });
+  alert("Invalid login");
 };
 
-/* ONLINE STATUS */
-function setOnlineStatus(){
-  if(!currentUser) return;
-  setDoc(doc(db,"onlineUsers",currentUser),{
-    name:currentUser,
-    time:Date.now()
-  });
+/* AUTO LOGIN */
+const savedUser = localStorage.getItem("user");
+if(savedUser){
+  currentUser = savedUser;
+  loginBox.style.display="none";
+  app.style.display="block";
 }
-
-/* PROFILE PICTURE */
-window.setProfile = async (base64)=>{
-  await setDoc(doc(db,"profiles",currentUser),{img:base64});
-};
-
-/* CHAT SYSTEM */
-window.sendChat = async ()=>{
-  if(!chatInput.value) return;
-
-  await addDoc(collection(db,"chat"),{
-    name:currentUser,
-    text:chatInput.value,
-    time:Date.now()
-  });
-
-  chatInput.value="";
-};
-
-const chatBox=document.createElement("div");
-chatBox.style="position:fixed;bottom:0;right:0;width:300px;background:white;border-radius:10px 10px 0 0;box-shadow:0 0 10px rgba(0,0,0,0.3);";
-chatBox.innerHTML=`
-<div style="background:purple;color:white;padding:5px;">Chat</div>
-<div id="chatMessages" style="height:200px;overflow:auto;"></div>
-<input id="chatInput" placeholder="Message..." style="width:70%">
-<button onclick="sendChat()">Send</button>
-`;
-document.body.appendChild(chatBox);
-
-onSnapshot(query(collection(db,"chat"),orderBy("time")),(snap)=>{
-  chatMessages.innerHTML="";
-  snap.forEach(d=>{
-    let c=d.data();
-    chatMessages.innerHTML+=`<div><b>${c.name}:</b> ${c.text}</div>`;
-  });
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-});
-
-/* NOTIFICATIONS */
-window.notify = (msg)=>{
-  alert("🔔 "+msg);
-};
 
 /* CREATE USER */
 window.createUser = async (u,p,n)=>{
   await setDoc(doc(db,"users",u),{username:u,password:p,name:n});
 };
 
-/* 🔥 LEVEL 5 ADDITIONS END */
+/* UPLOAD */
+window.upload = (e,id)=>{
+  const file=e.target.files[0];
+  const reader=new FileReader();
+  reader.onload=()=>{
+    setDoc(doc(db,"familyTree",id),{image:reader.result});
+  };
+  reader.readAsDataURL(file);
+};
 
+/* DELETE */
+window.deletePhoto = async ()=>{
+  if(currentUser!=="ADMIN") return alert("Admin only");
+  if(!currentZoom) return;
+  await deleteDoc(doc(db,"familyTree",currentZoom));
+};
+
+/* ZOOM */
+window.zoom=(id)=>{
+  currentZoom=id;
+  zoomImg.src=document.getElementById(id).src;
+  zoomBox.style.display="block";
+  overlay.style.display="block";
+};
+
+window.closeAll=()=>{
+  zoomBox.style.display="none";
+  overlay.style.display="none";
+};
+
+/* COMMENTS */
+window.addComment=()=>{
+  if(!comment.value) return;
+  addDoc(collection(db,"comments"),{
+    name:currentUser,
+    text:comment.value,
+    time:Date.now(),
+    likes:0
+  });
+  comment.value="";
+};
+
+onSnapshot(query(collection(db,"comments"),orderBy("time")),(snap)=>{
+  comments.innerHTML="";
+  snap.forEach(d=>{
+    let c=d.data();
+    comments.innerHTML+=`
+    <div class="comment">
+      <b>${c.name}</b><br>${c.text}<br>
+      👍 ${c.likes||0}
+    </div>`;
+  });
+});
+
+/* CHAT (LEVEL 5) */
+const chatBox=document.createElement("div");
+chatBox.style="position:fixed;bottom:0;right:0;width:300px;background:white;";
+chatBox.innerHTML=`
+<div id="chatMessages" style="height:200px;overflow:auto;"></div>
+<input id="chatInput">
+<button onclick="sendChat()">Send</button>`;
+document.body.appendChild(chatBox);
+
+window.sendChat=()=>{
+  if(!chatInput.value) return;
+  addDoc(collection(db,"chat"),{
+    name:currentUser,
+    text:chatInput.value,
+    time:Date.now()
+  });
+  chatInput.value="";
+};
+
+onSnapshot(query(collection(db,"chat"),orderBy("time")),(snap)=>{
+  chatMessages.innerHTML="";
+  snap.forEach(d=>{
+    let c=d.data();
+    chatMessages.innerHTML+=`<div>${c.name}: ${c.text}</div>`;
+  });
+});
+
+/* DATA */
 const layers={
   layer1:["DELIA LOZADA","JIMMY LOZADA"],
   layer2:["CHERRY GRACE LOZADA","CHEVY LOZADA CORTEZ","JERBOY LOZADA"],
@@ -341,8 +353,6 @@ function create(data){
 create(layers);
 create(pamangkin);
 create(gallery);
-
-/* KEEP ALL YOUR ORIGINAL FUNCTIONS BELOW (UNCHANGED) */
 
 </script>
 
