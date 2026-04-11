@@ -214,6 +214,19 @@ body::before {
   0% {background-position:0 0;}
   100% {background-position:0 100px;}
 }
+    /* 🔥 FIX PAMANGKIN & GALLERY ONLY */
+
+#pamangkin1, #pamangkin2,
+#gallery1, #gallery2, #gallery3, #gallery4, #gallery5 {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap:15
+  #pamangkin1 .card, #pamangkin2 .card,
+#gallery1 .card, #gallery2 .card,
+#gallery3 .card, #gallery4 .card, #gallery5 .card {
+  width:100%;
+  max-width:160px;
+}
   </style>
 </head>
 
