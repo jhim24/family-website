@@ -466,15 +466,7 @@ document.body.appendChild(msgBox);
 msgBtn.onclick=()=>msgBox.style.display="block";
 
 /* SEND MESSAGE */
-window.sendMsg=()=>{
-  if(!chatInput.value) return;
-  addDoc(collection(db,"chat"),{
-    name:currentUser,
-    text:chatInput.value,
-    time:Date.now()
-  });
-  chatInput.value="";
-};
+
 
 /* REALTIME CHAT + NOTIF */
 onSnapshot(query(collection(db,"chat"),orderBy("time")),(snap)=>{
