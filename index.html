@@ -761,6 +761,27 @@ setTimeout(()=>{
     });
   }
 },2000);
+  /* STEP 1 */
+window.openProfileFixed = () => {
+  profileBox.style.display = "block";
+  overlay.style.display = "block";
+};
+
+window.closeProfileFixed = () => {
+  profileBox.style.display = "none";
+  overlay.style.display = "none";
+};
+
+/* STEP 2 */
+setTimeout(()=>{
+  const buttons = profileBox.querySelectorAll("button");
+  if(buttons.length >= 2){
+    buttons[1].onclick = window.closeProfileFixed;
+  }
+},2000);
+
+/* STEP 3 */
+profileBtn.onclick = window.openProfileFixed;
 </script>
 
 </body>
