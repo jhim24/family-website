@@ -634,6 +634,93 @@ setTimeout(()=>{
 
   header.appendChild(closeBtn);
 }, 1000);
+  /* ===============================
+🔥 LEVEL 7 ADD-ONS (ONLINE + SEEN)
+=============================== */
+
+/* ===============================
+🟢 1. ONLINE USERS SYSTEM
+=============================== */
+
+// set user online
+setDoc(doc(db,"status",currentUser),{
+  online:true,
+  lastActive:Date.now()
+});
+
+// auto offline when close
+window.addEventListener("beforeunload",()=>{
+  setDoc(doc(db,"status",currentUser),{
+    online:false,
+    lastActive:Date.now()
+  });
+});
+
+// show online users UI
+const onlineBox=document.createElement("div");
+onlineBox.style="position:fixed;left:10px;bottom:20px;background:white;padding:10px;border-radius:10px;z-index:1002;width:150px;max-height:200px;overflow:auto;";
+onlineBox.innerHTML="<b>🟢 Online</b><div id='onlineList'></div>";
+document.body.appendChild(onlineBox);
+
+// realtime users
+onSnapshot(collection(db,"status"),(snap)=>{
+  onlineList.innerHTML="";
+  snap.forEach(d=>{
+    let u=d.id;
+    let data=d.data();
+    if(data.online){
+      onlineList.innerHTML+=`<div>🟢 ${u}</div>`;
+    }
+  });
+});
+
+
+/* ===============================
+✔✔ 2. SEEN / DELIVERED SYSTEM
+=============================== */
+
+// send message with status
+window.sendMsg=()=>{
+  if(!chatInput.value) return;
+
+  addDoc(collection(db,"chat"),{
+    name:currentUser,
+    text:chatInput.value,
+    time:Date.now(),
+    seen:false
+  });
+
+  chatInput.value="";
+};
+
+// mark messages as seen
+onSnapshot(query(collection(db,"chat"),orderBy("time")),(snap)=>{
+  chatMessages.innerHTML="";
+
+  snap.forEach(docSnap=>{
+    let c=docSnap.data();
+    let id=docSnap.id;
+
+    // auto seen if not sender
+    if(c.name!==currentUser && !c.seen){
+      setDoc(doc(db,"chat",id),{seen:true},{merge:true});
+    }
+
+    let status = "";
+    if(c.name===currentUser){
+      status = c.seen ? "✔✔ Seen" : "✔ Sent";
+    }
+
+    chatMessages.innerHTML+=`
+      <div style="margin:5px 0;">
+        <b>${c.name}</b>: ${c.text}<br>
+        <small>${status}</small>
+      </div>
+    `;
+  });
+
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+});
 </script>
 
 </body>
