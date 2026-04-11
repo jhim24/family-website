@@ -823,6 +823,60 @@ setInterval(()=>{
     greetBox.style.display = "none";
   }
 },500);
+  /* 📖 BIBLE VERSE PANEL (RIGHT SIDE) */
+
+const verseBox = document.createElement("div");
+
+verseBox.style = `
+position:fixed;
+right:0;
+top:0;
+width:220px;
+height:100%;
+background:linear-gradient(to bottom right, #1e3c72, #2a5298);
+color:white;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:999;
+padding:20px;
+text-align:center;
+box-shadow:-2px 0 10px rgba(0,0,0,0.3);
+`;
+
+const verses = [
+  "Jeremiah 29:11 — For I know the plans I have for you...",
+  "Philippians 4:13 — I can do all things through Christ...",
+  "Psalm 23:1 — The Lord is my shepherd...",
+  "Proverbs 3:5 — Trust in the Lord with all your heart...",
+  "Romans 8:28 — All things work together for good..."
+];
+
+let vIndex = 0;
+
+function showVerse(){
+  verseBox.innerHTML = `
+    <h3>📖 Bible Verse</h3>
+    <p style="margin-top:10px;">${verses[vIndex]}</p>
+  `;
+  vIndex = (vIndex + 1) % verses.length;
+}
+
+// change verse every 5 seconds
+setInterval(showVerse, 5000);
+showVerse();
+
+document.body.appendChild(verseBox);
+
+/* AUTO SHOW / HIDE */
+setInterval(()=>{
+  if(loginBox.style.display !== "none"){
+    verseBox.style.display = "flex";
+  }else{
+    verseBox.style.display = "none";
+  }
+},500
 </script>
 
 </body>
