@@ -19,7 +19,13 @@
     .header-title {font-size:28px; font-weight:bold; letter-spacing:2px;}
     .header-quote {font-size:14px; margin-top:5px; font-style:italic;}
 
-    .layer {display:flex; justify-content:center; flex-wrap:wrap; margin:20px 0;}
+   .layer {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap:15px;
+  padding:10px;
+  justify-items:center;
+}
 
     .card {
       background:white;
