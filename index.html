@@ -619,7 +619,21 @@ onSnapshot(query(collection(db,"galleryMulti"),orderBy("time")),(snap)=>{
     gallery5.appendChild(img);
   });
 });
+/* 🔥 ADD X CLOSE BUTTON SA CHAT (SAFE ADD ONLY) */
 
+setTimeout(()=>{
+  const header = msgBox.querySelector("div");
+
+  const closeBtn = document.createElement("button");
+  closeBtn.innerText = "❌";
+  closeBtn.style = "background:red;margin-left:10px;";
+
+  closeBtn.onclick = () => {
+    msgBox.style.display = "none";
+  };
+
+  header.appendChild(closeBtn);
+}, 1000);
 </script>
 
 </body>
