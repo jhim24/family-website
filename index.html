@@ -721,6 +721,11 @@ onSnapshot(query(collection(db,"chat"),orderBy("time")),(snap)=>{
 
   chatMessages.scrollTop = chatMessages.scrollHeight;
 });
+  /* 🔥 FIX PROFILE CLOSE BUTTON */
+
+window.closeProfile = () => {
+  profileBox.style.display = "none";
+};
 </script>
 
 </body>
