@@ -426,6 +426,199 @@ window.closeInfo=()=>{
   infoBox.style.display="none";
   overlay.style.display="none";
 };
+  /* ===============================
+🔥 LEVEL 6 ADD-ONS (SAFE ADD ONLY)
+=============================== */
+
+/* ===============================
+💬 1. GLOBAL CHAT (UPGRADE)
+=============================== */
+
+const notifBell = document.createElement("div");
+notifBell.innerHTML = "🔔<span id='notifCount' style='color:red;font-weight:bold;'>0</span>";
+notifBell.style = "position:fixed;top:15px;right:20px;font-size:22px;cursor:pointer;z-index:1002;";
+document.body.appendChild(notifBell);
+
+let notif = 0;
+
+/* ===============================
+💬 MESSAGE BUTTON (ENHANCED)
+=============================== */
+
+const msgBtn = document.createElement("button");
+msgBtn.innerText = "💬";
+msgBtn.style = "position:fixed;bottom:20px;right:20px;width:55px;height:55px;border-radius:50%;z-index:1002;background:purple;color:white;";
+document.body.appendChild(msgBtn);
+
+const msgBox = document.createElement("div");
+msgBox.style = "display:none;position:fixed;bottom:90px;right:20px;width:300px;background:white;border-radius:12px;padding:10px;z-index:1002;";
+msgBox.innerHTML = `
+<div style="display:flex;justify-content:space-between;">
+<b>Family Chat</b>
+<button onclick="msgBox.style.display='none'">❌</button>
+</div>
+<div id="chatMessages" style="height:200px;overflow:auto;"></div>
+<input id="chatInput" placeholder="Message">
+<button onclick="sendMsg()">Send</button>
+`;
+document.body.appendChild(msgBox);
+
+msgBtn.onclick=()=>msgBox.style.display="block";
+
+/* SEND MESSAGE */
+window.sendMsg=()=>{
+  if(!chatInput.value) return;
+  addDoc(collection(db,"chat"),{
+    name:currentUser,
+    text:chatInput.value,
+    time:Date.now()
+  });
+  chatInput.value="";
+};
+
+/* REALTIME CHAT + NOTIF */
+onSnapshot(query(collection(db,"chat"),orderBy("time")),(snap)=>{
+  chatMessages.innerHTML="";
+  snap.forEach(d=>{
+    let c=d.data();
+    chatMessages.innerHTML+=`<div><b>${c.name}</b>: ${c.text}</div>`;
+  });
+
+  notif++;
+  notifCount.innerText = notif;
+});
+
+/* ===============================
+🔔 2. NOTIFICATION CLICK RESET
+=============================== */
+
+notifBell.onclick=()=>{
+  notif=0;
+  notifCount.innerText=0;
+  msgBox.style.display="block";
+};
+
+/* ===============================
+👤 3. USER PROFILE SYSTEM
+=============================== */
+
+const profileBox=document.createElement("div");
+profileBox.style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:20px;border-radius:12px;z-index:1002;";
+profileBox.innerHTML=`
+<h3>My Profile</h3>
+<input id="p_name" placeholder="Name"><br>
+<input id="p_bio" placeholder="Bio"><br>
+<input type="file" id="p_img"><br><br>
+<button onclick="saveProfile()">Save</button>
+<button onclick="profileBox.style.display='none'">Close</button>
+`;
+document.body.appendChild(profileBox);
+
+/* OPEN PROFILE BUTTON */
+const profileBtn=document.createElement("button");
+profileBtn.innerText="👤";
+profileBtn.style="position:fixed;top:15px;right:70px;z-index:1002;";
+document.body.appendChild(profileBtn);
+
+profileBtn.onclick=()=>{
+  profileBox.style.display="block";
+
+  onSnapshot(doc(db,"profiles",currentUser),(snap)=>{
+    if(snap.exists()){
+      let d=snap.data();
+      p_name.value=d.name||"";
+      p_bio.value=d.bio||"";
+    }
+  });
+};
+
+/* SAVE PROFILE */
+window.saveProfile=()=>{
+  const file=p_img.files[0];
+
+  if(file){
+    const reader=new FileReader();
+    reader.onload=()=>{
+      setDoc(doc(db,"profiles",currentUser),{
+        name:p_name.value,
+        bio:p_bio.value,
+        img:reader.result
+      });
+    };
+    reader.readAsDataURL(file);
+  }else{
+    setDoc(doc(db,"profiles",currentUser),{
+      name:p_name.value,
+      bio:p_bio.value
+    });
+  }
+
+  alert("Profile saved ✅");
+};
+
+/* ===============================
+💌 4. PRIVATE CHAT
+=============================== */
+
+window.sendPrivate=(toUser)=>{
+  const msg=prompt("Message to "+toUser);
+  if(!msg) return;
+
+  addDoc(collection(db,"privateChat"),{
+    from:currentUser,
+    to:toUser,
+    text:msg,
+    time:Date.now()
+  });
+};
+
+/* CLICK NAME TO MESSAGE */
+setTimeout(()=>{
+  document.querySelectorAll(".card h4").forEach(el=>{
+    el.ondblclick=()=>sendPrivate(el.innerText);
+  });
+},2000);
+
+/* ===============================
+📷 5. MULTIPLE UPLOAD SUPPORT
+=============================== */
+
+window.multiUpload=(e,id)=>{
+  const files=e.target.files;
+
+  Array.from(files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      addDoc(collection(db,"galleryMulti"),{
+        image:reader.result,
+        uploadedBy:currentUser,
+        time:Date.now()
+      });
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
+/* AUTO ADD MULTI INPUT SA GALLERY */
+setTimeout(()=>{
+  document.querySelectorAll("#gallery1 .card, #gallery2 .card, #gallery3 .card").forEach(card=>{
+    const input=document.createElement("input");
+    input.type="file";
+    input.multiple=true;
+    input.onchange=(e)=>multiUpload(e,"multi");
+    card.appendChild(input);
+  });
+},2000);
+
+/* SHOW MULTI IMAGES */
+onSnapshot(query(collection(db,"galleryMulti"),orderBy("time")),(snap)=>{
+  snap.forEach(d=>{
+    let img=document.createElement("img");
+    img.src=d.data().image;
+    img.style="width:80px;margin:5px;border-radius:8px;";
+    gallery5.appendChild(img);
+  });
+});
 
 </script>
 
