@@ -635,10 +635,12 @@ setTimeout(()=>{
 =============================== */
 
 // set user online
-setDoc(doc(db,"status",currentUser),{
-  online:true,
-  lastActive:Date.now()
-});
+if(currentUser){
+  setDoc(doc(db,"status",currentUser),{
+    online:true,
+    lastActive:Date.now()
+  });
+}
 
 // auto offline when close
 window.addEventListener("beforeunload",()=>{
